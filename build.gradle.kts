@@ -15,19 +15,25 @@ application {
 
 repositories {
     mavenCentral()
+    maven("https://m2.dv8tion.net/releases")
 }
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("dev.kord:kord-core:0.8.0-M14")
     implementation("org.slf4j:slf4j-simple:1.7.36")
+    implementation("com.sedmelluq:lavaplayer:1.3.78")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
+    implementation("dev.kord:kord-core:0.8.0-M14") {
+        capabilities {
+            requireCapability("dev.kord:core-voice:0.8.0-M14")
+        }
+    }
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict", "-opt-in=kotlin.RequiresOptIn")
         jvmTarget = "17"
-        languageVersion = "1.6"
     }
 }
 
