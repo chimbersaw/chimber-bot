@@ -36,7 +36,7 @@ class LavaPlayerManager : DefaultAudioPlayerManager() {
         }
 
         player.playTrack(track)
-        delay(100)
+        delay(1000)
 
         return track
     }
