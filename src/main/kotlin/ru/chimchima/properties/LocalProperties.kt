@@ -4,6 +4,7 @@ import java.util.*
 
 const val DISCORD_TOKEN = "DISCORD_TOKEN"
 private const val PORT = "server.port"
+private const val HEROKU = "HEROKU"
 private const val LOCAL_PROPERTIES = "/local.properties"
 
 object LocalProperties {
@@ -22,4 +23,7 @@ object LocalProperties {
 
     val port: Int?
         get() = getProperty(PORT)?.toIntOrNull()
+
+    val heroku: Boolean
+        get() = getProperty(HEROKU) != null
 }
