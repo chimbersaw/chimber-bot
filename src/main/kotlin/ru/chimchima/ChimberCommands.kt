@@ -30,7 +30,8 @@ private const val USAGE = """
 data class QueuedTrack(
     val player: AudioPlayer,
     val message: Message,
-    val title: String
+    val title: String,
+    val quiet: Boolean
 ) {
     private suspend fun reply(text: String) {
         message.reply {
@@ -39,8 +40,11 @@ data class QueuedTrack(
     }
 
     suspend fun playingTrack() = reply("playing track: $title")
-    suspend fun queuedTrack() = reply("queued track: $title")
-    suspend fun skippedTrack() = reply("skipped $title")
+    suspend fun queuedTrack() {
+        if (!quiet) {
+            reply("queued track: $title")
+        }
+    }
 }
 
 data class GuildConnection(
@@ -98,7 +102,12 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         guildConnections[channel.guildId.value] = GuildConnection(connection, queue)
     }
 
-    private suspend fun addTrackToQueue(event: MessageCreateEvent, query: String, replyTitle: String? = null) {
+    private suspend fun addTrackToQueue(
+        event: MessageCreateEvent,
+        query: String,
+        replyTitle: String? = null,
+        quiet: Boolean = false
+    ) {
         val channel = event.member?.getVoiceState()?.getChannelOrNull() ?: return
         val guildId = event.guildId?.value ?: return
         val message = event.message
@@ -106,10 +115,12 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         val player = lavaPlayerManager.createPlayer()
         val track = lavaPlayerManager.playTrack(query, player)
         val title = replyTitle ?: track.info.title
-        val seconds = track.duration / 1000
-        val fullTitle = "$title (${seconds / 60}:${seconds % 60})"
+        val duration = track.duration / 1000
+        val minutes = String.format("%02d", duration / 60)
+        val seconds = String.format("%02d", duration % 60)
+        val fullTitle = "$title ($minutes:$seconds)"
 
-        val queuedTrack = QueuedTrack(player, message, fullTitle)
+        val queuedTrack = QueuedTrack(player, message, fullTitle, quiet)
         val guildConnection = guildConnections[guildId]
 
         if (guildConnection == null || guildConnection.queue.isEmpty()) {
@@ -121,8 +132,10 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
     }
 
     private suspend fun Int.playPiratSong(event: MessageCreateEvent) {
-        val path = ChimberCommands::class.java.getResource("/pirat/$this.mp3")?.path ?: return
-        addTrackToQueue(event, path, songs[this])
+        val (url, title) = songs[this]
+        val fileName = "/pirat/${this + 1}.mp3"
+        val path = ChimberCommands::class.java.getResource(fileName)?.path ?: "ytsearch: $url"
+        addTrackToQueue(event, path, title, quiet = true)
     }
 
     suspend fun plink(event: MessageCreateEvent) {
@@ -145,24 +158,38 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
     }
 
     suspend fun pirat(event: MessageCreateEvent) {
+        val loading = event.message.reply {
+            content = "*Добавляем серегу...*"
+        }
         val count = event.message.content.removePrefix("!pirat").trim().toIntOrNull() ?: 13
-        for (i in (1..13).take(count)) {
+        for (i in (0..12).take(count)) {
             i.playPiratSong(event)
         }
+        loading.delete()
+        queue(event)
     }
 
     suspend fun shuffled(event: MessageCreateEvent) {
+        val loading = event.message.reply {
+            content = "*Добавляем серегу...*"
+        }
         val count = event.message.content.removePrefix("!shuffled").trim().toIntOrNull() ?: 13
-        for (i in (1..13).shuffled().take(count)) {
+        for (i in (0..12).shuffled().take(count)) {
             i.playPiratSong(event)
         }
+        loading.delete()
+        queue(event)
     }
 
     suspend fun skip(event: MessageCreateEvent) {
         val count = event.message.content.removePrefix("!skip").trim().toIntOrNull() ?: 1
         val id = event.guildId?.value
         repeat(count) {
-            guildConnections[id]?.queue?.poll()?.skippedTrack()
+            guildConnections[id]?.queue?.poll()?.let {
+                event.message.reply {
+                    content = "skipped ${it.title}"
+                }
+            }
         }
     }
 
