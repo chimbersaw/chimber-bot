@@ -28,6 +28,7 @@ private const val USAGE = """
 """
 
 data class QueuedTrack(
+    val query: String,
     val player: AudioPlayer,
     val message: Message,
     val title: String,
@@ -75,6 +76,8 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
                 if (queuedTrack == null) {
                     disconnect(channel.guildId.value)
                     return@audioProvider null
+                } else if (queuedTrack.player.playingTrack == null) {
+                    lavaPlayerManager.playTrack(queuedTrack.query, queuedTrack.player)
                 }
 
                 var frame = queuedTrack.player.provide()
@@ -86,6 +89,8 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
                     if (queuedTrack == null) {
                         disconnect(channel.guildId.value)
                         return@audioProvider null
+                    } else if (queuedTrack.player.playingTrack == null) {
+                        lavaPlayerManager.playTrack(queuedTrack.query, queuedTrack.player)
                     }
                     frame = queuedTrack.player.provide()
                     newTrack = true
@@ -114,13 +119,14 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
 
         val player = lavaPlayerManager.createPlayer()
         val track = lavaPlayerManager.playTrack(query, player)
+        player.stopTrack()
         val title = replyTitle ?: track.info.title
         val duration = track.duration / 1000
         val minutes = String.format("%02d", duration / 60)
         val seconds = String.format("%02d", duration % 60)
         val fullTitle = "$title ($minutes:$seconds)"
 
-        val queuedTrack = QueuedTrack(player, message, fullTitle, quiet)
+        val queuedTrack = QueuedTrack(query, player, message, fullTitle, quiet)
         val guildConnection = guildConnections[guildId]
 
         if (guildConnection == null || guildConnection.queue.isEmpty()) {
@@ -159,7 +165,7 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
 
     suspend fun pirat(event: MessageCreateEvent) {
         val loading = event.message.reply {
-            content = "*Добавляем серегу...*"
+            content = "*Добавляю серегу...*"
         }
         val count = event.message.content.removePrefix("!pirat").trim().toIntOrNull() ?: 13
         for (i in (0..12).take(count)) {
@@ -171,7 +177,7 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
 
     suspend fun shuffled(event: MessageCreateEvent) {
         val loading = event.message.reply {
-            content = "*Добавляем серегу...*"
+            content = "*Добавляю серегу...*"
         }
         val count = event.message.content.removePrefix("!shuffled").trim().toIntOrNull() ?: 13
         for (i in (0..12).shuffled().take(count)) {
