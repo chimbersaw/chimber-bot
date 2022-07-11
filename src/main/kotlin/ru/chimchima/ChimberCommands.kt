@@ -4,15 +4,18 @@ package ru.chimchima
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import dev.kord.common.annotation.KordVoice
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 import dev.kord.core.behavior.channel.connect
-import dev.kord.core.behavior.reply
 import dev.kord.core.entity.Message
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.voice.AudioFrame
 import dev.kord.voice.VoiceConnection
 import kotlinx.coroutines.delay
-import ru.chimchima.pirat.songs
+import ru.chimchima.pirat.PiratRepository
+import ru.chimchima.utils.formatDuration
+import ru.chimchima.utils.query
+import ru.chimchima.utils.replyWith
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -34,16 +37,10 @@ data class QueuedTrack(
     val title: String,
     val quiet: Boolean
 ) {
-    private suspend fun reply(text: String) {
-        message.reply {
-            content = text
-        }
-    }
-
-    suspend fun playingTrack() = reply("playing track: $title")
+    suspend fun playingTrack() = message.replyWith("playing track: $title")
     suspend fun queuedTrack() {
         if (!quiet) {
-            reply("queued track: $title")
+            message.replyWith("queued track: $title")
         }
     }
 }
@@ -54,9 +51,10 @@ data class GuildConnection(
 )
 
 class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
-    private val guildConnections = ConcurrentHashMap<ULong, GuildConnection>()
+    private val piratRepository = PiratRepository()
+    private val guildConnections = ConcurrentHashMap<Snowflake, GuildConnection>()
 
-    private suspend fun disconnect(guildId: ULong, force: Boolean = false) {
+    private suspend fun disconnect(guildId: Snowflake, force: Boolean = false) {
         guildConnections[guildId]?.let { (connection, queue) ->
             if (force || queue.isEmpty()) {
                 connection.shutdown()
@@ -74,7 +72,7 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
             audioProvider {
                 var queuedTrack = queue.firstOrNull()
                 if (queuedTrack == null) {
-                    disconnect(channel.guildId.value)
+                    disconnect(channel.guildId)
                     return@audioProvider null
                 } else if (queuedTrack.player.playingTrack == null) {
                     lavaPlayerManager.playTrack(queuedTrack.query, queuedTrack.player)
@@ -87,7 +85,7 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
                     queue.poll()
                     queuedTrack = queue.firstOrNull()
                     if (queuedTrack == null) {
-                        disconnect(channel.guildId.value)
+                        disconnect(channel.guildId)
                         return@audioProvider null
                     } else if (queuedTrack.player.playingTrack == null) {
                         lavaPlayerManager.playTrack(queuedTrack.query, queuedTrack.player)
@@ -104,7 +102,7 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
             }
         }
 
-        guildConnections[channel.guildId.value] = GuildConnection(connection, queue)
+        guildConnections[channel.guildId] = GuildConnection(connection, queue)
     }
 
     private suspend fun addTrackToQueue(
@@ -114,19 +112,14 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         quiet: Boolean = false
     ) {
         val channel = event.member?.getVoiceState()?.getChannelOrNull() ?: return
-        val guildId = event.guildId?.value ?: return
-        val message = event.message
+        val guildId = event.guildId ?: return
 
         val player = lavaPlayerManager.createPlayer()
         val track = lavaPlayerManager.playTrack(query, player)
-        player.stopTrack()
         val title = replyTitle ?: track.info.title
-        val duration = track.duration / 1000
-        val minutes = String.format("%02d", duration / 60)
-        val seconds = String.format("%02d", duration % 60)
-        val fullTitle = "$title ($minutes:$seconds)"
+        val fullTitle = "$title ${track.formatDuration()}"
 
-        val queuedTrack = QueuedTrack(query, player, message, fullTitle, quiet)
+        val queuedTrack = QueuedTrack(query, player, event.message, fullTitle, quiet)
         val guildConnection = guildConnections[guildId]
 
         if (guildConnection == null || guildConnection.queue.isEmpty()) {
@@ -135,13 +128,6 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
             guildConnections[guildId]?.queue?.add(queuedTrack)
             queuedTrack.queuedTrack()
         }
-    }
-
-    private suspend fun Int.playPiratSong(event: MessageCreateEvent) {
-        val (url, title) = songs[this]
-        val fileName = "/pirat/${this + 1}.mp3"
-        val path = ChimberCommands::class.java.getResource(fileName)?.path ?: "ytsearch: $url"
-        addTrackToQueue(event, path, title, quiet = true)
     }
 
     suspend fun plink(event: MessageCreateEvent) {
@@ -154,53 +140,51 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
     }
 
     suspend fun play(event: MessageCreateEvent) {
-        val query = event.message.content.removePrefix("!play").trim()
-        addTrackToQueue(event, "ytsearch: $query")
+        val query = event.query
+        if (query.isNotEmpty()) {
+            addTrackToQueue(event, "ytsearch: $query")
+        }
     }
 
     suspend fun stop(event: MessageCreateEvent) {
-        val guildId = event.guildId?.value ?: return
+        val guildId = event.guildId ?: return
         disconnect(guildId, force = true)
     }
 
-    suspend fun pirat(event: MessageCreateEvent) {
-        val loading = event.message.reply {
-            content = "*Добавляю серегу...*"
+    suspend fun pirat(event: MessageCreateEvent, shuffled: Boolean = false) {
+        val loading = event.message.replyWith("*Добавляю серегу...*")
+
+        val count = event.query.toIntOrNull() ?: 13
+        var ids = (0..12).take(count)
+        if (shuffled) {
+            ids = ids.shuffled()
         }
-        val count = event.message.content.removePrefix("!pirat").trim().toIntOrNull() ?: 13
-        for (i in (0..12).take(count)) {
-            i.playPiratSong(event)
+
+        for (i in ids) {
+            val (title, url) = piratRepository.getPiratSong(i)
+            addTrackToQueue(event, url, title, quiet = true)
         }
+
         loading.delete()
         queue(event)
     }
 
     suspend fun shuffled(event: MessageCreateEvent) {
-        val loading = event.message.reply {
-            content = "*Добавляю серегу...*"
-        }
-        val count = event.message.content.removePrefix("!shuffled").trim().toIntOrNull() ?: 13
-        for (i in (0..12).shuffled().take(count)) {
-            i.playPiratSong(event)
-        }
-        loading.delete()
-        queue(event)
+        pirat(event, shuffled = true)
     }
 
     suspend fun skip(event: MessageCreateEvent) {
-        val count = event.message.content.removePrefix("!skip").trim().toIntOrNull() ?: 1
-        val id = event.guildId?.value
+        val queue = guildConnections[event.guildId]?.queue ?: return
+        val count = event.query.toIntOrNull() ?: 1
         repeat(count) {
-            guildConnections[id]?.queue?.poll()?.let {
-                event.message.reply {
-                    content = "skipped ${it.title}"
-                }
-            }
+            val track = queue.poll() ?: return
+            event.message.replyWith("skipped ${track.title}")
         }
     }
 
     suspend fun queue(event: MessageCreateEvent) {
-        val queue = guildConnections[event.guildId?.value]?.queue
+        val queue = guildConnections[event.guildId]?.queue
+
         val reply = if (queue == null || queue.isEmpty()) {
             "Queue is empty!"
         } else {
@@ -209,14 +193,10 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
             }.joinToString(separator = "\n", prefix = "```", postfix = "```")
         }
 
-        event.message.reply {
-            content = reply
-        }
+        event.message.replyWith(reply)
     }
 
     suspend fun help(event: MessageCreateEvent) {
-        event.message.reply {
-            content = USAGE
-        }
+        event.message.replyWith(USAGE)
     }
 }
