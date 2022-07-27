@@ -17,7 +17,8 @@ import ru.chimchima.utils.formatDuration
 import ru.chimchima.utils.query
 import ru.chimchima.utils.replyWith
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 
 private const val USAGE = """
 ```Команды:
@@ -30,79 +31,60 @@ private const val USAGE = """
     !help — Выводит данное сообщение.```
 """
 
-data class QueuedTrack(
-    val query: String,
+data class TrackInQueue(
     val player: AudioPlayer,
     val message: Message,
-    val title: String,
-    val quiet: Boolean
+    val title: String
 ) {
     suspend fun playingTrack() = message.replyWith("playing track: $title")
-    suspend fun queuedTrack() {
-        if (!quiet) {
-            message.replyWith("queued track: $title")
-        }
-    }
+    suspend fun queuedTrack() = message.replyWith("queued track: $title")
 }
 
 data class GuildConnection(
     val connection: VoiceConnection,
-    val queue: ConcurrentLinkedQueue<QueuedTrack>
+    val queue: LinkedBlockingQueue<TrackInQueue>,
+    var currentTrack: TrackInQueue
 )
 
 class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
     private val piratRepository = PiratRepository()
     private val guildConnections = ConcurrentHashMap<Snowflake, GuildConnection>()
 
-    private suspend fun disconnect(guildId: Snowflake, force: Boolean = false) {
-        guildConnections[guildId]?.let { (connection, queue) ->
-            if (force || queue.isEmpty()) {
-                connection.shutdown()
-                guildConnections.remove(guildId)
-            }
-        }
+    private suspend fun disconnect(guildId: Snowflake) {
+        guildConnections.remove(guildId)?.connection?.shutdown()
     }
 
-    private suspend fun connect(channel: BaseVoiceChannelBehavior, playFirst: QueuedTrack) {
-        val queue = ConcurrentLinkedQueue<QueuedTrack>()
-        queue.add(playFirst)
-        playFirst.playingTrack()
+    private suspend fun connect(channel: BaseVoiceChannelBehavior, firstTrack: TrackInQueue): GuildConnection {
+        val queue = LinkedBlockingQueue<TrackInQueue>()
 
         val connection = channel.connect {
             audioProvider {
-                var queuedTrack = queue.firstOrNull()
-                if (queuedTrack == null) {
-                    disconnect(channel.guildId)
-                    return@audioProvider null
-                } else if (queuedTrack.player.playingTrack == null) {
-                    lavaPlayerManager.playTrack(queuedTrack.query, queuedTrack.player)
-                }
+                val guildConnection = guildConnections[channel.guildId] ?: return@audioProvider null
 
-                var frame = queuedTrack.player.provide()
+                var frame = guildConnection.currentTrack.player.provide()
                 var newTrack = false
 
                 while (frame == null) {
-                    queue.poll()
-                    queuedTrack = queue.firstOrNull()
-                    if (queuedTrack == null) {
+                    guildConnection.currentTrack = queue.poll(1, TimeUnit.SECONDS) ?: run {
                         disconnect(channel.guildId)
                         return@audioProvider null
-                    } else if (queuedTrack.player.playingTrack == null) {
-                        lavaPlayerManager.playTrack(queuedTrack.query, queuedTrack.player)
                     }
-                    frame = queuedTrack.player.provide()
+                    frame = guildConnection.currentTrack.player.provide()
                     newTrack = true
                 }
 
                 if (newTrack) {
-                    queuedTrack?.playingTrack()
+                    guildConnection.currentTrack.playingTrack()
                 }
 
                 AudioFrame.fromData(frame.data)
             }
         }
 
-        guildConnections[channel.guildId] = GuildConnection(connection, queue)
+        val guildConnection = GuildConnection(connection, queue, firstTrack)
+        guildConnections[channel.guildId] = guildConnection
+
+        return guildConnection
     }
 
     private suspend fun addTrackToQueue(
@@ -111,22 +93,19 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         replyTitle: String? = null,
         quiet: Boolean = false
     ) {
-        val channel = event.member?.getVoiceState()?.getChannelOrNull() ?: return
         val guildId = event.guildId ?: return
+        val channel = event.member?.getVoiceState()?.getChannelOrNull() ?: return
 
         val player = lavaPlayerManager.createPlayer()
         val track = lavaPlayerManager.playTrack(query, player)
         val title = replyTitle ?: track.info.title
         val fullTitle = "$title ${track.formatDuration()}"
+        val trackInQueue = TrackInQueue(player, event.message, fullTitle)
 
-        val queuedTrack = QueuedTrack(query, player, event.message, fullTitle, quiet)
-        val guildConnection = guildConnections[guildId]
-
-        if (guildConnection == null || guildConnection.queue.isEmpty()) {
-            connect(channel, queuedTrack)
-        } else {
-            guildConnections[guildId]?.queue?.add(queuedTrack)
-            queuedTrack.queuedTrack()
+        val connection = guildConnections[guildId] ?: connect(channel, trackInQueue)
+        connection.queue.add(trackInQueue)
+        if (!quiet && connection.queue.size > 1) {
+            trackInQueue.queuedTrack()
         }
     }
 
@@ -148,7 +127,7 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
 
     suspend fun stop(event: MessageCreateEvent) {
         val guildId = event.guildId ?: return
-        disconnect(guildId, force = true)
+        disconnect(guildId)
     }
 
     suspend fun pirat(event: MessageCreateEvent, shuffled: Boolean = false) {
