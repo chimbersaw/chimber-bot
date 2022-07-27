@@ -47,6 +47,7 @@ suspend fun main() = runBlocking {
         kord.editPresence {
             listening("!help")
         }
+        println("Chimber started")
     }
 
     kord.login {

@@ -58,9 +58,9 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         guildConnections[guildId]?.let { (connection, queue) ->
             if (force || queue.isEmpty()) {
                 connection.shutdown()
+                guildConnections.remove(guildId)
             }
         }
-        guildConnections.remove(guildId)
     }
 
     private suspend fun connect(channel: BaseVoiceChannelBehavior, playFirst: QueuedTrack) {
@@ -154,14 +154,8 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
     suspend fun pirat(event: MessageCreateEvent, shuffled: Boolean = false) {
         val loading = event.message.replyWith("*Добавляю серегу...*")
 
-        val count = event.query.toIntOrNull() ?: 13
-        var ids = (0..12).take(count)
-        if (shuffled) {
-            ids = ids.shuffled()
-        }
-
-        for (i in ids) {
-            val (title, url) = piratRepository.getPiratSong(i)
+        val count = event.query.toIntOrNull()
+        for ((title, url) in piratRepository.getSongs(count, shuffled)) {
             addTrackToQueue(event, url, title, quiet = true)
         }
 
@@ -176,10 +170,13 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
     suspend fun skip(event: MessageCreateEvent) {
         val queue = guildConnections[event.guildId]?.queue ?: return
         val count = event.query.toIntOrNull() ?: 1
+        val titles = mutableListOf<String>()
         repeat(count) {
-            val track = queue.poll() ?: return
-            event.message.replyWith("skipped ${track.title}")
+            val track = queue.poll() ?: return@repeat
+            titles.add(track.title)
         }
+        val skippedTitles = titles.joinToString(separator = "\n", prefix = "```", postfix = "```")
+        event.message.replyWith("skipped:\n$skippedTitles")
     }
 
     suspend fun queue(event: MessageCreateEvent) {

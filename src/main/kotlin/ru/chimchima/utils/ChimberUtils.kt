@@ -18,8 +18,8 @@ val MessageCreateEvent.query: String
     }
 
 fun AudioTrack.formatDuration(): String {
-    val duration = duration / 1000
-    val minutes = String.format("%02d", duration / 60)
-    val seconds = String.format("%02d", duration % 60)
+    val durationInSeconds = duration / 1000
+    val minutes = String.format("%02d", durationInSeconds / 60)
+    val seconds = String.format("%02d", durationInSeconds % 60)
     return "$minutes:$seconds"
 }
