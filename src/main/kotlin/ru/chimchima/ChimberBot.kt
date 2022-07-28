@@ -5,8 +5,6 @@ import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.on
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import ru.chimchima.properties.DISCORD_TOKEN
 import ru.chimchima.properties.LocalProperties
@@ -43,16 +41,12 @@ suspend fun main() = runBlocking {
         }
     }
 
-    launch {
-        delay(5000)
-        kord.editPresence {
-            listening("!help")
-        }
-        println("Chimber started")
-    }
-
     kord.login {
         @OptIn(PrivilegedIntent::class)
         intents += Intent.MessageContent
+        presence {
+            listening("!help")
+        }
+        println("Chimber started")
     }
 }
