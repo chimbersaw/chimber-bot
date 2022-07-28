@@ -100,8 +100,8 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
     ) {
         val guildId = event.guildId ?: return
         val channel = event.member?.getVoiceStateOrNull()?.getChannelOrNull() ?: return
+        val audioTrack = lavaPlayerManager.loadTrack(query) ?: return
 
-        val audioTrack = lavaPlayerManager.loadTrack(query)
         val title = replyTitle ?: audioTrack.info.title
         val fullTitle = "$title ${audioTrack.formatDuration()}"
         val track = Track(fullTitle, audioTrack, event.message)

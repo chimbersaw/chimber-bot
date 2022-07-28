@@ -16,12 +16,12 @@ class LavaPlayerManager : DefaultAudioPlayerManager() {
         registerSourceManager(LocalAudioSourceManager())
     }
 
-    suspend fun loadTrack(query: String) = suspendCoroutine<AudioTrack> {
+    suspend fun loadTrack(query: String) = suspendCoroutine<AudioTrack?> {
         loadItem(query, object : AudioLoadResultHandler {
             override fun trackLoaded(track: AudioTrack) = it.resume(track)
             override fun playlistLoaded(playlist: AudioPlaylist) = it.resume(playlist.tracks.first())
-            override fun noMatches() = Unit
-            override fun loadFailed(exception: FriendlyException?) = Unit
+            override fun noMatches() = it.resume(null)
+            override fun loadFailed(exception: FriendlyException?) = it.resume(null)
         })
     }
 }
