@@ -8,6 +8,7 @@ data class PiratSong(
 class PiratRepository {
     private val piratSongs = songs.mapIndexed { id, (title, youtubeUrl) ->
         // TODO: use local files(fix working from jar)
+        // https://github.com/sedmelluq/lavaplayer/issues/621
         // val fileName = "/pirat/${id + 1}.mp3"
         // val url = ChimberCommands::class.java.getResource(fileName)?.path ?: "ytsearch: $youtubeUrl"
         val url = "ytsearch: $youtubeUrl"
