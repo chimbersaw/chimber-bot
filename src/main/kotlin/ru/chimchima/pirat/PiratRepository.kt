@@ -1,7 +1,5 @@
 package ru.chimchima.pirat
 
-import ru.chimchima.ChimberCommands
-
 data class PiratSong(
     val title: String,
     val url: String
@@ -9,8 +7,10 @@ data class PiratSong(
 
 class PiratRepository {
     private val piratSongs = songs.mapIndexed { id, (title, youtubeUrl) ->
-        val fileName = "/pirat/${id + 1}.mp3"
-        val url = ChimberCommands::class.java.getResource(fileName)?.path ?: "ytsearch: $youtubeUrl"
+        // TODO: use local files(fix working from jar)
+        // val fileName = "/pirat/${id + 1}.mp3"
+        // val url = ChimberCommands::class.java.getResource(fileName)?.path ?: "ytsearch: $youtubeUrl"
+        val url = "ytsearch: $youtubeUrl"
         PiratSong(title, url)
     }
 
