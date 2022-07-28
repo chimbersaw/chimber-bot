@@ -38,6 +38,7 @@ suspend fun main() = runBlocking {
             "!shuffled" -> commands.shuffled(this)
             "!skip" -> commands.skip(this)
             "!queue" -> commands.queue(this)
+            "!current" -> commands.current(this)
             "!help" -> commands.help(this)
         }
     }
