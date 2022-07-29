@@ -1,4 +1,4 @@
-package ru.chimchima
+package ru.chimchima.player
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager

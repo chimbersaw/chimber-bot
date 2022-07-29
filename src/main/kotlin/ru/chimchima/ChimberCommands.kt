@@ -13,6 +13,7 @@ import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.voice.AudioFrame
 import dev.kord.voice.VoiceConnection
 import kotlinx.coroutines.delay
+import ru.chimchima.player.LavaPlayerManager
 import ru.chimchima.repository.AntihypeRepository
 import ru.chimchima.repository.PiratRepository
 import ru.chimchima.utils.formatDuration

@@ -1,4 +1,4 @@
-package ru.chimchima.server
+package ru.chimchima.ping
 
 import java.net.ServerSocket
 import java.util.concurrent.Executors

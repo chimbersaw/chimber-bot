@@ -6,9 +6,10 @@ import dev.kord.core.on
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.runBlocking
+import ru.chimchima.player.LavaPlayerManager
 import ru.chimchima.properties.DISCORD_TOKEN
 import ru.chimchima.properties.LocalProperties
-import ru.chimchima.server.PingServer
+import ru.chimchima.ping.PingServer
 
 fun startPingServer() {
     println("Starting ping server...")
