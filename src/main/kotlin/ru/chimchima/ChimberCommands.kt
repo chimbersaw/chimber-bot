@@ -25,12 +25,16 @@ import java.util.concurrent.TimeUnit
 private const val USAGE = """
 ```
 Команды:
-    !pirat [count] — Добавляет в очередь count (или все доступные) треков Серёги Бандита.
+    !pirat [count] — Добавляет в очередь count (или все доступные) треки Серёги Бандита.
     !shuffled [count] — Добавляет в очередь count (или все доступные) треки Серёги Бандита в случайном порядке.
+    !antihype [count] — Добавляет в очередь count (или все доступные) треки Antihypetrain.
+    !antishuffle [count] — Добавляет в очередь count (или все доступные) треки Antihypetrain в случайном порядке.
     !play <track name> — Присоединяется к каналу и воспроизводит композицию с указанным названием (поиск по YouTube).
     !stop — Прекращает воспроизведение очереди и покидает канал.
     !skip [count] — Пропускает следующие count композиций (включая текущую), по умолчанию count=1.
     !queue — Выводит текущую очередь композиций.
+    !shuffle — Перемешать очередь композиций.
+    !clear — Очистить очередь композиций.
     !current — Выводит название текущей композиции.
     !help — Выводит данное сообщение.
 ```
@@ -208,6 +212,16 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         }
 
         event.message.replyWith(reply)
+    }
+
+    suspend fun clear(event: MessageCreateEvent) {
+        val queue = sessions[event.guildId]?.queue ?: run {
+            event.message.replyWith("Queue is already empty.")
+            return
+        }
+
+        queue.clear()
+        event.message.replyWith("Queue cleared.")
     }
 
     suspend fun current(event: MessageCreateEvent) {
