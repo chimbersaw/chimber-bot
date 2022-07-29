@@ -50,7 +50,7 @@ class Track(
 data class Session(
     val connection: VoiceConnection,
     val player: AudioPlayer,
-    val queue: LinkedBlockingQueue<Track>
+    var queue: LinkedBlockingQueue<Track>
 )
 
 class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
@@ -64,11 +64,10 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
 
     private suspend fun connect(channel: BaseVoiceChannelBehavior): Session {
         val player = lavaPlayerManager.createPlayer()
-        val queue = LinkedBlockingQueue<Track>()
 
         val connection = channel.connect {
             audioProvider {
-                sessions[channel.guildId] ?: return@audioProvider null
+                val queue = sessions[channel.guildId]?.queue ?: return@audioProvider null
 
                 var frame = player.provide(1, TimeUnit.SECONDS)
 
@@ -88,7 +87,7 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
             }
         }
 
-        val session = Session(connection, player, queue)
+        val session = Session(connection, player, LinkedBlockingQueue<Track>())
         sessions[channel.guildId] = session
 
         return session
@@ -161,8 +160,19 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         queue(event)
     }
 
-    suspend fun shuffled(event: MessageCreateEvent, shuffled: Boolean = false) {
-        pirat(event, shuffled = true)
+    suspend fun shuffle(event: MessageCreateEvent) {
+        val session = sessions[event.guildId] ?: run {
+            event.message.replyWith("Nothing to shuffle.")
+            return
+        }
+
+        val loading = event.message.replyWith("*Shuffling...*")
+
+        val shuffledQueue = session.queue.shuffled()
+        session.queue = LinkedBlockingQueue<Track>(shuffledQueue)
+
+        loading.delete()
+        queue(event)
     }
 
     suspend fun skip(event: MessageCreateEvent) {
