@@ -13,7 +13,8 @@ import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.voice.AudioFrame
 import dev.kord.voice.VoiceConnection
 import kotlinx.coroutines.delay
-import ru.chimchima.pirat.PiratRepository
+import ru.chimchima.repository.AntihypeRepository
+import ru.chimchima.repository.PiratRepository
 import ru.chimchima.utils.formatDuration
 import ru.chimchima.utils.query
 import ru.chimchima.utils.replyWith
@@ -54,6 +55,7 @@ data class Session(
 
 class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
     private val piratRepository = PiratRepository()
+    private val antihypeRepository = AntihypeRepository()
     private val sessions = ConcurrentHashMap<Snowflake, Session>()
 
     private suspend fun disconnect(guildId: Snowflake) {
@@ -147,7 +149,19 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         queue(event)
     }
 
-    suspend fun shuffled(event: MessageCreateEvent) {
+    suspend fun antihypetrain(event: MessageCreateEvent, shuffled: Boolean = false) {
+        val loading = event.message.replyWith("*Добавляю замая...*")
+
+        val count = event.query.toIntOrNull()
+        for ((title, url) in antihypeRepository.getSongs(count, shuffled)) {
+            addTrackToQueue(event, url, title, quiet = true)
+        }
+
+        loading.delete()
+        queue(event)
+    }
+
+    suspend fun shuffled(event: MessageCreateEvent, shuffled: Boolean = false) {
         pirat(event, shuffled = true)
     }
 
