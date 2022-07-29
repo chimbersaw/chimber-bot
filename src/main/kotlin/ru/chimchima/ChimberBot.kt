@@ -34,7 +34,7 @@ suspend fun main() = runBlocking {
             "!stop" -> commands.stop(this)
             "!pirat" -> commands.pirat(this)
             "!shuffled" -> commands.pirat(this, shuffled = true)
-            "!antihypetrain", "!antihype" -> commands.antihypetrain(this)
+            "!antihypetrain", "!antihype", "!antipenis" -> commands.antihypetrain(this)
             "!antishuffle" -> commands.antihypetrain(this, shuffled = true)
             "!skip" -> commands.skip(this)
             "!queue" -> commands.queue(this)

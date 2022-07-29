@@ -12,7 +12,7 @@ private val antihypetrainSongs = listOf(
     "Молодой Герцен" to "https://youtu.be/5V1g6K2Z3bU",
     "Grime Vietnam" to "https://youtu.be/wbeu62aVhLY",
     "Калимба" to "https://youtu.be/XEMHeRkC2Vc",
-    "Сель" to "https://youtu.be/AA_K9LWYCI",
+    "Сель" to "https://youtu.be/-AA_K9LWYCI",
     "Ангел Утешения" to "https://youtu.be/Qxx41MCna18",
     "Мы работаем на Кремль" to "https://youtu.be/FQ9okwtYtzw",
     "Дикпик" to "https://youtu.be/bDL3rbaGPh4",
@@ -100,11 +100,12 @@ private val antihypetrainSongs = listOf(
     "В грязи" to "https://youtu.be/fyy6MfU005c",
     "Мечты о падении" to "https://youtu.be/9s500_XH1S4",
     "Трихана" to "https://youtu.be/fFXhr5K-xsA",
-    "Прощай Антихайп" to "https://youtu.be/otHGh_PumIA"
+    "Прощай Антихайп" to "https://youtu.be/otHGh_PumIA",
+    "Antihypeoutro" to "https://youtu.be/FnYQOdRgd0s"
 )
 
 class AntihypeRepository : SongRepository() {
-    override val songs = antihypetrainSongs.map { (title, youtubeUrl) ->
-        Song(title, "ytsearch: $youtubeUrl")
+    override val songs = antihypetrainSongs.map { (title, url) ->
+        Song(title, url)
     }
 }

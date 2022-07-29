@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
+private const val MAX_MESSAGE_LENGTH = 2000
 private const val USAGE = """
 ```
 Команды:
@@ -206,9 +207,37 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         val reply = if (queue == null || queue.isEmpty()) {
             "Queue is empty!"
         } else {
-            queue.mapIndexed { i, track ->
-                "${i + 1}. ${track.title}"
-            }.joinToString(separator = "\n", prefix = "Playing next:\n```", postfix = "```")
+            val prefix = "${queue.size + 1} tracks total.\nPlaying next:\n```\n"
+            val postfix = "```"
+            val threeDots = "...\n"
+            val trackList = queue.mapIndexed { i, track ->
+                "${i + 1}. ${track.title}\n"
+            }
+            val lastTrackIndex = trackList.size - 1
+
+            var currentLength = prefix.length + postfix.length
+            var currentIndex = 0
+            val croppedList = trackList.takeWhile {
+                var threshold = MAX_MESSAGE_LENGTH - threeDots.length
+                if (currentIndex == lastTrackIndex) {
+                    threshold = MAX_MESSAGE_LENGTH
+                }
+
+                if (currentLength + it.length <= threshold) {
+                    currentLength += it.length
+                    currentIndex++
+                    true
+                } else {
+                    false
+                }
+            }
+
+            var result = prefix + croppedList.joinToString(separator = "")
+            if (croppedList.size < trackList.size) {
+                result += threeDots
+            }
+            result += postfix
+            result
         }
 
         event.message.replyWith(reply)
