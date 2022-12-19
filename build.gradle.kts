@@ -20,12 +20,12 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.slf4j:slf4j-simple:1.7.36")
+    implementation("org.slf4j:slf4j-simple:2.0.5")
     implementation("com.sedmelluq:lavaplayer:1.3.78")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
-    implementation("dev.kord:kord-core:0.8.0-M15") {
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("dev.kord:kord-core:0.8.0-M17") {
         capabilities {
-            requireCapability("dev.kord:core-voice:0.8.0-M15")
+            requireCapability("dev.kord:core-voice:0.8.0-M17")
         }
     }
 }
