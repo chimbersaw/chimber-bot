@@ -6,10 +6,10 @@ import dev.kord.core.on
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.runBlocking
+import ru.chimchima.ping.PingServer
 import ru.chimchima.player.LavaPlayerManager
 import ru.chimchima.properties.DISCORD_TOKEN
 import ru.chimchima.properties.LocalProperties
-import ru.chimchima.ping.PingServer
 
 fun startPingServer() {
     println("Starting ping server...")
@@ -38,6 +38,7 @@ suspend fun main() = runBlocking {
             "!antihypetrain", "!antihype", "!antipenis" -> commands.antihypetrain(this)
             "!antishuffle" -> commands.antihypetrain(this, shuffled = true)
             "!snus" -> commands.snus(this)
+            "!pauk" -> commands.pauk(this)
             "!skip" -> commands.skip(this)
             "!queue" -> commands.queue(this)
             "!shuffle" -> commands.shuffle(this)

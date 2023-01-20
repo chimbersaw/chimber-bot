@@ -32,6 +32,8 @@ private const val USAGE = """
     !antihype [count] — Добавляет в очередь count (или все доступные) треки Antihypetrain.
     !antishuffle [count] — Добавляет в очередь count (или все доступные) треки Antihypetrain в случайном порядке.
     !play <track name> — Присоединяется к каналу и воспроизводит композицию с указанным названием (поиск по YouTube).
+    !snus [count] - Добавляют в очередь count снюсов.
+    !pauk [count] - Добавляют в очередь count пауков.
     !stop — Прекращает воспроизведение очереди и покидает канал.
     !skip [count] — Пропускает следующие count композиций (включая текущую), по умолчанию count=1.
     !queue — Выводит текущую очередь композиций.
@@ -167,7 +169,15 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
     }
 
     suspend fun snus(event: MessageCreateEvent) {
-        addTrackToQueue(event, "https://www.youtube.com/watch?v=mx-f_wbZTMI")
+        repeat(event.query.toIntOrNull() ?: 1) {
+            addTrackToQueue(event, "https://www.youtube.com/watch?v=mx-f_wbZTMI")
+        }
+    }
+
+    suspend fun pauk(event: MessageCreateEvent) {
+        repeat(event.query.toIntOrNull() ?: 1) {
+            addTrackToQueue(event, "https://www.youtube.com/watch?v=e2RqDHziN6k")
+        }
     }
 
     suspend fun shuffle(event: MessageCreateEvent) {
