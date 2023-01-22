@@ -29,7 +29,8 @@ suspend fun main() = runBlocking {
 
     kord.on<MessageCreateEvent> {
         if (message.author?.isBot != false) return@on
-        when (message.content.substringBefore(" ")) {
+        val command = message.content.substringBefore(" ")
+        when (command) {
             "!plink" -> commands.plink(this)
             "!play" -> commands.play(this)
             "!stop" -> commands.stop(this)
@@ -45,6 +46,10 @@ suspend fun main() = runBlocking {
             "!clear" -> commands.clear(this)
             "!current" -> commands.current(this)
             "!help" -> commands.help(this)
+        }
+        if (command.startsWith("!play")) {
+            val count = command.substringAfter("!play").toIntOrNull() ?: return@on
+            commands.play(this, count)
         }
     }
 

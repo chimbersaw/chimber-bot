@@ -52,7 +52,14 @@ class Track(
     fun playWith(player: AudioPlayer) = player.playTrack(audioTrack)
 
     suspend fun playingTrack() = message.replyWith("playing track: $title")
-    suspend fun queuedTrack() = message.replyWith("queued track: $title")
+    suspend fun queuedTrack(count: Int = 1) {
+        val msg = if (count == 1) {
+            "queued track: $title"
+        } else {
+            "queued $count tracks: $title"
+        }
+        message.replyWith(msg)
+    }
 }
 
 data class Session(
@@ -105,7 +112,8 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         event: MessageCreateEvent,
         query: String,
         replyTitle: String? = null,
-        quiet: Boolean = false
+        quiet: Boolean = false,
+        count: Int = 1
     ) {
         val guildId = event.guildId ?: return
         val channel = event.member?.getVoiceStateOrNull()?.getChannelOrNull() ?: return
@@ -117,9 +125,13 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         audioTrack.userData = fullTitle
 
         val connection = sessions[guildId] ?: connect(channel)
-        connection.queue.add(track)
+
+        repeat(count) {
+            connection.queue.add(track)
+        }
+
         if (!quiet && connection.queue.size > 1) {
-            track.queuedTrack()
+            track.queuedTrack(count)
         }
     }
 
@@ -132,16 +144,16 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         response.delete()
     }
 
-    suspend fun play(event: MessageCreateEvent) {
-        val query = event.query
-        if (query.isNotBlank()) {
-            if (query.startsWith("http")) {
-                // mne poxui
-                addTrackToQueue(event, query)
-            } else {
-                addTrackToQueue(event, "ytsearch: $query")
-            }
+    suspend fun play(event: MessageCreateEvent, count: Int = 1) {
+        var query = event.query
+        if (query.isBlank()) return
+
+        // mne poxui
+        if (!query.startsWith("http")) {
+            query = "ytsearch: $query"
         }
+
+        addTrackToQueue(event, query, count = count)
     }
 
     suspend fun stop(event: MessageCreateEvent) {
