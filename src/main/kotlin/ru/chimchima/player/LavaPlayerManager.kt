@@ -13,10 +13,10 @@ import kotlin.coroutines.suspendCoroutine
 class LavaPlayerManager : DefaultAudioPlayerManager() {
     init {
         AudioSourceManagers.registerRemoteSources(this)
-        registerSourceManager(LocalAudioSourceManager())
+        AudioSourceManagers.registerLocalSource(this)
     }
 
-    suspend fun loadTrack(query: String) = suspendCoroutine<AudioTrack?> {
+    suspend fun loadTrack(query: String) = suspendCoroutine {
         loadItem(query, object : AudioLoadResultHandler {
             override fun trackLoaded(track: AudioTrack) = it.resume(track)
             override fun playlistLoaded(playlist: AudioPlaylist) = it.resume(playlist.tracks.first())

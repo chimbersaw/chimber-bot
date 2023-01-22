@@ -134,8 +134,13 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
 
     suspend fun play(event: MessageCreateEvent) {
         val query = event.query
-        if (query.isNotEmpty()) {
-            addTrackToQueue(event, "ytsearch: $query")
+        if (query.isNotBlank()) {
+            if (query.startsWith("http")) {
+                // mne poxui
+                addTrackToQueue(event, query)
+            } else {
+                addTrackToQueue(event, "ytsearch: $query")
+            }
         }
     }
 
@@ -219,7 +224,7 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
     suspend fun queue(event: MessageCreateEvent) {
         val queue = sessions[event.guildId]?.queue
 
-        val reply = if (queue == null || queue.isEmpty()) {
+        val reply = if (queue.isNullOrEmpty()) {
             "Queue is empty!"
         } else {
             val prefix = "${queue.size + 1} tracks total.\nPlaying next:\n```\n"
