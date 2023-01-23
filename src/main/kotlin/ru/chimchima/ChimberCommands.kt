@@ -184,15 +184,11 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
     }
 
     suspend fun snus(event: MessageCreateEvent) {
-        repeat(event.query.toIntOrNull() ?: 1) {
-            addTrackToQueue(event, "https://www.youtube.com/watch?v=mx-f_wbZTMI")
-        }
+        addTrackToQueue(event, "https://www.youtube.com/watch?v=mx-f_wbZTMI", count = event.query.toIntOrNull() ?: 1)
     }
 
     suspend fun pauk(event: MessageCreateEvent) {
-        repeat(event.query.toIntOrNull() ?: 1) {
-            addTrackToQueue(event, "https://www.youtube.com/watch?v=e2RqDHziN6k")
-        }
+        addTrackToQueue(event, "https://www.youtube.com/watch?v=e2RqDHziN6k", count = event.query.toIntOrNull() ?: 1)
     }
 
     suspend fun shuffle(event: MessageCreateEvent) {
