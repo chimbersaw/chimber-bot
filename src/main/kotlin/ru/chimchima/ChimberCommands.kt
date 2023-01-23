@@ -50,16 +50,9 @@ class Track(
     private val message: Message
 ) {
     fun playWith(player: AudioPlayer) = player.playTrack(audioTrack)
+    fun clone() = Track(title, audioTrack.makeClone(), message)
 
     suspend fun playingTrack() = message.replyWith("playing track: $title")
-    suspend fun queuedTrack(count: Int = 1) {
-        val msg = if (count == 1) {
-            "queued track: $title"
-        } else {
-            "queued $count tracks: $title"
-        }
-        message.replyWith(msg)
-    }
 }
 
 data class Session(
@@ -117,21 +110,26 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
     ) {
         val guildId = event.guildId ?: return
         val channel = event.member?.getVoiceStateOrNull()?.getChannelOrNull() ?: return
-        val audioTrack = lavaPlayerManager.loadTrack(query) ?: return
+        val connection = sessions[guildId] ?: connect(channel)
 
+        val audioTrack = lavaPlayerManager.loadTrack(query) ?: return
         val title = replyTitle ?: audioTrack.info.title
         val fullTitle = "$title ${audioTrack.formatDuration()}"
+
         val track = Track(fullTitle, audioTrack, event.message)
         audioTrack.userData = fullTitle
 
-        val connection = sessions[guildId] ?: connect(channel)
-
-        repeat(count) {
-            connection.queue.add(track)
+        if (!quiet && connection.queue.size + count > 1) {
+            val msg = if (count == 1) {
+                "queued track: $title"
+            } else {
+                "queued $count tracks: $title"
+            }
+            event.message.replyWith(msg)
         }
 
-        if (!quiet && connection.queue.size > 1) {
-            track.queuedTrack(count)
+        repeat(count) {
+            connection.queue.add(track.clone())
         }
     }
 
