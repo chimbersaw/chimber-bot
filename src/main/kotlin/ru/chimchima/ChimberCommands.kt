@@ -191,6 +191,10 @@ class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
         addTrackToQueue(event, "https://www.youtube.com/watch?v=e2RqDHziN6k", count = event.query.toIntOrNull() ?: 1)
     }
 
+    suspend fun sasha(event: MessageCreateEvent) {
+        addTrackToQueue(event, "https://www.youtube.com/watch?v=0vQBaqUPtlc", count = event.query.toIntOrNull() ?: 1)
+    }
+
     suspend fun shuffle(event: MessageCreateEvent) {
         val session = sessions[event.guildId] ?: run {
             event.message.replyWith("Nothing to shuffle.")
