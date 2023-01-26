@@ -7,7 +7,6 @@ import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.runBlocking
 import ru.chimchima.ping.PingServer
-import ru.chimchima.player.LavaPlayerManager
 import ru.chimchima.properties.DISCORD_TOKEN
 import ru.chimchima.properties.LocalProperties
 

@@ -43,14 +43,27 @@ private const val USAGE = """
 """
 
 class Track(
-    val title: String,
+    private val message: Message,
     private val audioTrack: AudioTrack,
-    private val message: Message
+    val title: String
 ) {
     fun playWith(player: AudioPlayer) = player.playTrack(audioTrack)
-    fun clone() = Track(title, audioTrack.makeClone(), message)
+    fun clone() = Track(message, audioTrack.makeClone(), title)
 
     suspend fun playingTrack() = message.replyWith("playing track: $title")
+
+    companion object {
+        suspend fun builder(message: Message, query: String, title: String? = null): suspend () -> Track? =
+            {
+                LavaPlayerManager.loadTrack(query)?.let {
+                    val fullTitle = "${title ?: it.info.title} ${it.formatDuration()}"
+                    Track(message, it, fullTitle)
+                } ?: run {
+                    message.replyWith("No such track was found :(")
+                    null
+                }
+            }
+    }
 }
 
 data class Session(
@@ -62,7 +75,6 @@ data class Session(
 
 @OptIn(KordVoice::class)
 class ChimberCommands {
-    private val lavaPlayerManager = LavaPlayerManager()
     private val connections = ConcurrentHashMap<Snowflake, VoiceConnection>()
     private val sessions = ConcurrentHashMap<Snowflake, Session>()
 
@@ -72,7 +84,7 @@ class ChimberCommands {
     }
 
     private suspend fun connect(channel: BaseVoiceChannelBehavior): Session {
-        val player = lavaPlayerManager.createPlayer()
+        val player = LavaPlayerManager.createPlayer()
         val queue = LinkedBlockingQueue<Track>()
         val session = Session(player, queue)
 
@@ -82,7 +94,7 @@ class ChimberCommands {
 
                 if (frame == null) {
                     if (!session.repeat) {
-                        session.current = queue.poll(3, TimeUnit.SECONDS)
+                        session.current = queue.poll(1, TimeUnit.SECONDS)
                         session.current?.playingTrack()
                     }
 
@@ -107,35 +119,39 @@ class ChimberCommands {
         return session
     }
 
-    private suspend fun addTrackToQueue(
+    private suspend fun addTracksToQueue(
         event: MessageCreateEvent,
-        query: String,
-        replyTitle: String? = null,
-        quiet: Boolean = false,
-        count: Int = 1
-    ) {
-        val guildId = event.guildId ?: return
-        val channel = event.member?.getVoiceStateOrNull()?.getChannelOrNull() ?: return
-        val audioTrack = lavaPlayerManager.loadTrack(query) ?: run {
-            event.message.replyWith("No tracks were found :(")
-            return
-        }
-
+        builders: List<suspend () -> Track?>
+    ): Int {
+        val guildId = event.guildId ?: return 0
+        val channel = event.member?.getVoiceStateOrNull()?.getChannelOrNull() ?: return 0
         val session = sessions[guildId] ?: connect(channel)
-        val title = replyTitle ?: audioTrack.info.title
-        val fullTitle = "$title ${audioTrack.formatDuration()}"
 
-        val track = Track(fullTitle, audioTrack, event.message)
-
-        repeat(count) {
-            session.queue.add(track.clone())
+        var queueSize = session.queue.size
+        if (session.current == null) {
+            queueSize--
         }
 
-        if (!quiet && session.queue.size > 1) {
+        for (builder in builders) {
+            builder.invoke()?.let {
+                session.queue.add(it)
+            }
+        }
+
+        return queueSize + builders.size
+    }
+
+    private suspend fun addTrackToQueue(event: MessageCreateEvent, query: String, count: Int = 1) {
+        val track = Track.builder(event.message, query).invoke() ?: return
+
+        val builder: suspend () -> Track? = { track.clone() }
+        val queueSize = addTracksToQueue(event, List(count) { builder })
+
+        if (queueSize > 0) {
             val msg = if (count == 1) {
-                "queued track: $title"
+                "queued track: ${track.title}"
             } else {
-                "queued $count tracks: $title"
+                "queued $count tracks: ${track.title}"
             }
             event.message.replyWith(msg)
         }
@@ -170,24 +186,26 @@ class ChimberCommands {
         val loading = event.message.replyWith("*Добавляю серегу...*")
 
         val count = event.query.toIntOrNull()
-        for ((title, url) in PiratRepository.getSongs(count, shuffled)) {
-            addTrackToQueue(event, url, title, quiet = true)
-        }
+        val builders = PiratRepository.getBuilders(event.message, count, shuffled)
+        addTracksToQueue(event, builders)
 
         loading.delete()
-        queue(event)
+        if (connections.containsKey(event.guildId)) {
+            queue(event)
+        }
     }
 
     suspend fun antihypetrain(event: MessageCreateEvent, shuffled: Boolean = false) {
         val loading = event.message.replyWith("*Добавляю замая...*")
 
         val count = event.query.toIntOrNull()
-        for ((title, url) in AntihypeRepository.getSongs(count, shuffled)) {
-            addTrackToQueue(event, url, title, quiet = true)
-        }
+        val builders = AntihypeRepository.getBuilders(event.message, count, shuffled)
+        addTracksToQueue(event, builders)
 
         loading.delete()
-        queue(event)
+        if (connections.containsKey(event.guildId)) {
+            queue(event)
+        }
     }
 
     suspend fun snus(event: MessageCreateEvent) {
@@ -224,14 +242,14 @@ class ChimberCommands {
         val (player, queue, current) = sessions[event.guildId] ?: return
         if (current == null) return
 
-        val skippedSongs = mutableListOf(current.title)
+        val skippedTracks = mutableListOf(current.title)
         repeat(count - 1) {
             val track = queue.poll() ?: return@repeat
-            skippedSongs.add(track.title)
+            skippedTracks.add(track.title)
         }
         player.stopTrack()
 
-        val skipped = skippedSongs.joinToString(separator = "\n", prefix = "```\n", postfix = "\n```")
+        val skipped = skippedTracks.joinToString(separator = "\n", prefix = "```\n", postfix = "\n```")
         event.message.replyWith("skipped:\n$skipped")
     }
 

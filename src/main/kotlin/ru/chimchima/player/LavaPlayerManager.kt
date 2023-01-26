@@ -3,14 +3,13 @@ package ru.chimchima.player
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
-import com.sedmelluq.discord.lavaplayer.source.local.LocalAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class LavaPlayerManager : DefaultAudioPlayerManager() {
+object LavaPlayerManager : DefaultAudioPlayerManager() {
     init {
         AudioSourceManagers.registerRemoteSources(this)
         AudioSourceManagers.registerLocalSource(this)
