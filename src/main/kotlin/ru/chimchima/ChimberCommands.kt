@@ -116,14 +116,16 @@ class ChimberCommands {
     ) {
         val guildId = event.guildId ?: return
         val channel = event.member?.getVoiceStateOrNull()?.getChannelOrNull() ?: return
-        val session = sessions[guildId] ?: connect(channel)
+        val audioTrack = lavaPlayerManager.loadTrack(query) ?: run {
+            event.message.replyWith("No tracks were found :(")
+            return
+        }
 
-        val audioTrack = lavaPlayerManager.loadTrack(query) ?: return
+        val session = sessions[guildId] ?: connect(channel)
         val title = replyTitle ?: audioTrack.info.title
         val fullTitle = "$title ${audioTrack.formatDuration()}"
 
         val track = Track(fullTitle, audioTrack, event.message)
-        audioTrack.userData = fullTitle
 
         if (!quiet && session.queue.size + count > 1) {
             val msg = if (count == 1) {
@@ -219,18 +221,14 @@ class ChimberCommands {
         val count = event.query.toIntOrNull() ?: 1
         if (count < 1) return
         val (player, queue, current) = sessions[event.guildId] ?: return
-        val currentTrack = player.playingTrack ?: return
+        if (current == null) return
 
-        val skippedSongs = mutableListOf<String>()
+        val skippedSongs = mutableListOf(current.title)
         repeat(count - 1) {
             val track = queue.poll() ?: return@repeat
             skippedSongs.add(track.title)
         }
         player.stopTrack()
-
-        currentTrack.getUserData(String::class.java)?.let {
-            skippedSongs.add(0, it)
-        }
 
         val skipped = skippedSongs.joinToString(separator = "\n", prefix = "```\n", postfix = "\n```")
         event.message.replyWith("skipped:\n$skipped")
@@ -289,7 +287,7 @@ class ChimberCommands {
     }
 
     suspend fun current(event: MessageCreateEvent) {
-        val title = sessions[event.guildId]?.player?.playingTrack?.getUserData(String::class.java) ?: return
+        val title = sessions[event.guildId]?.current?.title ?: return
         event.message.replyWith(title)
     }
 
