@@ -32,6 +32,14 @@ suspend fun main() = runBlocking {
             "!plink" -> commands.plink(this)
             "!play" -> commands.play(this)
             "!stop" -> commands.stop(this)
+            "!skip" -> commands.skip(this)
+            "!queue" -> commands.queue(this)
+            "!shuffle" -> commands.shuffle(this)
+            "!clear" -> commands.clear(this)
+            "!current" -> commands.current(this)
+            "!repeat" -> commands.repeat(this)
+            "!help" -> commands.help(this)
+
             "!pirat" -> commands.pirat(this)
             "!shuffled" -> commands.pirat(this, shuffled = true)
             "!antihypetrain", "!antihype", "!antipenis" -> commands.antihypetrain(this)
@@ -39,12 +47,6 @@ suspend fun main() = runBlocking {
             "!snus" -> commands.snus(this)
             "!pauk" -> commands.pauk(this)
             "!sasha" -> commands.sasha(this)
-            "!skip" -> commands.skip(this)
-            "!queue" -> commands.queue(this)
-            "!shuffle" -> commands.shuffle(this)
-            "!clear" -> commands.clear(this)
-            "!current" -> commands.current(this)
-            "!help" -> commands.help(this)
         }
         if (command.startsWith("!play")) {
             val count = command.substringAfter("!play").toIntOrNull() ?: return@on

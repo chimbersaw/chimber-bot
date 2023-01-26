@@ -29,15 +29,17 @@ private const val USAGE = """
     !shuffled [count] — Добавляет в очередь count (или все доступные) треки Серёги Бандита в случайном порядке.
     !antihype [count] — Добавляет в очередь count (или все доступные) треки Antihypetrain.
     !antishuffle [count] — Добавляет в очередь count (или все доступные) треки Antihypetrain в случайном порядке.
-    !play <track name> — Присоединяется к каналу и воспроизводит композицию с указанным названием (поиск по YouTube).
     !snus [count] - Добавляют в очередь count снюсов.
     !pauk [count] - Добавляют в очередь count пауков.
+    
+    !play <track name> — Присоединяется к каналу и воспроизводит композицию с указанным названием (поиск по YouTube).
     !stop — Прекращает воспроизведение очереди и покидает канал.
     !skip [count] — Пропускает следующие count композиций (включая текущую), по умолчанию count=1.
     !queue — Выводит текущую очередь композиций.
     !shuffle — Перемешать очередь композиций.
     !clear — Очистить очередь композиций.
     !current — Выводит название текущей композиции.
+    !repeat [on/off] — Устанавливает режим повторения трека на переданный (выводит текущий при отсутствии аргументов).
     !help — Выводит данное сообщение.
 ```
 """
@@ -69,14 +71,19 @@ class Track(
 data class Session(
     val player: AudioPlayer,
     var queue: LinkedBlockingQueue<Track>,
-    var current: Track? = null,
-    var repeat: Boolean = false
+    var current: Track? = null
 )
+
+enum class Repeat {
+    ON,
+    OFF
+}
 
 @OptIn(KordVoice::class)
 class ChimberCommands {
     private val connections = ConcurrentHashMap<Snowflake, VoiceConnection>()
     private val sessions = ConcurrentHashMap<Snowflake, Session>()
+    private val repeats = ConcurrentHashMap<Snowflake, Repeat>()
 
     private suspend fun disconnect(guildId: Snowflake) {
         sessions.remove(guildId)
@@ -88,12 +95,17 @@ class ChimberCommands {
         val queue = LinkedBlockingQueue<Track>()
         val session = Session(player, queue)
 
+        val guildId = channel.guildId
+        if (!repeats.containsKey(guildId)) {
+            repeats[guildId] = Repeat.OFF
+        }
+
         val connection = channel.connect {
             audioProvider {
                 val frame = player.provide(1, TimeUnit.SECONDS)
 
                 if (frame == null) {
-                    if (!session.repeat) {
+                    if (repeats[guildId] == Repeat.OFF || session.current == null) {
                         session.current = queue.poll(1, TimeUnit.SECONDS)
                         session.current?.playingTrack()
                     }
@@ -101,7 +113,7 @@ class ChimberCommands {
                     val track = session.current?.clone()
 
                     if (track == null) {
-                        disconnect(channel.guildId)
+                        disconnect(guildId)
                         return@audioProvider null
                     }
 
@@ -308,6 +320,20 @@ class ChimberCommands {
     suspend fun current(event: MessageCreateEvent) {
         val title = sessions[event.guildId]?.current?.title ?: return
         event.message.replyWith(title)
+    }
+
+    suspend fun repeat(event: MessageCreateEvent) {
+        val guildId = event.guildId ?: return
+
+        var start = "Repeat is now"
+        when (event.query.lowercase()) {
+            "on" -> repeats[guildId] = Repeat.ON
+            "off" -> repeats[guildId] = Repeat.OFF
+            else -> start = "Repeat is"
+        }
+
+        val mode = (repeats[guildId] ?: Repeat.OFF).toString().lowercase()
+        event.message.replyWith("$start $mode.")
     }
 
     suspend fun help(event: MessageCreateEvent) {
