@@ -127,17 +127,17 @@ class ChimberCommands {
 
         val track = Track(fullTitle, audioTrack, event.message)
 
-        if (!quiet && session.queue.size + count > 1) {
+        repeat(count) {
+            session.queue.add(track.clone())
+        }
+
+        if (!quiet && session.queue.size > 1) {
             val msg = if (count == 1) {
                 "queued track: $title"
             } else {
                 "queued $count tracks: $title"
             }
             event.message.replyWith(msg)
-        }
-
-        repeat(count) {
-            session.queue.add(track.clone())
         }
     }
 
@@ -220,6 +220,7 @@ class ChimberCommands {
     suspend fun skip(event: MessageCreateEvent) {
         val count = event.query.toIntOrNull() ?: 1
         if (count < 1) return
+
         val (player, queue, current) = sessions[event.guildId] ?: return
         if (current == null) return
 

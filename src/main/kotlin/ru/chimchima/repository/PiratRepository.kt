@@ -7,7 +7,7 @@ private val piratSongs = listOf(
     "Мой байк" to "https://youtu.be/OQGdrezi0Y4",
     "Почему ты еще не фанат?" to "https://youtu.be/apWlgn-nrEE",
     "Свинья" to "https://youtu.be/w8TW3IkVfAQ",
-    "zxcергей" to "https://youtu.be/-YAHPbTNBto",
+    "zxcергей" to "https://youtu.be/baXZvJoWgn0",
     "Вайбмен" to "https://youtu.be/YpMU3g8JLjw",
     "Гимн Дахака" to "https://youtu.be/mZvEsykmfZY",
     "Апельсин" to "https://youtu.be/Vr-DOV-TP5s",
