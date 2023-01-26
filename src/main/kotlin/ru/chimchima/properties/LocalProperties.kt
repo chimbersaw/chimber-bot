@@ -24,6 +24,6 @@ object LocalProperties {
     val port: Int?
         get() = getProperty(PORT)?.toIntOrNull()
 
-    val heroku: Boolean
+    val is_heroku: Boolean
         get() = getProperty(HEROKU) != null
 }

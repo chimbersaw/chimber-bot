@@ -17,11 +17,5 @@ private val piratSongs = listOf(
 )
 
 class PiratRepository : SongRepository() {
-    override val songs = piratSongs.mapIndexed { id, (title, url) ->
-        // TODO: use local files(fix working from jar)
-        // https://github.com/sedmelluq/lavaplayer/issues/621
-        // val fileName = "/pirat/${id + 1}.mp3"
-        // val url = ChimberCommands::class.java.getResource(fileName)?.path ?: "ytsearch: $youtubeUrl"
-        Song(title, url)
-    }
+    override val songs = piratSongs.toSongs()
 }

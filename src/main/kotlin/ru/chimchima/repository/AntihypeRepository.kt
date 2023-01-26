@@ -105,7 +105,5 @@ private val antihypetrainSongs = listOf(
 )
 
 class AntihypeRepository : SongRepository() {
-    override val songs = antihypetrainSongs.map { (title, url) ->
-        Song(title, url)
-    }
+    override val songs = antihypetrainSongs.toSongs()
 }

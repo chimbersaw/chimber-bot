@@ -61,7 +61,8 @@ data class Session(
     var queue: LinkedBlockingQueue<Track>
 )
 
-class ChimberCommands(private val lavaPlayerManager: LavaPlayerManager) {
+class ChimberCommands {
+    private val lavaPlayerManager = LavaPlayerManager()
     private val piratRepository = PiratRepository()
     private val antihypeRepository = AntihypeRepository()
     private val sessions = ConcurrentHashMap<Snowflake, Session>()

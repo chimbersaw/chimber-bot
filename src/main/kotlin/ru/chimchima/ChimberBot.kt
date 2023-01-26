@@ -20,12 +20,11 @@ fun startPingServer() {
 suspend fun main() = runBlocking {
     val token = LocalProperties.discordToken ?: throw RuntimeException("$DISCORD_TOKEN is not set")
     val kord = Kord(token)
-    if (LocalProperties.heroku) {
+    if (LocalProperties.is_heroku) {
         startPingServer()
     }
 
-    val lavaPlayerManager = LavaPlayerManager()
-    val commands = ChimberCommands(lavaPlayerManager)
+    val commands = ChimberCommands()
 
     kord.on<MessageCreateEvent> {
         if (message.author?.isBot != false) return@on
