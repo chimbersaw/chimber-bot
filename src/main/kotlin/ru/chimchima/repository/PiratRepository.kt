@@ -16,6 +16,6 @@ private val piratSongs = listOf(
     "Я взлетаю вверх" to "https://youtu.be/oghlaYD2_FQ"
 )
 
-class PiratRepository : SongRepository() {
+object PiratRepository : SongRepository() {
     override val songs = piratSongs.toSongs()
 }

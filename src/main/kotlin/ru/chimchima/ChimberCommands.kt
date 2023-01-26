@@ -1,5 +1,3 @@
-@file:OptIn(KordVoice::class)
-
 package ru.chimchima
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
@@ -56,48 +54,55 @@ class Track(
 }
 
 data class Session(
-    val connection: VoiceConnection,
     val player: AudioPlayer,
-    var queue: LinkedBlockingQueue<Track>
+    var queue: LinkedBlockingQueue<Track>,
+    var current: Track? = null,
+    var repeat: Boolean = false
 )
 
+@OptIn(KordVoice::class)
 class ChimberCommands {
     private val lavaPlayerManager = LavaPlayerManager()
-    private val piratRepository = PiratRepository()
-    private val antihypeRepository = AntihypeRepository()
+    private val connections = ConcurrentHashMap<Snowflake, VoiceConnection>()
     private val sessions = ConcurrentHashMap<Snowflake, Session>()
 
     private suspend fun disconnect(guildId: Snowflake) {
-        sessions.remove(guildId)?.connection?.shutdown()
+        sessions.remove(guildId)
+        connections.remove(guildId)?.shutdown()
     }
 
     private suspend fun connect(channel: BaseVoiceChannelBehavior): Session {
         val player = lavaPlayerManager.createPlayer()
+        val queue = LinkedBlockingQueue<Track>()
+        val session = Session(player, queue)
 
         val connection = channel.connect {
             audioProvider {
-                val queue = sessions[channel.guildId]?.queue ?: return@audioProvider null
+                val frame = player.provide(1, TimeUnit.SECONDS)
 
-                var frame = player.provide(1, TimeUnit.SECONDS)
+                if (frame == null) {
+                    if (!session.repeat) {
+                        session.current = queue.poll(3, TimeUnit.SECONDS)
+                        session.current?.playingTrack()
+                    }
 
-                while (frame == null) {
-                    val track = queue.poll(1, TimeUnit.SECONDS) ?: run {
+                    val track = session.current?.clone()
+
+                    if (track == null) {
                         disconnect(channel.guildId)
                         return@audioProvider null
                     }
+
                     track.playWith(player)
-                    frame = player.provide(5, TimeUnit.SECONDS)
-                    if (frame != null) {
-                        track.playingTrack()
-                    }
+                    return@audioProvider AudioFrame.SILENCE
                 }
 
                 AudioFrame.fromData(frame.data)
             }
         }
 
-        val session = Session(connection, player, LinkedBlockingQueue<Track>())
         sessions[channel.guildId] = session
+        connections[channel.guildId] = connection
 
         return session
     }
@@ -111,7 +116,7 @@ class ChimberCommands {
     ) {
         val guildId = event.guildId ?: return
         val channel = event.member?.getVoiceStateOrNull()?.getChannelOrNull() ?: return
-        val connection = sessions[guildId] ?: connect(channel)
+        val session = sessions[guildId] ?: connect(channel)
 
         val audioTrack = lavaPlayerManager.loadTrack(query) ?: return
         val title = replyTitle ?: audioTrack.info.title
@@ -120,7 +125,7 @@ class ChimberCommands {
         val track = Track(fullTitle, audioTrack, event.message)
         audioTrack.userData = fullTitle
 
-        if (!quiet && connection.queue.size + count > 1) {
+        if (!quiet && session.queue.size + count > 1) {
             val msg = if (count == 1) {
                 "queued track: $title"
             } else {
@@ -130,7 +135,7 @@ class ChimberCommands {
         }
 
         repeat(count) {
-            connection.queue.add(track.clone())
+            session.queue.add(track.clone())
         }
     }
 
@@ -147,7 +152,6 @@ class ChimberCommands {
         var query = event.query
         if (query.isBlank()) return
 
-        // mne poxui
         if (!query.startsWith("http")) {
             query = "ytsearch: $query"
         }
@@ -164,7 +168,7 @@ class ChimberCommands {
         val loading = event.message.replyWith("*Добавляю серегу...*")
 
         val count = event.query.toIntOrNull()
-        for ((title, url) in piratRepository.getSongs(count, shuffled)) {
+        for ((title, url) in PiratRepository.getSongs(count, shuffled)) {
             addTrackToQueue(event, url, title, quiet = true)
         }
 
@@ -176,7 +180,7 @@ class ChimberCommands {
         val loading = event.message.replyWith("*Добавляю замая...*")
 
         val count = event.query.toIntOrNull()
-        for ((title, url) in antihypeRepository.getSongs(count, shuffled)) {
+        for ((title, url) in AntihypeRepository.getSongs(count, shuffled)) {
             addTrackToQueue(event, url, title, quiet = true)
         }
 
@@ -214,7 +218,7 @@ class ChimberCommands {
     suspend fun skip(event: MessageCreateEvent) {
         val count = event.query.toIntOrNull() ?: 1
         if (count < 1) return
-        val (_, player, queue) = sessions[event.guildId] ?: return
+        val (player, queue, current) = sessions[event.guildId] ?: return
         val currentTrack = player.playingTrack ?: return
 
         val skippedSongs = mutableListOf<String>()

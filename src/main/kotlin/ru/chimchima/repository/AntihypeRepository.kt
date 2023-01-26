@@ -104,6 +104,6 @@ private val antihypetrainSongs = listOf(
     "Antihypeoutro" to "https://youtu.be/FnYQOdRgd0s"
 )
 
-class AntihypeRepository : SongRepository() {
+object AntihypeRepository : SongRepository() {
     override val songs = antihypetrainSongs.toSongs()
 }
