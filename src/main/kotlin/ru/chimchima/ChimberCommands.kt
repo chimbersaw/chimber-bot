@@ -25,13 +25,6 @@ private const val MAX_MESSAGE_LENGTH = 2000
 private const val USAGE = """
 ```
 Команды:
-    !pirat [count] — Добавляет в очередь count (или все доступные) треки Серёги Бандита.
-    !shuffled [count] — Добавляет в очередь count (или все доступные) треки Серёги Бандита в случайном порядке.
-    !antihype [count] — Добавляет в очередь count (или все доступные) треки Antihypetrain.
-    !antishuffle [count] — Добавляет в очередь count (или все доступные) треки Antihypetrain в случайном порядке.
-    !snus [count] - Добавляют в очередь count снюсов.
-    !pauk [count] - Добавляют в очередь count пауков.
-    
     !play <track name> — Присоединяется к каналу и воспроизводит композицию с указанным названием (поиск по YouTube).
     !stop — Прекращает воспроизведение очереди и покидает канал.
     !skip [count] — Пропускает следующие count композиций (включая текущую), по умолчанию count=1.
@@ -40,7 +33,17 @@ private const val USAGE = """
     !clear — Очистить очередь композиций.
     !current — Выводит название текущей композиции.
     !repeat [on/off] — Устанавливает режим повторения трека на переданный (выводит текущий при отсутствии аргументов).
+    !pause - Ставит текущий трек на паузу.
+    !resume - Снимает текущий трек с паузы.
     !help — Выводит данное сообщение.
+
+    !pirat [count] — Добавляет в очередь count (или все доступные) треки Серёги Бандита.
+    !shuffled [count] — Добавляет в очередь count (или все доступные) треки Серёги Бандита в случайном порядке.
+    !antihype [count] — Добавляет в очередь count (или все доступные) треки Antihypetrain.
+    !antishuffle [count] — Добавляет в очередь count (или все доступные) треки Antihypetrain в случайном порядке.
+    !snus [count] - Добавляют в очередь count снюсов.
+    !pauk [count] - Добавляют в очередь count пауков.
+    !sasha [count] - Добавляют в очередь count саш.
 ```
 """
 
@@ -79,15 +82,22 @@ enum class Repeat {
     OFF
 }
 
+enum class Pause {
+    ON,
+    OFF
+}
+
 @OptIn(KordVoice::class)
 class ChimberCommands {
     private val connections = ConcurrentHashMap<Snowflake, VoiceConnection>()
     private val sessions = ConcurrentHashMap<Snowflake, Session>()
     private val repeats = ConcurrentHashMap<Snowflake, Repeat>()
+    private val pauses = ConcurrentHashMap<Snowflake, Pause>()
 
     private suspend fun disconnect(guildId: Snowflake) {
         sessions.remove(guildId)
         connections.remove(guildId)?.shutdown()
+        pauses.remove(guildId)
     }
 
     private suspend fun connect(channel: BaseVoiceChannelBehavior): Session {
@@ -96,12 +106,21 @@ class ChimberCommands {
         val session = Session(player, queue)
 
         val guildId = channel.guildId
+
         if (!repeats.containsKey(guildId)) {
             repeats[guildId] = Repeat.OFF
         }
 
+        if (!pauses.containsKey(guildId)) {
+            pauses[guildId] = Pause.OFF
+        }
+
         val connection = channel.connect {
             audioProvider {
+                if (pauses[guildId] == Pause.ON) {
+                    return@audioProvider AudioFrame.SILENCE
+                }
+
                 val frame = player.provide(1, TimeUnit.SECONDS)
 
                 if (frame == null) {
@@ -260,6 +279,7 @@ class ChimberCommands {
             skippedTracks.add(track.title)
         }
         player.stopTrack()
+        sessions[event.guildId]?.current = null
 
         val skipped = skippedTracks.joinToString(separator = "\n", prefix = "```\n", postfix = "\n```")
         event.message.replyWith("skipped:\n$skipped")
@@ -334,6 +354,18 @@ class ChimberCommands {
 
         val mode = (repeats[guildId] ?: Repeat.OFF).toString().lowercase()
         event.message.replyWith("$start $mode.")
+    }
+
+    suspend fun pause(event: MessageCreateEvent) {
+        val guildId = event.guildId ?: return
+        pauses[guildId] = Pause.ON
+        event.message.replyWith("Player is paused.")
+    }
+
+    suspend fun resume(event: MessageCreateEvent) {
+        val guildId = event.guildId ?: return
+        pauses[guildId] = Pause.OFF
+        event.message.replyWith("Player is resumed.")
     }
 
     suspend fun help(event: MessageCreateEvent) {

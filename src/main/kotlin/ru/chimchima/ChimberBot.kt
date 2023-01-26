@@ -38,6 +38,8 @@ suspend fun main() = runBlocking {
             "!clear" -> commands.clear(this)
             "!current" -> commands.current(this)
             "!repeat" -> commands.repeat(this)
+            "!pause" -> commands.pause(this)
+            "!unpause", "!resume" -> commands.resume(this)
             "!help" -> commands.help(this)
 
             "!pirat" -> commands.pirat(this)
