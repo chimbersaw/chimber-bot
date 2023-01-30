@@ -15,7 +15,6 @@ import ru.chimchima.player.LavaPlayerManager
 import ru.chimchima.repository.AntihypeRepository
 import ru.chimchima.repository.PiratRepository
 import ru.chimchima.tts.TTSManager
-import ru.chimchima.tts.YandexTTS
 import ru.chimchima.utils.formatDuration
 import ru.chimchima.utils.query
 import ru.chimchima.utils.replyWith
@@ -89,7 +88,7 @@ enum class Pause {
 
 @OptIn(KordVoice::class)
 class ChimberCommands {
-    private val ttsManager = TTSManager(YandexTTS())
+    private val ttsManager = TTSManager()
 
     private val connections = ConcurrentHashMap<Snowflake, VoiceConnection>()
     private val sessions = ConcurrentHashMap<Snowflake, Session>()
@@ -214,11 +213,11 @@ class ChimberCommands {
         response.delete()
     }
 
-    suspend fun say(event: MessageCreateEvent) {
+    suspend fun say(event: MessageCreateEvent, jane: Boolean = false) {
         val query = event.query
         if (query.isBlank()) return
 
-        val file = ttsManager.textToSpeech(query) ?: run {
+        val file = ttsManager.textToSpeech(query, jane) ?: run {
             event.replyWith("Could not load tts :(")
             return
         }

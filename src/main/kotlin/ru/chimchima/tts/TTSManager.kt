@@ -8,7 +8,8 @@ import java.io.File
 import java.time.Duration
 import java.util.*
 
-class TTSManager(private val tts: TextToSpeech) {
+class TTSManager {
+    private val tts = YandexTTS()
     private val tmp = File("tmp")
 
     init {
@@ -16,7 +17,7 @@ class TTSManager(private val tts: TextToSpeech) {
         tmp.deleteOnExit()
     }
 
-    fun textToSpeech(text: String): File? {
+    fun textToSpeech(text: String, jane: Boolean = false): File? {
         val filename = "${UUID.randomUUID()}.ogg"
         val file = tmp.resolve(filename)
         file.deleteOnExit()
@@ -26,7 +27,7 @@ class TTSManager(private val tts: TextToSpeech) {
             file.delete()
         }
 
-        return if (tts.textToAudioFile(text, file)) {
+        return if (tts.textToAudioFile(text, file, jane)) {
             file
         } else {
             null

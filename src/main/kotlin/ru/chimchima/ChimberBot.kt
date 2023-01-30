@@ -31,6 +31,7 @@ suspend fun main() = runBlocking {
         when (command) {
             "!plink" -> commands.plink(this)
             "!say", "!tts" -> commands.say(this)
+            "!jane" -> commands.say(this, jane = true)
             "!play" -> commands.play(this)
             "!stop" -> commands.stop(this)
             "!skip" -> commands.skip(this)
