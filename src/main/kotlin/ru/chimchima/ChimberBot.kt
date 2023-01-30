@@ -17,7 +17,7 @@ fun startPingServer() {
 }
 
 suspend fun main() = runBlocking {
-    val token = LocalProperties.discordToken ?: throw RuntimeException("$DISCORD_TOKEN is not set")
+    val token = LocalProperties.discordToken ?: throw RuntimeException("$DISCORD_TOKEN property is not set")
     val kord = Kord(token)
     if (LocalProperties.is_heroku) {
         startPingServer()
