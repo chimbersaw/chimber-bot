@@ -218,6 +218,10 @@ class ChimberCommands {
     suspend fun say(event: MessageCreateEvent, jane: Boolean = false) {
         val query = event.query
         if (query.isBlank()) return
+        if (query.length > 300) {
+            event.replyWith("!say query must be no longer than 300 symbols")
+            return
+        }
 
         val file = ttsManager.textToSpeech(query, jane) ?: run {
             event.replyWith("Could not load tts :(")
