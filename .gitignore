@@ -1,5 +1,6 @@
 .gradle
 build/
+tmp/
 src/main/resources/local.properties
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/

@@ -5,6 +5,8 @@ import java.util.*
 const val DISCORD_TOKEN = "DISCORD_TOKEN"
 private const val PORT = "server.port"
 private const val HEROKU = "HEROKU"
+private const val IAM_TOKEN = "IAM_TOKEN"
+private const val FOLDER_ID = "FOLDER_ID"
 private const val LOCAL_PROPERTIES = "/local.properties"
 
 object LocalProperties {
@@ -24,6 +26,12 @@ object LocalProperties {
     val port: Int?
         get() = getProperty(PORT)?.toIntOrNull()
 
-    val is_heroku: Boolean
+    val isHeroku: Boolean
         get() = getProperty(HEROKU) != null
+
+    val iamToken: String?
+        get() = getProperty(IAM_TOKEN)
+
+    val folderId: String?
+        get() = getProperty(FOLDER_ID)
 }

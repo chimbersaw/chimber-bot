@@ -19,7 +19,7 @@ fun startPingServer() {
 suspend fun main() = runBlocking {
     val token = LocalProperties.discordToken ?: throw RuntimeException("$DISCORD_TOKEN property is not set")
     val kord = Kord(token)
-    if (LocalProperties.is_heroku) {
+    if (LocalProperties.isHeroku) {
         startPingServer()
     }
 
@@ -30,6 +30,7 @@ suspend fun main() = runBlocking {
         val command = message.content.substringBefore(" ")
         when (command) {
             "!plink" -> commands.plink(this)
+            "!say", "!tts" -> commands.say(this)
             "!play" -> commands.play(this)
             "!stop" -> commands.stop(this)
             "!skip" -> commands.skip(this)

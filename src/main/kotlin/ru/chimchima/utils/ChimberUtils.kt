@@ -6,6 +6,7 @@ import dev.kord.core.entity.Message
 import dev.kord.core.event.message.MessageCreateEvent
 
 suspend fun Message.replyWith(text: String) = reply { content = text }
+suspend fun MessageCreateEvent.replyWith(text: String) = message.replyWith(text)
 
 val MessageCreateEvent.query: String
     get() {

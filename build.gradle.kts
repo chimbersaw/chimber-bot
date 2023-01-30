@@ -24,6 +24,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.slf4j:slf4j-simple:2.0.5")
+    implementation("com.github.kittinunf.fuel:fuel:2.3.1")
     implementation("com.github.walkyst:lavaplayer-fork:1.3.99.2")
     implementation("dev.kord:kord-core:0.8.x-SNAPSHOT") {
         capabilities {

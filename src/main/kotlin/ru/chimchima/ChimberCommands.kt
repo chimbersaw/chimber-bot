@@ -14,6 +14,8 @@ import kotlinx.coroutines.delay
 import ru.chimchima.player.LavaPlayerManager
 import ru.chimchima.repository.AntihypeRepository
 import ru.chimchima.repository.PiratRepository
+import ru.chimchima.tts.TTSManager
+import ru.chimchima.tts.YandexTTS
 import ru.chimchima.utils.formatDuration
 import ru.chimchima.utils.query
 import ru.chimchima.utils.replyWith
@@ -63,9 +65,6 @@ class Track(
                 LavaPlayerManager.loadTrack(query)?.let {
                     val fullTitle = "${title ?: it.info.title} ${it.formatDuration()}"
                     Track(message, it, fullTitle)
-                } ?: run {
-                    message.replyWith("No such track was found :(")
-                    null
                 }
             }
     }
@@ -74,7 +73,8 @@ class Track(
 data class Session(
     val player: AudioPlayer,
     var queue: LinkedBlockingQueue<Track>,
-    var current: Track? = null
+    var ttsQueue: LinkedBlockingQueue<Track>,
+    var current: Track? = null,
 )
 
 enum class Repeat {
@@ -89,6 +89,8 @@ enum class Pause {
 
 @OptIn(KordVoice::class)
 class ChimberCommands {
+    private val ttsManager = TTSManager(YandexTTS())
+
     private val connections = ConcurrentHashMap<Snowflake, VoiceConnection>()
     private val sessions = ConcurrentHashMap<Snowflake, Session>()
     private val repeats = ConcurrentHashMap<Snowflake, Repeat>()
@@ -103,7 +105,10 @@ class ChimberCommands {
     private suspend fun connect(channel: BaseVoiceChannelBehavior): Session {
         val player = LavaPlayerManager.createPlayer()
         val queue = LinkedBlockingQueue<Track>()
-        val session = Session(player, queue)
+        val ttsPlayer = LavaPlayerManager.createPlayer()
+        val ttsQueue = LinkedBlockingQueue<Track>()
+
+        val session = Session(player, queue, ttsQueue)
 
         val guildId = channel.guildId
 
@@ -121,11 +126,20 @@ class ChimberCommands {
                     return@audioProvider AudioFrame.SILENCE
                 }
 
+                ttsPlayer.provide(1, TimeUnit.SECONDS)?.let {
+                    return@audioProvider AudioFrame.fromData(it.data)
+                }
+
+                session.ttsQueue.poll()?.let {
+                    it.playWith(ttsPlayer)
+                    return@audioProvider AudioFrame.SILENCE
+                }
+
                 val frame = player.provide(1, TimeUnit.SECONDS)
 
                 if (frame == null) {
                     if (repeats[guildId] == Repeat.OFF || session.current == null) {
-                        session.current = queue.poll(1, TimeUnit.SECONDS)
+                        session.current = queue.poll(100, TimeUnit.MILLISECONDS)
                         session.current?.playingTrack()
                     }
 
@@ -166,14 +180,17 @@ class ChimberCommands {
         for (builder in builders) {
             builder.invoke()?.let {
                 session.queue.add(it)
-            }
+            } ?: event.replyWith("Loading tracks failed...")
         }
 
         return queueSize + builders.size
     }
 
     private suspend fun addTrackToQueue(event: MessageCreateEvent, query: String, count: Int = 1) {
-        val track = Track.builder(event.message, query).invoke() ?: return
+        val track = Track.builder(event.message, query).invoke() ?: run {
+            event.replyWith("No such track was found :(")
+            return
+        }
 
         val builder: suspend () -> Track? = { track.clone() }
         val queueSize = addTracksToQueue(event, List(count) { builder })
@@ -184,7 +201,7 @@ class ChimberCommands {
             } else {
                 "queued $count tracks: ${track.title}"
             }
-            event.message.replyWith(msg)
+            event.replyWith(msg)
         }
     }
 
@@ -195,6 +212,27 @@ class ChimberCommands {
         delay(5000)
         message.delete()
         response.delete()
+    }
+
+    suspend fun say(event: MessageCreateEvent) {
+        val query = event.query
+        if (query.isBlank()) return
+
+        val file = ttsManager.textToSpeech(query) ?: run {
+            event.replyWith("Could not load tts :(")
+            return
+        }
+
+        val guildId = event.guildId ?: return
+        val channel = event.member?.getVoiceStateOrNull()?.getChannelOrNull() ?: return
+        val session = sessions[guildId] ?: connect(channel)
+
+        val track = Track.builder(event.message, file.absolutePath, query).invoke() ?: run {
+            event.replyWith("Couldn't load tts :(")
+            return
+        }
+
+        session.ttsQueue.add(track)
     }
 
     suspend fun play(event: MessageCreateEvent, count: Int = 1) {
@@ -214,7 +252,7 @@ class ChimberCommands {
     }
 
     suspend fun pirat(event: MessageCreateEvent, shuffled: Boolean = false) {
-        val loading = event.message.replyWith("*Добавляю серегу...*")
+        val loading = event.replyWith("*Добавляю серегу...*")
 
         val count = event.query.toIntOrNull()
         val builders = PiratRepository.getBuilders(event.message, count, shuffled)
@@ -227,7 +265,7 @@ class ChimberCommands {
     }
 
     suspend fun antihypetrain(event: MessageCreateEvent, shuffled: Boolean = false) {
-        val loading = event.message.replyWith("*Добавляю замая...*")
+        val loading = event.replyWith("*Добавляю замая...*")
 
         val count = event.query.toIntOrNull()
         val builders = AntihypeRepository.getBuilders(event.message, count, shuffled)
@@ -253,11 +291,11 @@ class ChimberCommands {
 
     suspend fun shuffle(event: MessageCreateEvent) {
         val session = sessions[event.guildId] ?: run {
-            event.message.replyWith("Nothing to shuffle.")
+            event.replyWith("Nothing to shuffle.")
             return
         }
 
-        val loading = event.message.replyWith("*Shuffling...*")
+        val loading = event.replyWith("*Shuffling...*")
 
         val shuffledQueue = session.queue.shuffled()
         session.queue = LinkedBlockingQueue<Track>(shuffledQueue)
@@ -270,7 +308,7 @@ class ChimberCommands {
         val count = event.query.toIntOrNull() ?: 1
         if (count < 1) return
 
-        val (player, queue, current) = sessions[event.guildId] ?: return
+        val (player, queue, _, current) = sessions[event.guildId] ?: return
         if (current == null) return
 
         val skippedTracks = mutableListOf(current.title)
@@ -282,7 +320,7 @@ class ChimberCommands {
         sessions[event.guildId]?.current = null
 
         val skipped = skippedTracks.joinToString(separator = "\n", prefix = "```\n", postfix = "\n```")
-        event.message.replyWith("skipped:\n$skipped")
+        event.replyWith("skipped:\n$skipped")
     }
 
     suspend fun queue(event: MessageCreateEvent) {
@@ -324,22 +362,22 @@ class ChimberCommands {
             result
         }
 
-        event.message.replyWith(reply)
+        event.replyWith(reply)
     }
 
     suspend fun clear(event: MessageCreateEvent) {
         val queue = sessions[event.guildId]?.queue ?: run {
-            event.message.replyWith("Queue is already empty.")
+            event.replyWith("Queue is already empty.")
             return
         }
 
         queue.clear()
-        event.message.replyWith("Queue cleared.")
+        event.replyWith("Queue cleared.")
     }
 
     suspend fun current(event: MessageCreateEvent) {
         val title = sessions[event.guildId]?.current?.title ?: return
-        event.message.replyWith(title)
+        event.replyWith(title)
     }
 
     suspend fun repeat(event: MessageCreateEvent) {
@@ -353,22 +391,22 @@ class ChimberCommands {
         }
 
         val mode = (repeats[guildId] ?: Repeat.OFF).toString().lowercase()
-        event.message.replyWith("$start $mode.")
+        event.replyWith("$start $mode.")
     }
 
     suspend fun pause(event: MessageCreateEvent) {
         val guildId = event.guildId ?: return
         pauses[guildId] = Pause.ON
-        event.message.replyWith("Player is paused.")
+        event.replyWith("Player is paused.")
     }
 
     suspend fun resume(event: MessageCreateEvent) {
         val guildId = event.guildId ?: return
         pauses[guildId] = Pause.OFF
-        event.message.replyWith("Player is resumed.")
+        event.replyWith("Player is resumed.")
     }
 
     suspend fun help(event: MessageCreateEvent) {
-        event.message.replyWith(USAGE)
+        event.replyWith(USAGE)
     }
 }
