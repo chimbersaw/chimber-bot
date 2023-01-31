@@ -6,13 +6,21 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 object LavaPlayerManager : DefaultAudioPlayerManager() {
-    init {
+    fun registerAllSources() {
         AudioSourceManagers.registerRemoteSources(this)
         AudioSourceManagers.registerLocalSource(this)
+
+        // YouTube cache warming on start to speed up loading the first track
+        createPlayer().playTrack(
+            runBlocking {
+                loadTrack("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+            }
+        )
     }
 
     suspend fun loadTrack(query: String) = suspendCoroutine {

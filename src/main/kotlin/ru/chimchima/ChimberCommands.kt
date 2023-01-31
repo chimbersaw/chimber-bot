@@ -97,6 +97,10 @@ class ChimberCommands {
     private val repeats = ConcurrentHashMap<Snowflake, Repeat>()
     private val pauses = ConcurrentHashMap<Snowflake, Pause>()
 
+    init {
+        LavaPlayerManager.registerAllSources()
+    }
+
     private suspend fun disconnect(guildId: Snowflake) {
         sessions.remove(guildId)
         connections.remove(guildId)?.shutdown()
