@@ -17,7 +17,7 @@ class TTSManager {
         tmp.deleteOnExit()
     }
 
-    fun textToSpeech(text: String, jane: Boolean = false): File? {
+    suspend fun textToSpeech(text: String, jane: Boolean = false): File? {
         val filename = "${UUID.randomUUID()}.ogg"
         val file = tmp.resolve(filename)
         file.deleteOnExit()

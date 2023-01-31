@@ -5,11 +5,11 @@
 * Install Java 17 and make sure with `java --version`.
 * Create the `local.properties` file in `src/main/resources`.
 * Fill in a valid discord application token.
-* To use Yandex TTS fill in a valid yandex IAM_TOKEN as well as your FOLDER_ID.
+* To use Yandex TTS fill in a valid yandex OAuth token as well as your FOLDER_ID in Yandex Cloud.
 
 ```
 DISCORD_TOKEN=xxx
-YANDEX_IAM_TOKEN=xxx
+YANDEX_OAUTH_TOKEN=xxx
 YANDEX_FOLDER_ID=xxx
 ```
 

@@ -1,12 +1,20 @@
 package ru.chimchima.tts
 
-import com.github.kittinunf.fuel.core.extensions.authentication
-import com.github.kittinunf.fuel.httpPost
-import com.github.kittinunf.result.Result
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.http.*
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.*
 import ru.chimchima.properties.LocalProperties
+import ru.chimchima.utils.runOnSuccessOrNull
 import java.io.File
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 const val YANDEX_TTS_URL = "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize"
+const val YANDEX_IAM_TOKEN_URL = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
 
 private val enVoices = listOf("john" to null)
 private val ruVoices = listOf(
@@ -26,10 +34,34 @@ private val ruVoices = listOf(
 )
 
 class YandexTTS {
-    private val iamToken = LocalProperties.iamToken
+    private val oauthToken = LocalProperties.oauthToken
     private val folderId = LocalProperties.folderId
+    private val client = HttpClient()
+    private var iamToken = requestIamToken()
 
-    fun textToAudioFile(text: String, file: File, jane: Boolean = false): Boolean {
+    private fun requestIamToken(): String? = runBlocking {
+        val response = client.post(YANDEX_IAM_TOKEN_URL) {
+            contentType(ContentType.Application.Json)
+            setBody(
+                buildJsonObject {
+                    put("yandexPassportOauthToken", JsonPrimitive(oauthToken))
+                }.toString()
+            )
+        }
+
+        response.runOnSuccessOrNull { body: String ->
+            val json: JsonObject = Json.decodeFromString(body)
+            json.getValue("iamToken").jsonPrimitive.content
+        }
+    }
+
+    init {
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate({
+            iamToken = requestIamToken()
+        }, 1, 1, TimeUnit.HOURS)
+    }
+
+    suspend fun textToAudioFile(text: String, file: File, jane: Boolean = false): Boolean {
         if (iamToken == null || folderId == null) return false
 
         val containsCyrillic = text.any { Character.UnicodeBlock.of(it) == Character.UnicodeBlock.CYRILLIC }
@@ -47,33 +79,21 @@ class YandexTTS {
             voices.random()
         }
 
-        val params = mutableListOf(
-            "lang" to lang,
-            "voice" to voice,
-            "folderId" to folderId
-        )
+        val response = client.submitForm(
+            YANDEX_TTS_URL,
+            parametersOf("text", text)
+        ) {
+            bearerAuth(iamToken ?: "")
 
-        emotion?.let {
-            params.add("emotion" to it)
+            parameter("folderId", folderId)
+            parameter("lang", lang)
+            parameter("voice", voice)
+            parameter("emotion", emotion)
         }
 
-        val (_, response, result) = YANDEX_TTS_URL.httpPost(params)
-            .authentication().bearer(iamToken)
-            .header("Content-Type" to "application/x-www-form-urlencoded")
-            .body("text=$text")
-            .response()
-
-        return when (result) {
-            is Result.Success -> {
-                file.writeBytes(result.get())
-                true
-            }
-
-            is Result.Failure -> {
-                print(result.getException())
-                println(response.body().asString("text/plain"))
-                false
-            }
-        }
+        return response.runOnSuccessOrNull { body: ByteArray ->
+            file.writeBytes(body)
+            true
+        } ?: false
     }
 }
