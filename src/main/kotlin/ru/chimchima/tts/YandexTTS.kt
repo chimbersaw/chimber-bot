@@ -62,8 +62,6 @@ class YandexTTS {
     }
 
     suspend fun textToAudioFile(text: String, file: File, jane: Boolean = false): Boolean {
-        if (iamToken == null || folderId == null) return false
-
         val containsCyrillic = text.any { Character.UnicodeBlock.of(it) == Character.UnicodeBlock.CYRILLIC }
         val containsEnglish = text.any { it in 'a'..'z' || it in 'A'..'Z' }
 
