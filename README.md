@@ -21,7 +21,7 @@ To quickly run the application use your IDE or:
 ./gradlew run
 ```
 
-To build a fat jar and then run it use:
+To build a fat jar and run it use:
 
 ```bash
 ./gradlew build
