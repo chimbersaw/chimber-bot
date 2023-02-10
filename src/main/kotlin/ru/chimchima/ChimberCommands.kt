@@ -12,8 +12,9 @@ import dev.kord.voice.AudioFrame
 import dev.kord.voice.VoiceConnection
 import kotlinx.coroutines.delay
 import ru.chimchima.player.LavaPlayerManager
-import ru.chimchima.repository.AntihypeRepository
+import ru.chimchima.repository.AntihypeTrainRepository
 import ru.chimchima.repository.PiratRepository
+import ru.chimchima.repository.SongRepository
 import ru.chimchima.tts.TTSManager
 import ru.chimchima.utils.formatDuration
 import ru.chimchima.utils.query
@@ -260,11 +261,17 @@ class ChimberCommands {
         disconnect(guildId)
     }
 
-    suspend fun pirat(event: MessageCreateEvent, shuffled: Boolean = false) {
-        val loading = event.replyWith("*Добавляю серегу...*")
+    suspend fun loadFromRepo(
+        event: MessageCreateEvent,
+        repository: SongRepository,
+        loadingMessage: String,
+        favourites: Boolean = true,
+        shuffled: Boolean = false
+    ) {
+        val loading = event.replyWith(loadingMessage)
 
         val count = event.query.toIntOrNull()
-        val builders = PiratRepository.getBuilders(event.message, count, shuffled)
+        val builders = repository.getBuilders(event.message, count, favourites, shuffled)
         addTracksToQueue(event, builders)
 
         loading.delete()
@@ -273,17 +280,12 @@ class ChimberCommands {
         }
     }
 
+    suspend fun pirat(event: MessageCreateEvent, shuffled: Boolean = false) {
+        loadFromRepo(event, PiratRepository, "*Добавляю серегу...*", true, shuffled)
+    }
+
     suspend fun antihypetrain(event: MessageCreateEvent, shuffled: Boolean = false) {
-        val loading = event.replyWith("*Добавляю замая...*")
-
-        val count = event.query.toIntOrNull()
-        val builders = AntihypeRepository.getBuilders(event.message, count, shuffled)
-        addTracksToQueue(event, builders)
-
-        loading.delete()
-        if (connections.containsKey(event.guildId)) {
-            queue(event)
-        }
+        loadFromRepo(event, AntihypeTrainRepository, "*Добавляю замая...*", true, shuffled)
     }
 
     suspend fun snus(event: MessageCreateEvent) {

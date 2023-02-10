@@ -1,6 +1,6 @@
 package ru.chimchima.repository
 
-object AntihypeRepository : SongRepository() {
+object AntihypeTrainRepository : SongRepository() {
     override val songs = listOf(
         "Antihypeintro" to "https://youtu.be/x0lfEcgjjKE",
         "Двуглавый орёл" to "https://youtu.be/dh_TPlOFWLM",
@@ -103,5 +103,5 @@ object AntihypeRepository : SongRepository() {
         "Трихана" to "https://youtu.be/fFXhr5K-xsA",
         "Прощай Антихайп" to "https://youtu.be/otHGh_PumIA",
         "Antihypeoutro" to "https://youtu.be/FnYQOdRgd0s"
-    )
+    ).toSongs()
 }
