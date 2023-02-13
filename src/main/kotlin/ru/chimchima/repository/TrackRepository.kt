@@ -10,7 +10,7 @@ data class Song(
 )
 
 fun List<Pair<String, String>>.toSongs() = map { Song(it.first, it.second) }
-fun List<Pair<Pair<String, String>, Boolean>>.toSongs() = map { Song(it.first.first, it.first.second, it.second) }
+//fun List<Pair<Pair<String, String>, Boolean>>.toSongs() = map { Song(it.first.first, it.first.second, it.second) }
 
 abstract class SongRepository {
     protected abstract val songs: List<Song>
