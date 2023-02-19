@@ -1,5 +1,7 @@
 # Chimber bot
 
+http://chimchima.ru/bot
+
 ## Prerequisites
 
 * Install Java 17 and make sure with `java --version`.
