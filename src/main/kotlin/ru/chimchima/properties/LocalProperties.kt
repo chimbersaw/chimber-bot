@@ -4,7 +4,6 @@ import java.util.*
 
 const val DISCORD_TOKEN = "DISCORD_TOKEN"
 private const val PORT = "server.port"
-private const val HEROKU = "HEROKU"
 private const val YANDEX_OAUTH_TOKEN = "YANDEX_OAUTH_TOKEN"
 private const val YANDEX_FOLDER_ID = "YANDEX_FOLDER_ID"
 private const val LOCAL_PROPERTIES = "/local.properties"
@@ -25,9 +24,6 @@ object LocalProperties {
 
     val port: Int?
         get() = getProperty(PORT)?.toIntOrNull()
-
-    val isHeroku: Boolean
-        get() = getProperty(HEROKU) != null
 
     val oauthToken: String?
         get() = getProperty(YANDEX_OAUTH_TOKEN)

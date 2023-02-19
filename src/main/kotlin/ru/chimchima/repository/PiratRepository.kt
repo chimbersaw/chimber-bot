@@ -15,5 +15,5 @@ object PiratRepository : SongRepository() {
         "Солевар" to "https://youtu.be/KhX3T_NYndo",
         "Извини сегодня праздник" to "https://youtu.be/REReaqbM6Kw",
         "Я взлетаю вверх" to "https://youtu.be/oghlaYD2_FQ"
-    ).toSongs()
+    ).toFavouriteSongs()
 }

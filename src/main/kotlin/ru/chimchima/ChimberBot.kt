@@ -19,9 +19,7 @@ fun startPingServer() {
 suspend fun main() = runBlocking {
     val token = LocalProperties.discordToken ?: throw RuntimeException("$DISCORD_TOKEN property is not set")
     val kord = Kord(token)
-    if (LocalProperties.isHeroku) {
-        startPingServer()
-    }
+    startPingServer()
 
     val commands = ChimberCommands()
 
@@ -34,7 +32,7 @@ suspend fun main() = runBlocking {
             "!jane" -> commands.say(this, jane = true)
             "!play" -> commands.play(this)
             "!stop" -> commands.stop(this)
-            "!skip" -> commands.skip(this)
+            "!skip", "!next" -> commands.skip(this)
             "!queue" -> commands.queue(this)
             "!shuffle" -> commands.shuffle(this)
             "!clear" -> commands.clear(this)
@@ -45,9 +43,21 @@ suspend fun main() = runBlocking {
             "!help" -> commands.help(this)
 
             "!pirat" -> commands.pirat(this)
-            "!shuffled" -> commands.pirat(this, shuffled = true)
-            "!antihypetrain", "!antihype", "!antipenis" -> commands.antihypetrain(this)
-            "!antishuffle" -> commands.antihypetrain(this, shuffled = true)
+
+            "!antihype" -> commands.antihype(this)
+            "!nemimohype", "!nemimohypa", "!nemimo" -> commands.nemimohype(this)
+            "!hypetrain" -> commands.hypetrain(this)
+            "!antihypetrain", "!antipenis" -> commands.antihypetrain(this)
+
+            "!zamay" -> commands.zamay(this)
+            "!mrgaslight", "!gaslight" -> commands.mrgaslight(this)
+            "!lusthero3", "!lusthero", "!lust" -> commands.lusthero3(this)
+
+            "!slavakpss", "!slava", "!kpss" -> commands.slavakpss(this)
+            "!russianfield", "!pole" -> commands.russianfield(this)
+            "!bootlegvolume1", "!bootleg" -> commands.bootlegvolume1(this)
+            "!angelstrue", "!angel", "!true" -> commands.angelstrue(this)
+
             "!snus" -> commands.snus(this)
             "!pauk" -> commands.pauk(this)
             "!sasha" -> commands.sasha(this)

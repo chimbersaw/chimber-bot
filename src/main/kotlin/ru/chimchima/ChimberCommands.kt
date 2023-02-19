@@ -12,9 +12,7 @@ import dev.kord.voice.AudioFrame
 import dev.kord.voice.VoiceConnection
 import kotlinx.coroutines.delay
 import ru.chimchima.player.LavaPlayerManager
-import ru.chimchima.repository.AntihypeTrainRepository
-import ru.chimchima.repository.PiratRepository
-import ru.chimchima.repository.SongRepository
+import ru.chimchima.repository.*
 import ru.chimchima.tts.TTSManager
 import ru.chimchima.utils.formatDuration
 import ru.chimchima.utils.query
@@ -24,9 +22,7 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
 private const val MAX_MESSAGE_LENGTH = 2000
-private const val USAGE = """
-```
-Команды:
+const val USAGE = """Команды:
     !play[count] <track name / url> — Присоединяется к каналу и воспроизводит 1 (или count) композиций с указанным названием (поиск по YouTube) / по указанной ссылке.
     !stop — Прекращает воспроизведение очереди и покидает канал.
     !skip [count] — Пропускает следующие count композиций (включая текущую), по умолчанию count=1.
@@ -41,14 +37,31 @@ private const val USAGE = """
 
     !say <text> - Произносит текст рандомным голосом вне очереди.
     !jane <text> - Произносит текст голосом злой Жени вне очереди.
-    !pirat [count] — Добавляет в очередь count (или все доступные) треки Серёги Бандита.
-    !shuffled [count] — Добавляет в очередь count (или все доступные) треки Серёги Бандита в случайном порядке.
-    !antihype [count] — Добавляет в очередь count (или все доступные) треки Antihypetrain.
-    !antishuffle [count] — Добавляет в очередь count (или все доступные) треки Antihypetrain в случайном порядке.
+
     !snus [count] - Добавляют в очередь count снюсов.
     !pauk [count] - Добавляют в очередь count пауков.
     !sasha [count] - Добавляют в очередь count саш.
-```
+
+    !<playlist> [-s/--shuffle/--shuffled] [-a/--all/--full] [count]
+    Добавляет count (или все) избранных треков из плейлиста (--all для всех треков, --shuffled для случайного порядка треков).
+
+    Плейлисты:
+    !pirat - Избранные треки сереги бандита.
+
+    !antihype - Три микстейпа ниже вместе.
+    !nemimohype, !nemimohypa, !nemimo - #НЕМИМОХАЙПА (Mixtape)
+    !hypetrain - HYPE TRAIN (Mixtape)
+    !antihypetrain, !antipenis - ANTIHYPETRAIN
+
+    !zamay - Два альбома ниже вместе.
+    !mrgaslight, !gaslight - Mr. Gaslight
+    !lusthero3, !lusthero, !lust - LUST HERO 3
+
+    !slavakpss, !slava, !kpss - Три релиза ниже вместе.
+    !russianfield, !pole - Русское поле (Бутер Бродский)
+    !bootlegvolume1, !bootleg - Bootleg Vol.1
+    !angelstrue, !angel, !true - Ангельское True (Mixtape)
+
 """
 
 class Track(
@@ -261,16 +274,32 @@ class ChimberCommands {
         disconnect(guildId)
     }
 
-    suspend fun loadFromRepo(
+    private suspend fun loadFromRepo(
         event: MessageCreateEvent,
         repository: SongRepository,
-        loadingMessage: String,
-        favourites: Boolean = true,
-        shuffled: Boolean = false
+        loadingString: String
     ) {
-        val loading = event.replyWith(loadingMessage)
+        val loading = event.replyWith("*$loadingString*")
 
-        val count = event.query.toIntOrNull()
+        var count: Int? = null
+        var favourites = true
+        var shuffled = false
+
+        for (arg in event.query.split(" ")) {
+            when (arg) {
+                "-s", "--shuffle", "shuffle", "--shuffled", "shuffled" -> shuffled = true
+                "-a", "--all", "all", "--full", "full" -> favourites = false
+                "-as", "-sa" -> {
+                    shuffled = true
+                    favourites = false
+                }
+
+                else -> {
+                    count = arg.toIntOrNull()
+                }
+            }
+        }
+
         val builders = repository.getBuilders(event.message, count, favourites, shuffled)
         addTracksToQueue(event, builders)
 
@@ -278,26 +307,6 @@ class ChimberCommands {
         if (connections.containsKey(event.guildId)) {
             queue(event)
         }
-    }
-
-    suspend fun pirat(event: MessageCreateEvent, shuffled: Boolean = false) {
-        loadFromRepo(event, PiratRepository, "*Добавляю серегу...*", true, shuffled)
-    }
-
-    suspend fun antihypetrain(event: MessageCreateEvent, shuffled: Boolean = false) {
-        loadFromRepo(event, AntihypeTrainRepository, "*Добавляю замая...*", true, shuffled)
-    }
-
-    suspend fun snus(event: MessageCreateEvent) {
-        addTrackToQueue(event, "https://www.youtube.com/watch?v=mx-f_wbZTMI", count = event.query.toIntOrNull() ?: 1)
-    }
-
-    suspend fun pauk(event: MessageCreateEvent) {
-        addTrackToQueue(event, "https://www.youtube.com/watch?v=e2RqDHziN6k", count = event.query.toIntOrNull() ?: 1)
-    }
-
-    suspend fun sasha(event: MessageCreateEvent) {
-        addTrackToQueue(event, "https://www.youtube.com/watch?v=0vQBaqUPtlc", count = event.query.toIntOrNull() ?: 1)
     }
 
     suspend fun shuffle(event: MessageCreateEvent) {
@@ -330,8 +339,8 @@ class ChimberCommands {
         player.stopTrack()
         sessions[event.guildId]?.current = null
 
-        val skipped = skippedTracks.joinToString(separator = "\n", prefix = "```\n", postfix = "\n```")
-        event.replyWith("skipped:\n$skipped")
+        val skipped = skippedTracks.joinToString(separator = "\n")
+        event.replyWith("skipped:\n```$skipped\n".take(MAX_MESSAGE_LENGTH - 3) + "```")
     }
 
     suspend fun queue(event: MessageCreateEvent) {
@@ -417,7 +426,67 @@ class ChimberCommands {
         event.replyWith("Player is resumed.")
     }
 
+    suspend fun pirat(event: MessageCreateEvent) {
+        loadFromRepo(event, PiratRepository, "Добавляю серегу...")
+    }
+
+    suspend fun antihype(event: MessageCreateEvent) {
+        loadFromRepo(event, AntihypeRepository, "Это ты зря другалёчек...")
+    }
+
+    suspend fun nemimohype(event: MessageCreateEvent) {
+        loadFromRepo(event, NemimohypeRepository, "Ну да мы живём не мимо хайпа...")
+    }
+
+    suspend fun hypetrain(event: MessageCreateEvent) {
+        loadFromRepo(event, HypeTrainRepository, "Добавляю поезд хайпа...")
+    }
+
+    suspend fun antihypetrain(event: MessageCreateEvent) {
+        loadFromRepo(event, AntihypeTrainRepository, "Добавляю анти поезд хайпа...")
+    }
+
+    suspend fun zamay(event: MessageCreateEvent) {
+        loadFromRepo(event, ZamayRepository, "Добавляю замая...")
+    }
+
+    suspend fun mrgaslight(event: MessageCreateEvent) {
+        loadFromRepo(event, MrGaslightRepository, "Добавляю мистера газлайта...")
+    }
+
+    suspend fun lusthero3(event: MessageCreateEvent) {
+        loadFromRepo(event, LustHero3Repository, "Добавляю героя похоти три...")
+    }
+
+    suspend fun slavakpss(event: MessageCreateEvent) {
+        loadFromRepo(event, SlavaKPSSRepository, "Добавляю славу...")
+    }
+
+    suspend fun russianfield(event: MessageCreateEvent) {
+        loadFromRepo(event, RussianFieldRepository, "Добавляю русское поле...")
+    }
+
+    suspend fun bootlegvolume1(event: MessageCreateEvent) {
+        loadFromRepo(event, BootlegVolume1Repository, "Добавляю бутлег vol 1...")
+    }
+
+    suspend fun angelstrue(event: MessageCreateEvent) {
+        loadFromRepo(event, AngelsTrueRepository, "Добавляю ангельское тру...")
+    }
+
+    suspend fun snus(event: MessageCreateEvent) {
+        addTrackToQueue(event, "https://www.youtube.com/watch?v=mx-f_wbZTMI", count = event.query.toIntOrNull() ?: 1)
+    }
+
+    suspend fun pauk(event: MessageCreateEvent) {
+        addTrackToQueue(event, "https://www.youtube.com/watch?v=e2RqDHziN6k", count = event.query.toIntOrNull() ?: 1)
+    }
+
+    suspend fun sasha(event: MessageCreateEvent) {
+        addTrackToQueue(event, "https://www.youtube.com/watch?v=0vQBaqUPtlc", count = event.query.toIntOrNull() ?: 1)
+    }
+
     suspend fun help(event: MessageCreateEvent) {
-        event.replyWith(USAGE)
+        event.replyWith("```То же самое есть на https://chimchima.ru/bot\n$USAGE```")
     }
 }

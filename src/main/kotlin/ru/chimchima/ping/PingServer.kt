@@ -1,5 +1,6 @@
 package ru.chimchima.ping
 
+import ru.chimchima.USAGE
 import java.net.ServerSocket
 import java.util.concurrent.Executors
 
@@ -12,7 +13,8 @@ class PingServer(private val port: Int) {
             while (true) {
                 val socket = serverSocket.accept()
                 val output = socket.getOutputStream()
-                output.write("HTTP/1.1 200 OK\r\nContent-Length: 7\r\n\r\nping ok".toByteArray())
+                // voprosy?
+                output.write("HTTP/1.1 200 OK\r\nContent-Length: ${USAGE.toByteArray().size}\r\nContent-Type: text/plain;charset=UTF-8\r\n\r\n$USAGE".toByteArray())
                 output.close()
                 socket.close()
             }

@@ -6,19 +6,19 @@ import ru.chimchima.Track
 data class Song(
     val title: String,
     val url: String,
-    val favourite: Boolean = true
+    val favourite: Boolean = false
 )
 
-fun List<Pair<String, String>>.toSongs() = map { Song(it.first, it.second) }
-//fun List<Pair<Pair<String, String>, Boolean>>.toSongs() = map { Song(it.first.first, it.first.second, it.second) }
+fun List<Pair<String, String>>.toFavouriteSongs() = map { Song(it.first, it.second, true) }
+fun List<Pair<Pair<String, String>, Boolean>>.toSongs() = map { Song(it.first.first, it.first.second, it.second) }
 
 abstract class SongRepository {
-    protected abstract val songs: List<Song>
+    abstract val songs: List<Song>
 
     suspend fun getBuilders(
         message: Message,
         count: Int?,
-        favourite: Boolean,
+        favourite: Boolean = true,
         shuffled: Boolean = false
     ): List<suspend () -> Track?> {
         var songsList = if (shuffled) songs.shuffled() else songs

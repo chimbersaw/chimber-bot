@@ -1,5 +1,77 @@
 package ru.chimchima.repository
 
+object AntihypeRepository : SongRepository() {
+    override val songs = NemimohypeRepository.songs + HypeTrainRepository.songs + AntihypeTrainRepository.songs
+}
+
+object NemimohypeRepository : SongRepository() {
+    override val songs = listOf(
+        "Интро" to "https://youtu.be/YemQ_lUWR4Y" to true,
+        "Трое в лодке (feat. Петрик Путяха)" to "https://youtu.be/tYQ4vXTboik" to true,
+        "Ретвит от Мирона (feat. Букер Д. Фред)" to "https://youtu.be/6ZQ8eI7jjtM" to false,
+        "Берлиоз" to "https://youtu.be/J6YmF9kSY1A" to true,
+        "Надежда Грайма" to "https://youtu.be/UXr4sxRB0-g" to true,
+        "Grime Hate" to "https://youtu.be/UBRSbL73S-8" to true,
+        "Пиу-пиу" to "https://youtu.be/Ie-3LU06I9w" to false,
+        "Контрольный выстрел" to "https://youtu.be/Z4yaDBnk5G8" to true,
+        "Бытиё есть Панчлайн (feat. Вандальский)" to "https://youtu.be/6KOMWN6HSGc" to false,
+        "Умный парень (feat. Vs94ski)" to "https://youtu.be/2heMxce0ZDc" to true,
+        "#НЕМИМОХАЙПА" to "https://youtu.be/LYW35triFG8" to false,
+        "Мой хайп" to "https://youtu.be/1JjPdns7RCk" to false,
+        "Mf Dron (feat. Young Gipsy)" to "https://youtu.be/-VOu1zyAKEs" to false,
+        "Sadwave (feat. Кореш)" to "https://youtu.be/aKIHE6Ndpj0" to false,
+        "Верим в Перуна (Руна нам дана) (feat. Zoo In Space)" to "https://youtu.be/cK2ZG0bKEk4" to false,
+        "Отдыхайте в Крыму! (feat. Вандальский)" to "https://youtu.be/XAUJpQxQTzw" to false,
+        "Не забывай! (feat. Вандальский)" to "https://youtu.be/tFb4D6WpC-g" to true,
+        "Страх и ненависть в Ленинграде" to "https://youtu.be/BAuDw9mTvXo" to false,
+        "Парад калек (feat. MF Док, Саша Маставой & Грязный Луи)" to "https://youtu.be/z_9E1rX4r4c" to false,
+        "ЛГБТ Anthem (feat. ВИА Молодые Аллахи)" to "https://youtu.be/dsl690CPU_8" to false,
+        "Воскресение (feat. Овсянкин)" to "https://youtu.be/ASFBl5HVJkM" to false,
+        "Культурное похмелье (feat. Саша)" to "https://youtu.be/FVhvcs16tjg" to false,
+        "Смерть на рейве" to "https://youtu.be/_XVnfnkRy40" to false,
+        "Апокалипсис" to "https://youtu.be/zUPMEpTdlcY" to false,
+        "Рагнарок (feat. Вандальский)" to "https://youtu.be/2pMMx4ryGD8" to false,
+        "Моя тюрьма (feat. Саша Дискотека)" to "https://youtu.be/oBh51kpEzBI" to true,
+        "Паук (feat. Vs94ski)" to "https://youtu.be/e2RqDHziN6k" to true,
+        "Outro" to "https://youtu.be/dokLpx5UaA0" to true
+    ).toSongs()
+}
+
+object HypeTrainRepository : SongRepository() {
+    override val songs = listOf(
+        "HYPEINTRO" to "https://youtu.be/jzVuLFXIuJg" to true,
+        "Макароны (feat. КИЧ)" to "https://youtu.be/YaJXdiwXei0" to true,
+        "#FREEYUNGTRAPPA (feat. Аббалбиск)" to "https://youtu.be/iXdvCdR-Lj4" to false,
+        "Giger (feat. Аббалбиск)" to "https://youtu.be/zYwqsf27yV4" to false,
+        "Облажает (feat. Unda Scope)" to "https://youtu.be/Er4mT37feuA" to false,
+        "FUCKTRAP (feat. Маки)" to "https://youtu.be/GhUnTUkM85M" to true,
+        "Вейп-вейп-вейп (feat. Лсп, Young P&h, Эхопрокуренныхподъездов, Заебатсу & Booker)" to "https://youtu.be/dyqbYEQ_a6g" to true,
+        "Гоша Рубчинский (feat. Сд, Zoo In Space, Booker & Овсянкин)" to "https://youtu.be/zYcvQMgxOWU" to true,
+        "Сэймяу Game (feat. Овсянкин & Fallen MC)" to "https://youtu.be/ienV8yg2P1w" to false,
+        "Grime в России" to "https://youtu.be/MtEJEhvSJuY" to false,
+        "Сука не нужна (feat. Хип-Хоп Одинокой Старухи & Овсянкин)" to "https://youtu.be/8wY5HNK04u0" to false,
+        "Стикербой (feat. Стеефан)" to "https://youtu.be/qKROw2UKxL8" to false,
+        "Покемоны мои (feat. Монеточка & Овсянкин)" to "https://youtu.be/kR8Um8DFf-g" to false,
+        "Районная (feat. Майти Ди, Edik_Kingsta & Halloween)" to "https://youtu.be/sMqTfFzeuj8" to false,
+        "Вне игры (feat. СД, Саша & Morralles) [Long Mix]" to "https://youtu.be/wziD6qEi29U" to false,
+        "Крокодил (feat. СД, Монк & Овсянкин)" to "https://youtu.be/rKyf1TSN-5I" to false,
+        "Боевой шок (feat. Ленина Пакет)" to "https://youtu.be/2c77WvotQI8" to false,
+        "Корона (feat. Palach)" to "https://youtu.be/ldq2ydAYDRo" to false,
+        "В футболке Бабангида (feat. Овсянкин)" to "https://youtu.be/YqxL1ONGU_0" to true,
+        "Реп-мент (feat. ΨBOY & Человек-Спам)" to "https://youtu.be/RyQF6f7CD40" to false,
+        "Вичхаус лобня-2 (feat. Мц Лучник)" to "https://youtu.be/E2hrOHiATRU" to false,
+        "Дурь-трава (feat. MF Док & Edik_Kingsta)" to "https://youtu.be/GlcizCN9ztw" to true,
+        "Весна (feat. Паша Техник, СД, MF Док & Овсянкин)" to "https://youtu.be/7zn-muE2sZE" to false,
+        "Абамка (feat. Саша Скул & Овсянкин)" to "https://youtu.be/dqOmJx--BfE" to false,
+        "Техника молодежи (feat. Сугат & Некий Шура)" to "https://youtu.be/SFDRvV1Y1Vs" to false,
+        "Сиплота (feat. Сугат, Катровасер & Тот Самый Коля)" to "https://youtu.be/-0uBovKLTM0" to false,
+        "Эльдорадо (feat. Абуя Ко & Саша)" to "https://youtu.be/rHnRrEzislU" to false,
+        "Фонк гука (feat. MF Док)" to "https://youtu.be/gZ05YMp7CRw" to false,
+        "Антихайп (feat. Майти Ди, Zoo In Space & Lokos)" to "https://youtu.be/evClbzpnQlY" to false,
+        "Старый отель (feat. Саша Маставой & Катровасер)" to "https://youtu.be/_NIEvLE5Ukg" to false
+    ).toSongs()
+}
+
 object AntihypeTrainRepository : SongRepository() {
     override val songs = listOf(
         "Antihypeintro" to "https://youtu.be/x0lfEcgjjKE",
@@ -103,5 +175,5 @@ object AntihypeTrainRepository : SongRepository() {
         "Трихана" to "https://youtu.be/fFXhr5K-xsA",
         "Прощай Антихайп" to "https://youtu.be/otHGh_PumIA",
         "Antihypeoutro" to "https://youtu.be/FnYQOdRgd0s"
-    ).toSongs()
+    ).toFavouriteSongs()
 }
