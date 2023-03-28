@@ -18,12 +18,12 @@ abstract class SongRepository {
     suspend fun getBuilders(
         message: Message,
         count: Int?,
-        favourite: Boolean = true,
+        favourites: Boolean = true,
         shuffled: Boolean = false
     ): List<suspend () -> Track?> {
         var songsList = if (shuffled) songs.shuffled() else songs
         songsList = songsList.take(count ?: songsList.size)
-        if (favourite) {
+        if (favourites) {
             songsList = songsList.filter { it.favourite }
         }
 

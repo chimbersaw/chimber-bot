@@ -16,22 +16,20 @@ application {
 
 repositories {
     mavenCentral()
-    maven("https://m2.dv8tion.net/releases")
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://jitpack.io")
 }
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0-RC")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 
-    implementation("io.ktor:ktor-client-core:2.2.2")
-    implementation("org.slf4j:slf4j-simple:2.0.5")
-    implementation("com.github.walkyst:lavaplayer-fork:1.3.99.2")
-    implementation("dev.kord:kord-core:0.8.x-SNAPSHOT") {
+    implementation("io.ktor:ktor-client-core:2.2.4")
+    implementation("org.slf4j:slf4j-simple:2.0.7")
+    implementation("com.github.walkyst:lavaplayer-fork:1.4.0")
+    implementation("dev.kord:kord-core:0.8.1") {
         capabilities {
-            requireCapability("dev.kord:core-voice:0.8.x-SNAPSHOT")
+            requireCapability("dev.kord:core-voice:0.8.1")
         }
     }
 }
