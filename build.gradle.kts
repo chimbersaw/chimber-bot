@@ -1,8 +1,9 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.0"
-    kotlin("plugin.serialization") version "1.8.0"
+    kotlin("jvm") version "1.8.20"
+    kotlin("plugin.serialization") version "1.8.20"
     application
 }
 
@@ -24,20 +25,20 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 
-    implementation("io.ktor:ktor-client-core:2.2.4")
+    implementation("io.ktor:ktor-client-core:2.3.0")
     implementation("org.slf4j:slf4j-simple:2.0.7")
     implementation("com.github.walkyst:lavaplayer-fork:1.4.0")
-    implementation("dev.kord:kord-core:0.8.1") {
+    implementation("dev.kord:kord-core:0.8.3") {
         capabilities {
-            requireCapability("dev.kord:core-voice:0.8.1")
+            requireCapability("dev.kord:core-voice:0.8.3")
         }
     }
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict", "-opt-in=kotlin.RequiresOptIn")
-        jvmTarget = "17"
+    compilerOptions {
+        freeCompilerArgs.set(listOf("-Xjsr305=strict", "-opt-in=kotlin.RequiresOptIn"))
+        jvmTarget.set(JVM_17)
     }
 }
 
