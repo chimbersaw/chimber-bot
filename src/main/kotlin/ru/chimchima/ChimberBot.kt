@@ -6,20 +6,20 @@ import dev.kord.core.on
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.runBlocking
-import ru.chimchima.ping.PingServer
+import ru.chimchima.help.HelpServer
 import ru.chimchima.properties.DISCORD_TOKEN
 import ru.chimchima.properties.LocalProperties
 
-fun startPingServer() {
-    println("Starting ping server...")
+fun startHelpServer() {
+    println("Starting !help server...")
     val port = LocalProperties.port ?: 8080
-    PingServer(port).start()
+    HelpServer(port).start()
 }
 
 suspend fun main() = runBlocking {
     val token = LocalProperties.discordToken ?: throw RuntimeException("$DISCORD_TOKEN property is not set")
     val kord = Kord(token)
-    startPingServer()
+    startHelpServer()
 
     val commands = ChimberCommands()
 
@@ -61,6 +61,7 @@ suspend fun main() = runBlocking {
             "!snus" -> commands.snus(this)
             "!pauk" -> commands.pauk(this)
             "!sasha" -> commands.sasha(this)
+            "!ruslan" -> commands.ruslan(this)
         }
         if (command.startsWith("!play")) {
             val count = command.substringAfter("!play").toIntOrNull() ?: return@on

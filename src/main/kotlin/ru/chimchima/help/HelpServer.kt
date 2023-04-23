@@ -1,10 +1,10 @@
-package ru.chimchima.ping
+package ru.chimchima.help
 
 import ru.chimchima.USAGE
 import java.net.ServerSocket
 import java.util.concurrent.Executors
 
-class PingServer(private val port: Int) {
+class HelpServer(private val port: Int) {
     private val serverSocketService = Executors.newSingleThreadExecutor()
 
     fun start() {

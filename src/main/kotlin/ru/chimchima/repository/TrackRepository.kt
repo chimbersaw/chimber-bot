@@ -2,6 +2,7 @@ package ru.chimchima.repository
 
 import dev.kord.core.entity.Message
 import ru.chimchima.Track
+import ru.chimchima.TrackLoader
 
 data class Song(
     val title: String,
@@ -20,15 +21,15 @@ abstract class SongRepository {
         count: Int?,
         favourites: Boolean = true,
         shuffled: Boolean = false
-    ): List<suspend () -> Track?> {
+    ): List<TrackLoader> {
         var songsList = if (shuffled) songs.shuffled() else songs
-        songsList = songsList.take(count ?: songsList.size)
         if (favourites) {
             songsList = songsList.filter { it.favourite }
         }
+        songsList = songsList.take(count ?: songsList.size)
 
         return songsList.map { (title, url) ->
-            Track.builder(message, url, title)
+            Track.trackLoader(message, url, title)
         }
     }
 }

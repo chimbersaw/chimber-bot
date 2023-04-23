@@ -23,12 +23,14 @@ object LavaPlayerManager : DefaultAudioPlayerManager() {
         )
     }
 
-    suspend fun loadTrack(query: String) = suspendCoroutine {
+    suspend fun loadPlaylist(query: String): List<AudioTrack> = suspendCoroutine {
         loadItem(query, object : AudioLoadResultHandler {
-            override fun trackLoaded(track: AudioTrack) = it.resume(track)
-            override fun playlistLoaded(playlist: AudioPlaylist) = it.resume(playlist.tracks.first())
-            override fun noMatches() = it.resume(null)
-            override fun loadFailed(exception: FriendlyException?) = it.resume(null)
+            override fun trackLoaded(track: AudioTrack) = it.resume(listOf(track))
+            override fun playlistLoaded(playlist: AudioPlaylist) = it.resume(playlist.tracks)
+            override fun noMatches() = it.resume(emptyList())
+            override fun loadFailed(exception: FriendlyException?) = it.resume(emptyList())
         })
     }
+
+    suspend fun loadTrack(query: String): AudioTrack? = loadPlaylist(query).firstOrNull()
 }

@@ -14,16 +14,14 @@ import kotlinx.coroutines.delay
 import ru.chimchima.player.LavaPlayerManager
 import ru.chimchima.repository.*
 import ru.chimchima.tts.TTSManager
-import ru.chimchima.utils.formatDuration
-import ru.chimchima.utils.query
-import ru.chimchima.utils.replyWith
+import ru.chimchima.utils.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
 private const val MAX_MESSAGE_LENGTH = 2000
 const val USAGE = """Команды:
-    !play[count] <track name / url> — Присоединяется к каналу и воспроизводит 1 (или count) композиций с указанным названием (поиск по YouTube) / по указанной ссылке.
+    !play[count] <track name / track url / playlist url> — Присоединяется к каналу и воспроизводит 1 (или count) треков/плейлистов с указанным названием (поиск по YouTube) / по указанной ссылке.
     !stop — Прекращает воспроизведение очереди и покидает канал.
     !skip [count] — Пропускает следующие count композиций (включая текущую), по умолчанию count=1.
     !queue — Выводит текущую очередь композиций.
@@ -64,6 +62,9 @@ const val USAGE = """Команды:
 
 """
 
+typealias PlaylistLoader = suspend () -> List<Track>
+typealias TrackLoader = suspend () -> Track?
+
 class Track(
     private val message: Message,
     private val audioTrack: AudioTrack,
@@ -75,15 +76,28 @@ class Track(
     suspend fun playingTrack() = message.replyWith("playing track: $title")
 
     companion object {
-        suspend fun builder(message: Message, query: String, title: String? = null): suspend () -> Track? =
-            {
-                LavaPlayerManager.loadTrack(query)?.let {
-                    val fullTitle = "${title ?: it.info.title} ${it.formatDuration()}"
-                    Track(message, it, fullTitle)
-                }
+        private fun AudioTrack.toTrack(message: Message, title: String? = null): Track {
+            val fullTitle = "${title ?: info.title} ${formatDuration()}"
+            return Track(message, this, fullTitle)
+        }
+
+        suspend fun trackLoader(message: Message, query: String, title: String? = null): TrackLoader = {
+            LavaPlayerManager.loadTrack(query)?.toTrack(message, title)
+        }
+
+        suspend fun playlistLoader(message: Message, query: String, title: String? = null): PlaylistLoader = {
+            LavaPlayerManager.loadPlaylist(query).map {
+                it.toTrack(message, title)
             }
+        }
     }
 }
+
+data class Args(
+    val count: Int?,
+    val favourites: Boolean,
+    val shuffled: Boolean,
+)
 
 data class Session(
     val player: AudioPlayer,
@@ -185,7 +199,7 @@ class ChimberCommands {
 
     private suspend fun addTracksToQueue(
         event: MessageCreateEvent,
-        builders: List<suspend () -> Track?>
+        loaders: List<TrackLoader>
     ): Int {
         val guildId = event.guildId ?: return 0
         val channel = event.member?.getVoiceStateOrNull()?.getChannelOrNull() ?: return 0
@@ -196,23 +210,65 @@ class ChimberCommands {
             queueSize--
         }
 
-        for (builder in builders) {
-            builder.invoke()?.let {
+        for (loader in loaders) {
+            loader.invoke()?.let {
                 session.queue.add(it)
             } ?: event.replyWith("Loading tracks failed...")
         }
 
-        return queueSize + builders.size
+        return queueSize + loaders.size
     }
 
-    private suspend fun addTrackToQueue(event: MessageCreateEvent, query: String, count: Int = 1) {
-        val track = Track.builder(event.message, query).invoke() ?: run {
+    private suspend fun queueTracksByLink(
+        event: MessageCreateEvent,
+        link: String,
+        count: Int = 1,
+        shuffled: Boolean = false
+    ) {
+        var tracks = Track.playlistLoader(event.message, link).invoke()
+        if (shuffled) {
+            tracks = tracks.shuffled()
+        }
+
+        if (tracks.isEmpty()) {
+            event.replyWith("No such track or playlist was found :(")
+            return
+        }
+
+        val loaders = tracks.map { it.toLoader() }
+        val queueSize = addTracksToQueue(event, loaders.repeatNTimes(count))
+
+        if (queueSize > 0) {
+            val msg = if (tracks.size > 1) {
+                if (count == 1) {
+                    "queued playlist with ${tracks.size} tracks"
+                } else {
+                    "queued playlist with ${tracks.size} tracks $count times"
+                }
+            } else {
+                val title = tracks.first().title
+                if (count == 1) {
+                    "queued track: $title"
+                } else {
+                    "queued $count tracks: $title"
+                }
+            }
+
+            event.replyWith(msg)
+        }
+    }
+
+    private suspend fun queueTrackBySearch(
+        event: MessageCreateEvent,
+        query: String,
+        count: Int = 1
+    ) {
+        val track = Track.trackLoader(event.message, "ytsearch: $query").invoke() ?: run {
             event.replyWith("No such track was found :(")
             return
         }
 
-        val builder: suspend () -> Track? = { track.clone() }
-        val queueSize = addTracksToQueue(event, List(count) { builder })
+        val queueSize = addTracksToQueue(event, track.toLoader().repeatNTimes(count))
 
         if (queueSize > 0) {
             val msg = if (count == 1) {
@@ -220,6 +276,7 @@ class ChimberCommands {
             } else {
                 "queued $count tracks: ${track.title}"
             }
+
             event.replyWith(msg)
         }
     }
@@ -250,7 +307,7 @@ class ChimberCommands {
         val channel = event.member?.getVoiceStateOrNull()?.getChannelOrNull() ?: return
         val session = sessions[guildId] ?: connect(channel)
 
-        val track = Track.builder(event.message, file.absolutePath, query).invoke() ?: run {
+        val track = Track.trackLoader(event.message, file.absolutePath, query).invoke() ?: run {
             event.replyWith("Couldn't load tts :(")
             return
         }
@@ -259,14 +316,14 @@ class ChimberCommands {
     }
 
     suspend fun play(event: MessageCreateEvent, count: Int = 1) {
-        var query = event.query
+        val query = event.query
         if (query.isBlank()) return
 
-        if (!query.startsWith("http")) {
-            query = "ytsearch: $query"
+        if (Regex("https?://.+").matches(query)) {
+            queueTracksByLink(event, query, count)
+        } else {
+            queueTrackBySearch(event, query, count)
         }
-
-        addTrackToQueue(event, query, count = count)
     }
 
     suspend fun stop(event: MessageCreateEvent) {
@@ -274,13 +331,7 @@ class ChimberCommands {
         disconnect(guildId)
     }
 
-    private suspend fun loadFromRepo(
-        event: MessageCreateEvent,
-        repository: SongRepository,
-        loadingString: String
-    ) {
-        val loading = event.replyWith("*$loadingString*")
-
+    private fun parseArgs(event: MessageCreateEvent): Args {
         var count: Int? = null
         var favourites = true
         var shuffled = false
@@ -300,7 +351,19 @@ class ChimberCommands {
             }
         }
 
-        val builders = repository.getBuilders(event.message, count, favourites, shuffled)
+        return Args(count, favourites, shuffled)
+    }
+
+    private suspend fun loadFromRepo(
+        event: MessageCreateEvent,
+        repository: SongRepository,
+        loadingString: String
+    ) {
+        val loading = event.replyWith("*$loadingString*")
+
+        val args = parseArgs(event)
+
+        val builders = repository.getBuilders(event.message, args.count, args.favourites, args.shuffled)
         addTracksToQueue(event, builders)
 
         loading.delete()
@@ -474,19 +537,32 @@ class ChimberCommands {
         loadFromRepo(event, AngelsTrueRepository, "Добавляю ангельское тру...")
     }
 
+    private suspend fun loadTrackByLink(event: MessageCreateEvent, link: String) {
+        queueTracksByLink(event, link, count = event.query.toIntOrNull() ?: 1)
+    }
+
     suspend fun snus(event: MessageCreateEvent) {
-        addTrackToQueue(event, "https://www.youtube.com/watch?v=mx-f_wbZTMI", count = event.query.toIntOrNull() ?: 1)
+        loadTrackByLink(event, "https://www.youtube.com/watch?v=mx-f_wbZTMI")
     }
 
     suspend fun pauk(event: MessageCreateEvent) {
-        addTrackToQueue(event, "https://www.youtube.com/watch?v=e2RqDHziN6k", count = event.query.toIntOrNull() ?: 1)
+        loadTrackByLink(event, "https://www.youtube.com/watch?v=e2RqDHziN6k")
     }
 
     suspend fun sasha(event: MessageCreateEvent) {
-        addTrackToQueue(event, "https://www.youtube.com/watch?v=0vQBaqUPtlc", count = event.query.toIntOrNull() ?: 1)
+        loadTrackByLink(event, "https://www.youtube.com/watch?v=0vQBaqUPtlc")
+    }
+
+    private suspend fun loadPlaylistByLink(event: MessageCreateEvent, link: String) {
+        val args = parseArgs(event)
+        queueTracksByLink(event, link, count = args.count ?: 1, shuffled = args.shuffled)
+    }
+
+    suspend fun ruslan(event: MessageCreateEvent) {
+        loadPlaylistByLink(event, "https://www.youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR")
     }
 
     suspend fun help(event: MessageCreateEvent) {
-        event.replyWith("```То же самое есть на https://chimchima.ru/bot\n$USAGE```")
+        event.replyWith("```То же самое можно прочитать на https://chimchima.ru/bot\n$USAGE```")
     }
 }

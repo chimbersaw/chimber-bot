@@ -42,3 +42,9 @@ suspend inline fun <reified T, R> HttpResponse.runOnSuccessOrNull(block: (T) -> 
         null
     }
 }
+
+fun <T> T.toLoader(): suspend () -> T = { this }
+
+fun <T> T.repeatNTimes(n: Int): List<T> = List(n) { this }
+
+fun <T> List<T>.repeatNTimes(n: Int): List<T> = List(n) { this }.flatten()
