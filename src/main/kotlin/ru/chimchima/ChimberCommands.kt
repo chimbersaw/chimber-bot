@@ -586,6 +586,6 @@ class ChimberCommands {
     }
 
     suspend fun help(event: MessageCreateEvent) {
-        event.replyWith("https://chimchima.ru/bot")
+        event.replyWith("http://chimchima.ru/bot")
     }
 }
