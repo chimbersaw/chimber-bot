@@ -3,6 +3,7 @@ package ru.chimchima.repository
 import dev.kord.core.entity.Message
 import ru.chimchima.Track
 import ru.chimchima.TrackLoader
+import ru.chimchima.utils.repeatNTimes
 
 data class Song(
     val title: String,
@@ -16,8 +17,9 @@ fun List<Pair<Pair<String, String>, Boolean>>.toSongs() = map { Song(it.first.fi
 abstract class SongRepository {
     abstract val songs: List<Song>
 
-    suspend fun getBuilders(
+    suspend fun getLoaders(
         message: Message,
+        limit: Int?,
         count: Int?,
         favourites: Boolean = true,
         shuffled: Boolean = false
@@ -26,7 +28,8 @@ abstract class SongRepository {
         if (favourites) {
             songsList = songsList.filter { it.favourite }
         }
-        songsList = songsList.take(count ?: songsList.size)
+        songsList = songsList.repeatNTimes(count ?: 1)
+        songsList = songsList.take(limit ?: songsList.size)
 
         return songsList.map { (title, url) ->
             Track.trackLoader(message, url, title)

@@ -63,6 +63,7 @@ suspend fun main() = runBlocking {
             "!sasha" -> commands.sasha(this)
             "!ruslan" -> commands.ruslan(this)
         }
+
         if (command.startsWith("!play")) {
             val count = command.substringAfter("!play").toIntOrNull() ?: return@on
             commands.play(this, count)

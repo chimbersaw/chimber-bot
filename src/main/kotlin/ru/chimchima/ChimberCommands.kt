@@ -40,10 +40,16 @@ const val USAGE = """Команды:
     !pauk [count] - Добавляют в очередь count пауков.
     !sasha [count] - Добавляют в очередь count саш.
 
-    !<playlist> [-s/--shuffle/--shuffled] [-a/--all/--full] [count]
-    Добавляет count (или все) избранных треков из плейлиста (--all для всех треков, --shuffled для случайного порядка треков).
+    !<playlist> [-s/--shuffle/--shuffled] [-a/--all/--full] [count] [limit]l
+    Добавляет limit (или все) избранных треков из плейлиста, повторенного count (или 1) раз (--all для всех треков, --shuffled для случайного порядка треков).
+    
+    Пример:
+    !pirat -as 3 10l
+    Добавит все (а не только избранные) треки из плейлиста pirat в случайном порядке, повторенном 3 раза, но не больше 10 треков.
 
     Плейлисты:
+    !ruslan - Добавляет плейлист для игры в доту aka https://www.youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR
+
     !pirat - Избранные треки сереги бандита.
 
     !antihype - Три микстейпа ниже вместе.
@@ -95,6 +101,7 @@ class Track(
 
 data class Args(
     val count: Int?,
+    val limit: Int?,
     val favourites: Boolean,
     val shuffled: Boolean,
 )
@@ -222,11 +229,13 @@ class ChimberCommands {
     private suspend fun queueTracksByLink(
         event: MessageCreateEvent,
         link: String,
-        count: Int = 1,
-        shuffled: Boolean = false
+        overrideCount: Int? = null
     ) {
         var tracks = Track.playlistLoader(event.message, link).invoke()
-        if (shuffled) {
+
+        val args = parseArgs(event)
+        val count = overrideCount ?: args.count ?: 1
+        if (args.shuffled) {
             tracks = tracks.shuffled()
         }
 
@@ -235,38 +244,53 @@ class ChimberCommands {
             return
         }
 
-        val loaders = tracks.map { it.toLoader() }
-        val queueSize = addTracksToQueue(event, loaders.repeatNTimes(count))
+        var loaders = tracks.map { it.toLoader() }.repeatNTimes(count)
+        args.limit?.let {
+            loaders = loaders.take(it)
+        }
+
+        if (loaders.isEmpty()) {
+            return
+        }
+
+        val queueSize = addTracksToQueue(event, loaders)
 
         if (queueSize > 0) {
             val msg = if (tracks.size > 1) {
                 if (count == 1) {
-                    "queued playlist with ${tracks.size} tracks"
-                } else {
+                    "queued playlist with ${loaders.size} tracks"
+                } else if (args.limit == null) {
                     "queued playlist with ${tracks.size} tracks $count times"
+                } else {
+                    "queued playlist with ${tracks.size} tracks $count times limited to ${loaders.size}"
                 }
             } else {
                 val title = tracks.first().title
                 if (count == 1) {
                     "queued track: $title"
                 } else {
-                    "queued $count tracks: $title"
+                    "queued ${loaders.size} tracks: $title"
                 }
             }
 
             event.replyWith(msg)
+            if (tracks.size > 1) {
+                queue(event)
+            }
         }
     }
 
     private suspend fun queueTrackBySearch(
         event: MessageCreateEvent,
         query: String,
-        count: Int = 1
+        overrideCount: Int? = null
     ) {
         val track = Track.trackLoader(event.message, "ytsearch: $query").invoke() ?: run {
             event.replyWith("No such track was found :(")
             return
         }
+
+        val count = overrideCount ?: parseArgs(event).count ?: 1
 
         val queueSize = addTracksToQueue(event, track.toLoader().repeatNTimes(count))
 
@@ -320,9 +344,9 @@ class ChimberCommands {
         if (query.isBlank()) return
 
         if (Regex("https?://.+").matches(query)) {
-            queueTracksByLink(event, query, count)
+            queueTracksByLink(event, query, overrideCount = count)
         } else {
-            queueTrackBySearch(event, query, count)
+            queueTrackBySearch(event, query, overrideCount = count)
         }
     }
 
@@ -333,10 +357,11 @@ class ChimberCommands {
 
     private fun parseArgs(event: MessageCreateEvent): Args {
         var count: Int? = null
+        var limit: Int? = null
         var favourites = true
         var shuffled = false
 
-        for (arg in event.query.split(" ")) {
+        for (arg in event.args.split(" ")) {
             when (arg) {
                 "-s", "--shuffle", "shuffle", "--shuffled", "shuffled" -> shuffled = true
                 "-a", "--all", "all", "--full", "full" -> favourites = false
@@ -346,12 +371,18 @@ class ChimberCommands {
                 }
 
                 else -> {
-                    count = arg.toIntOrNull()
+                    if (arg.startsWith('l', ignoreCase = true)) {
+                        limit = arg.drop(1).toNonNegativeIntOrNull()
+                    } else if (arg.endsWith('l', ignoreCase = true)) {
+                        limit = arg.dropLast(1).toNonNegativeIntOrNull()
+                    } else {
+                        count = arg.toNonNegativeIntOrNull()
+                    }
                 }
             }
         }
 
-        return Args(count, favourites, shuffled)
+        return Args(count, limit, favourites, shuffled)
     }
 
     private suspend fun loadFromRepo(
@@ -363,8 +394,8 @@ class ChimberCommands {
 
         val args = parseArgs(event)
 
-        val builders = repository.getBuilders(event.message, args.count, args.favourites, args.shuffled)
-        addTracksToQueue(event, builders)
+        val loaders = repository.getLoaders(event.message, args.limit, args.count, args.favourites, args.shuffled)
+        addTracksToQueue(event, loaders)
 
         loading.delete()
         if (connections.containsKey(event.guildId)) {
@@ -388,7 +419,8 @@ class ChimberCommands {
     }
 
     suspend fun skip(event: MessageCreateEvent) {
-        val count = event.query.toIntOrNull() ?: 1
+        val args = parseArgs(event)
+        val count = args.count ?: args.limit ?: 1
         if (count < 1) return
 
         val (player, queue, _, current) = sessions[event.guildId] ?: return
@@ -467,7 +499,7 @@ class ChimberCommands {
         val guildId = event.guildId ?: return
 
         var start = "Repeat is now"
-        when (event.query.lowercase()) {
+        when (event.args.lowercase()) {
             "on" -> repeats[guildId] = Repeat.ON
             "off" -> repeats[guildId] = Repeat.OFF
             else -> start = "Repeat is"
@@ -537,32 +569,23 @@ class ChimberCommands {
         loadFromRepo(event, AngelsTrueRepository, "Добавляю ангельское тру...")
     }
 
-    private suspend fun loadTrackByLink(event: MessageCreateEvent, link: String) {
-        queueTracksByLink(event, link, count = event.query.toIntOrNull() ?: 1)
-    }
-
     suspend fun snus(event: MessageCreateEvent) {
-        loadTrackByLink(event, "https://www.youtube.com/watch?v=mx-f_wbZTMI")
+        queueTracksByLink(event, "https://www.youtube.com/watch?v=mx-f_wbZTMI")
     }
 
     suspend fun pauk(event: MessageCreateEvent) {
-        loadTrackByLink(event, "https://www.youtube.com/watch?v=e2RqDHziN6k")
+        queueTracksByLink(event, "https://www.youtube.com/watch?v=e2RqDHziN6k")
     }
 
     suspend fun sasha(event: MessageCreateEvent) {
-        loadTrackByLink(event, "https://www.youtube.com/watch?v=0vQBaqUPtlc")
-    }
-
-    private suspend fun loadPlaylistByLink(event: MessageCreateEvent, link: String) {
-        val args = parseArgs(event)
-        queueTracksByLink(event, link, count = args.count ?: 1, shuffled = args.shuffled)
+        queueTracksByLink(event, "https://www.youtube.com/watch?v=0vQBaqUPtlc")
     }
 
     suspend fun ruslan(event: MessageCreateEvent) {
-        loadPlaylistByLink(event, "https://www.youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR")
+        queueTracksByLink(event, "https://www.youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR")
     }
 
     suspend fun help(event: MessageCreateEvent) {
-        event.replyWith("```То же самое можно прочитать на https://chimchima.ru/bot\n$USAGE```")
+        event.replyWith("https://chimchima.ru/bot")
     }
 }

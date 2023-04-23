@@ -11,7 +11,7 @@ import io.ktor.http.*
 suspend fun Message.replyWith(text: String) = reply { content = text }
 suspend fun MessageCreateEvent.replyWith(text: String) = message.replyWith(text)
 
-val MessageCreateEvent.query: String
+val MessageCreateEvent.args: String
     get() {
         val query = message.content
         return if (query.startsWith("!")) {
@@ -19,6 +19,13 @@ val MessageCreateEvent.query: String
         } else {
             ""
         }
+    }
+
+val MessageCreateEvent.query: String
+    get() = if (args.isHttp()) {
+        args.substringBefore(" ")
+    } else {
+        args
     }
 
 fun AudioTrack.formatDuration(): String {
@@ -42,6 +49,10 @@ suspend inline fun <reified T, R> HttpResponse.runOnSuccessOrNull(block: (T) -> 
         null
     }
 }
+
+fun String.isHttp() = Regex("https?://.+").matches(this)
+
+fun String.toNonNegativeIntOrNull() = toUIntOrNull()?.toInt()
 
 fun <T> T.toLoader(): suspend () -> T = { this }
 
