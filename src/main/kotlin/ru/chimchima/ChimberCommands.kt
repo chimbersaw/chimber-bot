@@ -632,6 +632,10 @@ class ChimberCommands {
         queueTracksByLink(event, "https://www.youtube.com/watch?v=0vQBaqUPtlc")
     }
 
+    suspend fun discord(event: MessageCreateEvent) {
+        queueTracksByLink(event, "https://www.youtube.com/watch?v=vHZChECbKEo")
+    }
+
 
     suspend fun ruslan(event: MessageCreateEvent) {
         queueTracksByLink(event, "https://www.youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR")
