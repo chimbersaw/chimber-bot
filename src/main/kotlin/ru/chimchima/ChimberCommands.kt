@@ -39,6 +39,7 @@ const val USAGE = """Команды:
     !snus [count] - Добавляют в очередь count снюсов.
     !pauk [count] - Добавляют в очередь count пауков.
     !sasha [count] - Добавляют в очередь count саш.
+    !discord [count] - Мама это дискорд.
 
     !<playlist> [-s/--shuffle/--shuffled] [-a/--all/--full] [count] [limit]l
     Добавляет limit (или все) избранных треков из плейлиста, повторенного count (или 1) раз (--all для всех треков, --shuffled для случайного порядка треков).
