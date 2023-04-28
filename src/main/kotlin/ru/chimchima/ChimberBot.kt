@@ -58,6 +58,16 @@ suspend fun main() = runBlocking {
             "!bootlegvolume1", "!bootleg" -> commands.bootlegvolume1(this)
             "!angelstrue", "!angel", "!true" -> commands.angelstrue(this)
 
+            "!krovostok", "!krov" -> commands.krovostok(this)
+            "!bloodriver", "!reka", "!rekakrovi" -> commands.bloodriver(this)
+            "!skvoznoe", "!skvoz" -> commands.skvoznoe(this)
+            "!dumbbell", "!gantelya" -> commands.dumbbell(this)
+            "!studen" -> commands.studen(this)
+            "!lombard" -> commands.lombard(this)
+            "!cheburashka", "!cheba" -> commands.cheburashka(this)
+            "!nauka", "!science" -> commands.nauka(this)
+            "!krovonew", "!lenin" -> commands.krovonew(this)
+
             "!snus" -> commands.snus(this)
             "!pauk" -> commands.pauk(this)
             "!sasha" -> commands.sasha(this)

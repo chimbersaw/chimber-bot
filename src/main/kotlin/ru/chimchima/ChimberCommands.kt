@@ -53,18 +53,28 @@ const val USAGE = """Команды:
     !pirat - Избранные треки сереги бандита.
 
     !antihype - Три микстейпа ниже вместе.
-    !nemimohype, !nemimohypa, !nemimo - #НЕМИМОХАЙПА (Mixtape)
-    !hypetrain - HYPE TRAIN (Mixtape)
-    !antihypetrain, !antipenis - ANTIHYPETRAIN
+    !nemimohype, !nemimohypa, !nemimo - #НЕМИМОХАЙПА (Mixtape) (2015)
+    !hypetrain - HYPE TRAIN (Mixtape) (2016)
+    !antihypetrain, !antipenis - ANTIHYPETRAIN (2021)
 
     !zamay - Два альбома ниже вместе.
-    !mrgaslight, !gaslight - Mr. Gaslight
-    !lusthero3, !lusthero, !lust - LUST HERO 3
+    !mrgaslight, !gaslight - Mr. Gaslight (2022)
+    !lusthero3, !lusthero, !lust - LUST HERO 3 (2022)
 
     !slavakpss, !slava, !kpss - Три релиза ниже вместе.
-    !russianfield, !pole - Русское поле (Бутер Бродский)
-    !bootlegvolume1, !bootleg - Bootleg Vol.1
-    !angelstrue, !angel, !true - Ангельское True (Mixtape)
+    !russianfield, !pole - Русское поле (Бутер Бродский) (2016)
+    !bootlegvolume1, !bootleg - Bootleg Vol.1 (2017)
+    !angelstrue, !angel, !true - Ангельское True (Mixtape) (2022)
+    
+    !krovostok, !krov - Восемь релизов ниже вместе.
+    !bloodriver, !reka, !rekakrovi - Река крови (2004)
+    !skvoznoe, !skvoz - Сквозное (2006)
+    !dumbbell, !gantelya - Гантеля (2008)
+    !studen - Студень (2012)
+    !lombard - Ломбард (2015)
+    !cheburashka, !cheba - ЧБ (2018)
+    !nauka, !science - Наука (2021)
+    !krovonew, !lenin - Бабочки (2022) & Ленин (2023)
 
 """
 
@@ -103,14 +113,14 @@ data class Args(
     val count: Int?,
     val limit: Int?,
     val favourites: Boolean,
-    val shuffled: Boolean,
+    val shuffled: Boolean
 )
 
 data class Session(
     val player: AudioPlayer,
     var queue: LinkedBlockingQueue<Track>,
     var ttsQueue: LinkedBlockingQueue<Track>,
-    var current: Track? = null,
+    var current: Track? = null
 )
 
 enum class Repeat {
@@ -522,52 +532,93 @@ class ChimberCommands {
     }
 
     suspend fun pirat(event: MessageCreateEvent) {
-        loadFromRepo(event, PiratRepository, "Добавляю серегу...")
+        loadFromRepo(event, PiratRepository, "О как же хорошо: моя чимчима не в курсе")
     }
+
 
     suspend fun antihype(event: MessageCreateEvent) {
         loadFromRepo(event, AntihypeRepository, "Это ты зря другалёчек...")
     }
 
     suspend fun nemimohype(event: MessageCreateEvent) {
-        loadFromRepo(event, NemimohypeRepository, "Ну да мы живём не мимо хайпа...")
+        loadFromRepo(event, NemimohypeRepository, "Чимчима чимчимовна надежда грайма")
     }
 
     suspend fun hypetrain(event: MessageCreateEvent) {
-        loadFromRepo(event, HypeTrainRepository, "Добавляю поезд хайпа...")
+        loadFromRepo(event, HypeTrainRepository, "Гоша Чимчимский - самый модный")
     }
 
     suspend fun antihypetrain(event: MessageCreateEvent) {
-        loadFromRepo(event, AntihypeTrainRepository, "Добавляю анти поезд хайпа...")
+        loadFromRepo(event, AntihypeTrainRepository, "Славян отрыгнул на биток, а я тут начимчлю")
     }
+
 
     suspend fun zamay(event: MessageCreateEvent) {
         loadFromRepo(event, ZamayRepository, "Добавляю замая...")
     }
 
     suspend fun mrgaslight(event: MessageCreateEvent) {
-        loadFromRepo(event, MrGaslightRepository, "Добавляю мистера газлайта...")
+        loadFromRepo(event, MrGaslightRepository, "Чимчимы из подполья эти помни навеки")
     }
 
     suspend fun lusthero3(event: MessageCreateEvent) {
-        loadFromRepo(event, LustHero3Repository, "Добавляю героя похоти три...")
+        loadFromRepo(event, LustHero3Repository, "Меня ждут в городах чимчимы")
     }
+
 
     suspend fun slavakpss(event: MessageCreateEvent) {
         loadFromRepo(event, SlavaKPSSRepository, "Добавляю славу...")
     }
 
     suspend fun russianfield(event: MessageCreateEvent) {
-        loadFromRepo(event, RussianFieldRepository, "Добавляю русское поле...")
+        loadFromRepo(event, RussianFieldRepository, "Выйду в русское поле: немного почимчимлю и вернусь в неволю")
     }
 
     suspend fun bootlegvolume1(event: MessageCreateEvent) {
-        loadFromRepo(event, BootlegVolume1Repository, "Добавляю бутлег vol 1...")
+        loadFromRepo(event, BootlegVolume1Repository, "Иду по пищевой цепи, пожирая чимчимы")
     }
 
     suspend fun angelstrue(event: MessageCreateEvent) {
-        loadFromRepo(event, AngelsTrueRepository, "Добавляю ангельское тру...")
+        loadFromRepo(event, AngelsTrueRepository, "Ты не французский рэп, хотя показывал чимчима-флоу")
     }
+
+
+    suspend fun krovostok(event: MessageCreateEvent) {
+        loadFromRepo(event, KrovostokRepository, "Добавляю кровостiк...")
+    }
+
+    suspend fun bloodriver(event: MessageCreateEvent) {
+        loadFromRepo(event, BloodRiverRepository, "Чимчима рано ударила в голову")
+    }
+
+    suspend fun skvoznoe(event: MessageCreateEvent) {
+        loadFromRepo(event, SkvoznoeRepository, "Чимчиму в массы: и натуралу, и пидорасу")
+    }
+
+    suspend fun dumbbell(event: MessageCreateEvent) {
+        loadFromRepo(event, DumbbellRepository, "Cперва я почимчимлю чимчиму отложив пекаль")
+    }
+
+    suspend fun studen(event: MessageCreateEvent) {
+        loadFromRepo(event, StudenRepository, "Чимчима всегда наполовину полна, всегда")
+    }
+
+    suspend fun lombard(event: MessageCreateEvent) {
+        loadFromRepo(event, LombardRepository, "И хуле, что он заложник, он чимчима, но он человек")
+    }
+
+    suspend fun cheburashka(event: MessageCreateEvent) {
+        loadFromRepo(event, CheburashkaRepository, "Передо мной в пакете Дикси лежит отрезанная чимчима́")
+    }
+
+    suspend fun nauka(event: MessageCreateEvent) {
+        loadFromRepo(event, NaukaRepository, "Или всё будет не так, и чимчима спиздила. Проверим.")
+    }
+
+    suspend fun krovonew(event: MessageCreateEvent) {
+        loadFromRepo(event, KrovostokMisc, "Бог оказался фраером, расчимчимленным фраерком")
+    }
+
 
     suspend fun snus(event: MessageCreateEvent) {
         queueTracksByLink(event, "https://www.youtube.com/watch?v=mx-f_wbZTMI")
@@ -581,9 +632,11 @@ class ChimberCommands {
         queueTracksByLink(event, "https://www.youtube.com/watch?v=0vQBaqUPtlc")
     }
 
+
     suspend fun ruslan(event: MessageCreateEvent) {
         queueTracksByLink(event, "https://www.youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR")
     }
+
 
     suspend fun help(event: MessageCreateEvent) {
         event.replyWith("http://chimchima.ru/bot")

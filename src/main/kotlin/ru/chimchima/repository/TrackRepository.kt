@@ -11,11 +11,11 @@ data class Song(
     val favourite: Boolean = false
 )
 
-fun List<Pair<String, String>>.toFavouriteSongs() = map { Song(it.first, it.second, true) }
-fun List<Pair<Pair<String, String>, Boolean>>.toSongs() = map { Song(it.first.first, it.first.second, it.second) }
+infix fun String.fav(url: String): Song = Song(this, url, favourite = true)
+infix fun String.kal(url: String): Song = Song(this, url, favourite = false)
 
-abstract class SongRepository {
-    abstract val songs: List<Song>
+interface SongRepository {
+    val songs: List<Song>
 
     suspend fun getLoaders(
         message: Message,
