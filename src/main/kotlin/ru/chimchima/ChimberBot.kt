@@ -59,12 +59,12 @@ suspend fun main() = runBlocking {
             "!angelstrue", "!angel", "!true" -> commands.angelstrue(this)
 
             "!krovostok", "!krov" -> commands.krovostok(this)
-            "!bloodriver", "!reka", "!rekakrovi" -> commands.bloodriver(this)
+            "!bloodriver", "!blood", "!reka", "!rekakrovi" -> commands.bloodriver(this)
             "!skvoznoe", "!skvoz" -> commands.skvoznoe(this)
-            "!dumbbell", "!gantelya" -> commands.dumbbell(this)
+            "!dumbbell", "!dumb", "!gantelya" -> commands.dumbbell(this)
             "!studen" -> commands.studen(this)
             "!lombard" -> commands.lombard(this)
-            "!cheburashka", "!cheba" -> commands.cheburashka(this)
+            "!cheburashka", "!cheba", "!chb" -> commands.cheburashka(this)
             "!nauka", "!science" -> commands.nauka(this)
             "!krovonew", "!lenin" -> commands.krovonew(this)
 

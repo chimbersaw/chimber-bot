@@ -67,12 +67,12 @@ const val USAGE = """Команды:
     !angelstrue, !angel, !true - Ангельское True (Mixtape) (2022)
     
     !krovostok, !krov - Восемь релизов ниже вместе.
-    !bloodriver, !reka, !rekakrovi - Река крови (2004)
+    !bloodriver, !blood, !reka, !rekakrovi - Река крови (2004)
     !skvoznoe, !skvoz - Сквозное (2006)
-    !dumbbell, !gantelya - Гантеля (2008)
+    !dumbbell, !dumb, !gantelya - Гантеля (2008)
     !studen - Студень (2012)
     !lombard - Ломбард (2015)
-    !cheburashka, !cheba - ЧБ (2018)
+    !cheburashka, !cheba, !chb - ЧБ (2018)
     !nauka, !science - Наука (2021)
     !krovonew, !lenin - Бабочки (2022) & Ленин (2023)
 
