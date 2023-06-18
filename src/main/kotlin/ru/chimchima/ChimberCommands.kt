@@ -52,6 +52,7 @@ const val USAGE = """Команды:
     !ruslan - Добавляет плейлист для игры в доту aka https://www.youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR
 
     !pirat - Избранные треки сереги бандита.
+    !cover - Избранные каверы сереги чимичанги.
 
     !antihype - Три микстейпа ниже вместе.
     !nemimohype, !nemimohypa, !nemimo - #НЕМИМОХАЙПА (Mixtape) (2015)
@@ -532,8 +533,13 @@ class ChimberCommands {
         event.replyWith("Player is resumed.")
     }
 
+
     suspend fun pirat(event: MessageCreateEvent) {
         loadFromRepo(event, PiratRepository, "О как же хорошо: моя чимчима не в курсе")
+    }
+
+    suspend fun cover(event: MessageCreateEvent) {
+        loadFromRepo(event, PiratCoverRepository, "Мне люди должны сказать: \"чимчима\"")
     }
 
 

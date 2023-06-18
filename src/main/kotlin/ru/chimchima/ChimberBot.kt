@@ -43,6 +43,7 @@ suspend fun main() = runBlocking {
             "!help" -> commands.help(this)
 
             "!pirat" -> commands.pirat(this)
+            "!cover" -> commands.cover(this)
 
             "!antihype" -> commands.antihype(this)
             "!nemimohype", "!nemimohypa", "!nemimo" -> commands.nemimohype(this)
