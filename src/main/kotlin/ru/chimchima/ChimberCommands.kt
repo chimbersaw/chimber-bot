@@ -23,7 +23,9 @@ private const val MAX_MESSAGE_LENGTH = 2000
 const val USAGE = """Команды:
     !play[count] <track name / track url / playlist url> — Присоединяется к каналу и воспроизводит 1 (или count) треков/плейлистов с указанным названием (поиск по YouTube) / по указанной ссылке.
     !stop — Прекращает воспроизведение очереди и покидает канал.
-    !skip [count] — Пропускает следующие count композиций (включая текущую), по умолчанию count=1.
+    !skip/!next [count] — Пропускает следующие count композиций (включая текущую), по умолчанию count=1.
+    !seek/!ff [seconds] - Проматывает текущий трек на seconds (или 10) секунд вперед (назад при отрицательном аргументе).
+    !back - Начинает текущий трек заново.
     !queue — Выводит текущую очередь композиций.
     !shuffle — Перемешать очередь композиций.
     !clear — Очистить очередь композиций.
@@ -33,7 +35,7 @@ const val USAGE = """Команды:
     !resume - Снимает текущий трек с паузы.
     !help — Выводит данное сообщение.
 
-    !say <text> - Произносит текст рандомным голосом вне очереди.
+    !say/!tts <text> - Произносит текст рандомным голосом вне очереди.
     !jane <text> - Произносит текст голосом злой Жени вне очереди.
 
     !snus [count] - Добавляют в очередь count снюсов.
@@ -41,11 +43,11 @@ const val USAGE = """Команды:
     !sasha [count] - Добавляют в очередь count саш.
     !discord [count] - Мама это дискорд.
 
-    !<playlist> [-s/--shuffle/--shuffled] [-a/--all/--full] [count] [limit]l
+    !<playlist> [-s/--shuffle/--shuffled] [-a/--all/--full] [count] [limit]L
     Добавляет limit (или все) избранных треков из плейлиста, повторенного count (или 1) раз (--all для всех треков, --shuffled для случайного порядка треков).
     
     Пример:
-    !pirat -as 3 10l
+    !pirat -as 3 10L
     Добавит все (а не только избранные) треки из плейлиста pirat в случайном порядке, повторенном 3 раза, но не больше 10 треков.
 
     Плейлисты:
@@ -90,6 +92,15 @@ class Track(
 ) {
     fun playWith(player: AudioPlayer) = player.playTrack(audioTrack)
     fun clone() = Track(message, audioTrack.makeClone(), title)
+
+    fun seek(seconds: Int) {
+        val newPosition = audioTrack.position + seconds * 1000L
+        audioTrack.position = newPosition.coerceIn(0..audioTrack.duration)
+    }
+
+    fun startOver() {
+        audioTrack.position = 0
+    }
 
     suspend fun playingTrack() = message.replyWith("playing track: $title")
 
@@ -193,9 +204,11 @@ class ChimberCommands {
                     if (repeats[guildId] == Repeat.OFF || session.current == null) {
                         session.current = queue.poll(100, TimeUnit.MILLISECONDS)
                         session.current?.playingTrack()
+                    } else {
+                        session.current = session.current?.clone()
                     }
 
-                    val track = session.current?.clone()
+                    val track = session.current
 
                     if (track == null) {
                         disconnect(guildId)
@@ -231,7 +244,7 @@ class ChimberCommands {
 
         for (loader in loaders) {
             loader.invoke()?.let {
-                session.queue.add(it)
+                session.queue.add(it.clone())
             } ?: event.replyWith("Loading tracks failed...")
         }
 
@@ -367,7 +380,7 @@ class ChimberCommands {
         disconnect(guildId)
     }
 
-    private fun parseArgs(event: MessageCreateEvent): Args {
+    private fun parseArgs(event: MessageCreateEvent, allowNegative: Boolean = false): Args {
         var count: Int? = null
         var limit: Int? = null
         var favourites = true
@@ -384,11 +397,11 @@ class ChimberCommands {
 
                 else -> {
                     if (arg.startsWith('l', ignoreCase = true)) {
-                        limit = arg.drop(1).toNonNegativeIntOrNull()
+                        limit = arg.drop(1).toSignedIntOrNull(allowNegative)
                     } else if (arg.endsWith('l', ignoreCase = true)) {
-                        limit = arg.dropLast(1).toNonNegativeIntOrNull()
+                        limit = arg.dropLast(1).toSignedIntOrNull(allowNegative)
                     } else {
-                        count = arg.toNonNegativeIntOrNull()
+                        count = arg.toSignedIntOrNull(allowNegative)
                     }
                 }
             }
@@ -448,6 +461,18 @@ class ChimberCommands {
 
         val skipped = skippedTracks.joinToString(separator = "\n")
         event.replyWith("skipped:\n```$skipped\n".take(MAX_MESSAGE_LENGTH - 3) + "```")
+    }
+
+    fun seek(event: MessageCreateEvent) {
+        val current = sessions[event.guildId]?.current ?: return
+        val seconds = parseArgs(event, allowNegative = true).count ?: 10
+
+        current.seek(seconds)
+    }
+
+    fun back(event: MessageCreateEvent) {
+        val current = sessions[event.guildId]?.current ?: return
+        current.startOver()
     }
 
     suspend fun queue(event: MessageCreateEvent) {
@@ -512,8 +537,8 @@ class ChimberCommands {
 
         var start = "Repeat is now"
         when (event.args.lowercase()) {
-            "on" -> repeats[guildId] = Repeat.ON
-            "off" -> repeats[guildId] = Repeat.OFF
+            "on", "1" -> repeats[guildId] = Repeat.ON
+            "off", "0" -> repeats[guildId] = Repeat.OFF
             else -> start = "Repeat is"
         }
 

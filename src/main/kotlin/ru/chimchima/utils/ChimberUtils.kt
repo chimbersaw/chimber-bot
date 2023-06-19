@@ -52,7 +52,7 @@ suspend inline fun <reified T, R> HttpResponse.runOnSuccessOrNull(block: (T) -> 
 
 fun String.isHttp() = Regex("https?://.+").matches(this)
 
-fun String.toNonNegativeIntOrNull() = toUIntOrNull()?.toInt()
+fun String.toSignedIntOrNull(allowNegative: Boolean) = if (allowNegative) toIntOrNull() else toUIntOrNull()?.toInt()
 
 fun <T> T.toLoader(): suspend () -> T = { this }
 
