@@ -22,6 +22,7 @@ object PiratCoverRepository : SongRepository {
     override val songs = listOf(
         "Мне люди должны сказать спасибо" fav "https://www.youtube.com/watch?v=XZIBA1Q1y7o",
         "Коко джамбо" fav "https://www.youtube.com/watch?v=_yBAYVaHCV4",
+        "Контрспелл левел один" fav "https://www.youtube.com/watch?v=A0tNNy2KSKM",
         "Вер из май майнд" fav "https://www.youtube.com/watch?v=aZWWlqDy8nE",
         "Astral step" fav "https://www.youtube.com/watch?v=kirKzTXP7mg",
         "Любите, девушки" fav "https://www.youtube.com/watch?v=11wDRHWXMZQ",
