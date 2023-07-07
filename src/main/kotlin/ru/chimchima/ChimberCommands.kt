@@ -668,6 +668,10 @@ class ChimberCommands {
         queueTracksByLink(event, "https://www.youtube.com/watch?v=vHZChECbKEo")
     }
 
+    suspend fun taxi(event: MessageCreateEvent) {
+        queueTracksByLink(event, "https://www.youtube.com/watch?v=A010SCa1S8U")
+    }
+
     suspend fun diss(event: MessageCreateEvent) {
         queueTracksByLink(event, "https://www.youtube.com/watch?v=QzrFC51rwDs")
     }

@@ -75,6 +75,7 @@ suspend fun main() = runBlocking {
             "!pauk" -> commands.pauk(this)
             "!sasha" -> commands.sasha(this)
             "!discord" -> commands.discord(this)
+            "!taxi" -> commands.taxi(this)
             "!diss" -> commands.diss(this)
             "!ruslan" -> commands.ruslan(this)
         }
