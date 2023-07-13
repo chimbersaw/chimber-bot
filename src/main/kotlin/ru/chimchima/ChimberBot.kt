@@ -1,5 +1,6 @@
 package ru.chimchima
 
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.on
@@ -9,6 +10,7 @@ import kotlinx.coroutines.runBlocking
 import ru.chimchima.help.HelpServer
 import ru.chimchima.properties.DISCORD_TOKEN
 import ru.chimchima.properties.LocalProperties
+import java.util.concurrent.ConcurrentHashMap
 
 fun startHelpServer() {
     println("Starting !help server...")
@@ -22,73 +24,83 @@ suspend fun main() = runBlocking {
     startHelpServer()
 
     val commands = ChimberCommands()
+    val lastCommands = ConcurrentHashMap<Snowflake, MessageCreateEvent>()
 
     kord.on<MessageCreateEvent> {
-        if (message.author?.isBot != false) return@on
-        val command = message.content.substringBefore(" ")
+        val author = message.author ?: return@on
+        if (author.isBot) return@on
+
+        var event = this
+        if (message.content.substringBefore(" ") in listOf("!again", "!rep", "!yadaun")) {
+            event = lastCommands[author.id] ?: return@on
+        } else {
+            lastCommands[author.id] = this
+        }
+
+        val command = event.message.content.substringBefore(" ")
         when (command) {
-            "!plink" -> commands.plink(this)
-            "!say", "!tts" -> commands.say(this)
-            "!jane" -> commands.say(this, jane = true)
-            "!play" -> commands.play(this)
-            "!stop" -> commands.stop(this)
-            "!skip" -> commands.skip(this)
-            "!next" -> commands.next(this)
-            "!seek", "!ff" -> commands.seek(this)
-            "!back" -> commands.back(this)
-            "!queue" -> commands.queue(this)
-            "!shuffle" -> commands.shuffle(this)
-            "!clear" -> commands.clear(this)
-            "!current" -> commands.current(this)
-            "!repeat" -> commands.repeat(this)
-            "!pause" -> commands.pause(this)
-            "!unpause", "!resume" -> commands.resume(this)
-            "!help" -> commands.help(this)
+            "!plink" -> commands.plink(event)
+            "!say", "!tts" -> commands.say(event)
+            "!jane" -> commands.say(event, jane = true)
+            "!play" -> commands.play(event)
+            "!stop" -> commands.stop(event)
+            "!skip" -> commands.skip(event)
+            "!next" -> commands.next(event)
+            "!seek", "!ff" -> commands.seek(event)
+            "!back" -> commands.back(event)
+            "!queue" -> commands.queue(event)
+            "!shuffle" -> commands.shuffle(event)
+            "!clear" -> commands.clear(event)
+            "!current" -> commands.current(event)
+            "!repeat" -> commands.repeat(event)
+            "!pause" -> commands.pause(event)
+            "!unpause", "!resume" -> commands.resume(event)
+            "!help" -> commands.help(event)
 
-            "!pirat" -> commands.pirat(this)
-            "!cover" -> commands.cover(this)
+            "!pirat" -> commands.pirat(event)
+            "!cover" -> commands.cover(event)
 
-            "!antihype" -> commands.antihype(this)
-            "!nemimohype", "!nemimohypa", "!nemimo" -> commands.nemimohype(this)
-            "!hypetrain" -> commands.hypetrain(this)
-            "!antihypetrain", "!antipenis" -> commands.antihypetrain(this)
+            "!antihype" -> commands.antihype(event)
+            "!nemimohype", "!nemimohypa", "!nemimo" -> commands.nemimohype(event)
+            "!hypetrain" -> commands.hypetrain(event)
+            "!antihypetrain", "!antipenis" -> commands.antihypetrain(event)
 
-            "!zamay" -> commands.zamay(this)
-            "!mrgaslight", "!gaslight" -> commands.mrgaslight(this)
-            "!lusthero3", "!lusthero", "!lust" -> commands.lusthero3(this)
+            "!zamay" -> commands.zamay(event)
+            "!mrgaslight", "!gaslight" -> commands.mrgaslight(event)
+            "!lusthero3", "!lusthero", "!lust" -> commands.lusthero3(event)
 
-            "!slavakpss", "!slava", "!kpss" -> commands.slavakpss(this)
-            "!russianfield", "!pole" -> commands.russianfield(this)
-            "!bootlegvolume1", "!bootleg" -> commands.bootlegvolume1(this)
-            "!angelstrue", "!angel", "!true" -> commands.angelstrue(this)
+            "!slavakpss", "!slava", "!kpss" -> commands.slavakpss(event)
+            "!russianfield", "!pole" -> commands.russianfield(event)
+            "!bootlegvolume1", "!bootleg" -> commands.bootlegvolume1(event)
+            "!angelstrue", "!angel", "!true" -> commands.angelstrue(event)
 
-            "!krovostok", "!krov" -> commands.krovostok(this)
-            "!bloodriver", "!blood", "!reka", "!rekakrovi" -> commands.bloodriver(this)
-            "!skvoznoe", "!skvoz" -> commands.skvoznoe(this)
-            "!dumbbell", "!dumb", "!gantelya" -> commands.dumbbell(this)
-            "!studen" -> commands.studen(this)
-            "!lombard" -> commands.lombard(this)
-            "!cheburashka", "!cheba", "!chb" -> commands.cheburashka(this)
-            "!nauka", "!science" -> commands.nauka(this)
-            "!krovonew", "!lenin" -> commands.krovonew(this)
+            "!krovostok", "!krov" -> commands.krovostok(event)
+            "!bloodriver", "!blood", "!reka", "!rekakrovi" -> commands.bloodriver(event)
+            "!skvoznoe", "!skvoz" -> commands.skvoznoe(event)
+            "!dumbbell", "!dumb", "!gantelya" -> commands.dumbbell(event)
+            "!studen" -> commands.studen(event)
+            "!lombard" -> commands.lombard(event)
+            "!cheburashka", "!cheba", "!chb" -> commands.cheburashka(event)
+            "!nauka", "!science" -> commands.nauka(event)
+            "!krovonew", "!lenin" -> commands.krovonew(event)
 
-            "!snus" -> commands.snus(this)
-            "!pauk" -> commands.pauk(this)
-            "!sasha" -> commands.sasha(this)
-            "!discord" -> commands.discord(this)
-            "!taxi" -> commands.taxi(this)
-            "!diss" -> commands.diss(this)
-            "!ruslan" -> commands.ruslan(this)
+            "!snus" -> commands.snus(event)
+            "!pauk" -> commands.pauk(event)
+            "!sasha" -> commands.sasha(event)
+            "!discord" -> commands.discord(event)
+            "!taxi" -> commands.taxi(event)
+            "!diss" -> commands.diss(event)
+            "!ruslan" -> commands.ruslan(event)
         }
 
         if (command.startsWith("!play")) {
             val count = command.substringAfter("!play").toIntOrNull() ?: return@on
-            commands.play(this, count)
+            commands.play(event, count)
         }
 
         if (command.startsWith("!next")) {
             val count = command.substringAfter("!next").toIntOrNull() ?: return@on
-            commands.play(this, count, playNext = true)
+            commands.play(event, count, playNext = true)
         }
     }
 
