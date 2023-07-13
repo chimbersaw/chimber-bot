@@ -34,17 +34,19 @@ const val USAGE = """Команды:
     !repeat [on/off] — Устанавливает режим повторения трека на переданный (выводит текущий при отсутствии аргументов).
     !pause - Ставит текущий трек на паузу.
     !resume - Снимает текущий трек с паузы.
+    !again/!rep/!yadaun - Повторяет последнюю команду пользователя.
     !help — Выводит данное сообщение.
 
     !say/!tts <text> - Произносит текст рандомным голосом вне очереди.
     !jane <text> - Произносит текст голосом злой Жени вне очереди.
 
-    !snus [count] - Добавляют в очередь count снюсов.
-    !pauk [count] - Добавляют в очередь count пауков.
-    !sasha [count] - Добавляют в очередь count саш.
-    !discord [count] - Мама это дискорд.
-    !taxi [count] - ДИСС НА ТИГРАНА.
-    !diss [count] - ДИСС НА ТИГРАНА [REMASTERED].
+    !snus [count] [next] - Окей, мы часто кидаем снюс.
+    !pauk [count] [next] - В этой банке никого кроме паука...
+    !sasha [count] [next] - Саша лох.
+    !discord [count] [next] - Мама это дискорд.
+    !sperma [count] [next] - Сперма в рот летит как будто самолет.
+    !taxi [count] [next] - ДИСС НА ТИГРАНА.
+    !diss [count] [next] - ДИСС НА ТИГРАНА [REMASTERED].
 
     !<playlist> [-s/--shuffle/--shuffled] [-a/--all/--full] [count] [limit]L
     Добавляет limit (или все) избранных треков из плейлиста, повторенного count (или 1) раз (--all для всех треков, --shuffled для случайного порядка треков).
@@ -129,7 +131,8 @@ data class Args(
     val count: Int?,
     val limit: Int?,
     val favourites: Boolean,
-    val shuffled: Boolean
+    val shuffled: Boolean,
+    val playNext: Boolean
 )
 
 data class Session(
@@ -269,6 +272,7 @@ class ChimberCommands {
 
         val args = parseArgs(event)
         val count = overrideCount ?: args.count ?: 1
+        val next = playNext || args.playNext
         if (args.shuffled) {
             tracks = tracks.shuffled()
         }
@@ -287,7 +291,7 @@ class ChimberCommands {
             return
         }
 
-        val queueSize = addTracksToQueue(event, loaders, playNext)
+        val queueSize = addTracksToQueue(event, loaders, next)
 
         if (queueSize > 0) {
             val msg = if (tracks.size > 1) {
@@ -395,14 +399,26 @@ class ChimberCommands {
         var limit: Int? = null
         var favourites = true
         var shuffled = false
+        var playNext = false
 
         for (arg in event.args.split(" ")) {
             when (arg) {
                 "-s", "--shuffle", "shuffle", "--shuffled", "shuffled" -> shuffled = true
                 "-a", "--all", "all", "--full", "full" -> favourites = false
+                "-n", "--next", "next" -> playNext = true
                 "-as", "-sa" -> {
                     shuffled = true
                     favourites = false
+                }
+
+                "-an", "-na" -> {
+                    favourites = false
+                    playNext = true
+                }
+
+                "-sn", "-ns" -> {
+                    shuffled = true
+                    playNext = true
                 }
 
                 else -> {
@@ -417,7 +433,7 @@ class ChimberCommands {
             }
         }
 
-        return Args(count, limit, favourites, shuffled)
+        return Args(count, limit, favourites, shuffled, playNext)
     }
 
     private suspend fun loadFromRepo(
@@ -684,6 +700,10 @@ class ChimberCommands {
 
     suspend fun discord(event: MessageCreateEvent) {
         queueTracksByLink(event, "https://www.youtube.com/watch?v=vHZChECbKEo")
+    }
+
+    suspend fun sperma(event: MessageCreateEvent) {
+        queueTracksByLink(event, "https://www.youtube.com/watch?v=QcbGm8FsbZg")
     }
 
     suspend fun taxi(event: MessageCreateEvent) {
