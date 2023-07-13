@@ -16,14 +16,15 @@ import ru.chimchima.repository.*
 import ru.chimchima.tts.TTSManager
 import ru.chimchima.utils.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
 
 private const val MAX_MESSAGE_LENGTH = 2000
 const val USAGE = """Команды:
     !play[count] <track name / track url / playlist url> — Присоединяется к каналу и воспроизводит 1 (или count) треков/плейлистов с указанным названием (поиск по YouTube) / по указанной ссылке.
     !stop — Прекращает воспроизведение очереди и покидает канал.
-    !skip/!next [count] — Пропускает следующие count композиций (включая текущую), по умолчанию count=1.
+    !skip [count] — Пропускает следующие count композиций (включая текущую), по умолчанию count=1.
+    !next[count] [track name / track url / playlist url] — Ставит указанный трек следующим (в начало очереди).
     !seek/!ff [seconds] - Проматывает текущий трек на seconds (или 10) секунд вперед (назад при отрицательном аргументе).
     !back - Начинает текущий трек заново.
     !queue — Выводит текущую очередь композиций.
@@ -42,6 +43,8 @@ const val USAGE = """Команды:
     !pauk [count] - Добавляют в очередь count пауков.
     !sasha [count] - Добавляют в очередь count саш.
     !discord [count] - Мама это дискорд.
+    !taxi [count] - ДИСС НА ТИГРАНА.
+    !diss [count] - ДИСС НА ТИГРАНА [REMASTERED].
 
     !<playlist> [-s/--shuffle/--shuffled] [-a/--all/--full] [count] [limit]L
     Добавляет limit (или все) избранных треков из плейлиста, повторенного count (или 1) раз (--all для всех треков, --shuffled для случайного порядка треков).
@@ -131,8 +134,8 @@ data class Args(
 
 data class Session(
     val player: AudioPlayer,
-    var queue: LinkedBlockingQueue<Track>,
-    var ttsQueue: LinkedBlockingQueue<Track>,
+    var queue: LinkedBlockingDeque<Track>,
+    var ttsQueue: LinkedBlockingDeque<Track>,
     var current: Track? = null
 )
 
@@ -167,9 +170,9 @@ class ChimberCommands {
 
     private suspend fun connect(channel: BaseVoiceChannelBehavior): Session {
         val player = LavaPlayerManager.createPlayer()
-        val queue = LinkedBlockingQueue<Track>()
+        val queue = LinkedBlockingDeque<Track>()
         val ttsPlayer = LavaPlayerManager.createPlayer()
-        val ttsQueue = LinkedBlockingQueue<Track>()
+        val ttsQueue = LinkedBlockingDeque<Track>()
 
         val session = Session(player, queue, ttsQueue)
 
@@ -231,7 +234,8 @@ class ChimberCommands {
 
     private suspend fun addTracksToQueue(
         event: MessageCreateEvent,
-        loaders: List<TrackLoader>
+        loaders: List<TrackLoader>,
+        playNext: Boolean = false
     ): Int {
         val guildId = event.guildId ?: return 0
         val channel = event.member?.getVoiceStateOrNull()?.getChannelOrNull() ?: return 0
@@ -244,7 +248,11 @@ class ChimberCommands {
 
         for (loader in loaders) {
             loader.invoke()?.let {
-                session.queue.add(it.clone())
+                if (playNext) {
+                    session.queue.addFirst(it.clone())
+                } else {
+                    session.queue.addLast(it.clone())
+                }
             } ?: event.replyWith("Loading tracks failed...")
         }
 
@@ -254,7 +262,8 @@ class ChimberCommands {
     private suspend fun queueTracksByLink(
         event: MessageCreateEvent,
         link: String,
-        overrideCount: Int? = null
+        overrideCount: Int? = null,
+        playNext: Boolean = false
     ) {
         var tracks = Track.playlistLoader(event.message, link).invoke()
 
@@ -278,7 +287,7 @@ class ChimberCommands {
             return
         }
 
-        val queueSize = addTracksToQueue(event, loaders)
+        val queueSize = addTracksToQueue(event, loaders, playNext)
 
         if (queueSize > 0) {
             val msg = if (tracks.size > 1) {
@@ -308,7 +317,8 @@ class ChimberCommands {
     private suspend fun queueTrackBySearch(
         event: MessageCreateEvent,
         query: String,
-        overrideCount: Int? = null
+        overrideCount: Int? = null,
+        playNext: Boolean = false
     ) {
         val track = Track.trackLoader(event.message, "ytsearch: $query").invoke() ?: run {
             event.replyWith("No such track was found :(")
@@ -317,7 +327,7 @@ class ChimberCommands {
 
         val count = overrideCount ?: parseArgs(event).count ?: 1
 
-        val queueSize = addTracksToQueue(event, track.toLoader().repeatNTimes(count))
+        val queueSize = addTracksToQueue(event, track.toLoader().repeatNTimes(count), playNext)
 
         if (queueSize > 0) {
             val msg = if (count == 1) {
@@ -361,17 +371,17 @@ class ChimberCommands {
             return
         }
 
-        session.ttsQueue.add(track)
+        session.ttsQueue.addLast(track)
     }
 
-    suspend fun play(event: MessageCreateEvent, count: Int = 1) {
+    suspend fun play(event: MessageCreateEvent, count: Int = 1, playNext: Boolean = false) {
         val query = event.query
         if (query.isBlank()) return
 
-        if (Regex("https?://.+").matches(query)) {
-            queueTracksByLink(event, query, overrideCount = count)
+        if (query.isHttp()) {
+            queueTracksByLink(event, query, overrideCount = count, playNext = playNext)
         } else {
-            queueTrackBySearch(event, query, overrideCount = count)
+            queueTrackBySearch(event, query, overrideCount = count, playNext = playNext)
         }
     }
 
@@ -437,7 +447,7 @@ class ChimberCommands {
         val loading = event.replyWith("*Shuffling...*")
 
         val shuffledQueue = session.queue.shuffled()
-        session.queue = LinkedBlockingQueue<Track>(shuffledQueue)
+        session.queue = LinkedBlockingDeque<Track>(shuffledQueue)
 
         loading.delete()
         queue(event)
@@ -461,6 +471,14 @@ class ChimberCommands {
 
         val skipped = skippedTracks.joinToString(separator = "\n")
         event.replyWith("skipped:\n```$skipped\n".take(MAX_MESSAGE_LENGTH - 3) + "```")
+    }
+
+    suspend fun next(event: MessageCreateEvent) {
+        if (event.args.isBlank()) {
+            skip(event)
+        } else {
+            play(event, playNext = true)
+        }
     }
 
     fun seek(event: MessageCreateEvent) {

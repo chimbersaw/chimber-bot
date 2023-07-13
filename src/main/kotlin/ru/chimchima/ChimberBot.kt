@@ -32,7 +32,8 @@ suspend fun main() = runBlocking {
             "!jane" -> commands.say(this, jane = true)
             "!play" -> commands.play(this)
             "!stop" -> commands.stop(this)
-            "!skip", "!next" -> commands.skip(this)
+            "!skip" -> commands.skip(this)
+            "!next" -> commands.next(this)
             "!seek", "!ff" -> commands.seek(this)
             "!back" -> commands.back(this)
             "!queue" -> commands.queue(this)
@@ -83,6 +84,11 @@ suspend fun main() = runBlocking {
         if (command.startsWith("!play")) {
             val count = command.substringAfter("!play").toIntOrNull() ?: return@on
             commands.play(this, count)
+        }
+
+        if (command.startsWith("!next")) {
+            val count = command.substringAfter("!next").toIntOrNull() ?: return@on
+            commands.play(this, count, playNext = true)
         }
     }
 
