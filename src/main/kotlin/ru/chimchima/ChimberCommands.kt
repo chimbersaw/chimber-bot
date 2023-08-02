@@ -169,7 +169,13 @@ class ChimberCommands {
     }
 
     private suspend fun disconnect(guildId: Snowflake) {
-        sessions.remove(guildId)
+        sessions.remove(guildId)?.let {
+            it.current = null
+            it.queue.clear()
+            it.ttsQueue.clear()
+            it.player.stopTrack()
+        }
+
         connections.remove(guildId)?.shutdown()
         pauses.remove(guildId)
     }
@@ -735,7 +741,7 @@ class ChimberCommands {
     }
 
     suspend fun cocyxa2(event: MessageCreateEvent) {
-        val count = parseArgs(event).count ?: 5
+        val count = minOf(10, parseArgs(event).count ?: 5)
         repeat(count) {
             textToSpeech(event, "предсмертный выстрел")
         }
