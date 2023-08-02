@@ -55,6 +55,7 @@ suspend fun main() = runBlocking {
             "!repeat" -> commands.repeat(event)
             "!pause" -> commands.pause(event)
             "!unpause", "!resume" -> commands.resume(event)
+            "!join" -> commands.join(event)
             "!help" -> commands.help(event)
 
             "!pirat" -> commands.pirat(event)
@@ -91,6 +92,8 @@ suspend fun main() = runBlocking {
             "!sperma" -> commands.sperma(event)
             "!taxi" -> commands.taxi(event)
             "!diss" -> commands.diss(event)
+            "!cocyxa", "!сосуха" -> commands.cocyxa(event)
+            "!cocyxa2", "!сосуха2" -> commands.cocyxa2(event)
             "!ruslan" -> commands.ruslan(event)
         }
 

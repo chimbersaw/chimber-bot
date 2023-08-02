@@ -34,6 +34,7 @@ const val USAGE = """Команды:
     !repeat [on/off] — Устанавливает режим повторения трека на переданный (выводит текущий при отсутствии аргументов).
     !pause - Ставит текущий трек на паузу.
     !resume - Снимает текущий трек с паузы.
+    !join - Включает час тишины (полезно для tts).
     !again/!rep/!yadaun - Повторяет последнюю команду пользователя.
     !help — Выводит данное сообщение.
 
@@ -47,6 +48,8 @@ const val USAGE = """Команды:
     !sperma [count] [next] - Сперма в рот летит как будто самолет.
     !taxi [count] [next] - ДИСС НА ТИГРАНА.
     !diss [count] [next] - ДИСС НА ТИГРАНА [REMASTERED].
+    !cocyxa [count] [next] - Предсмертный выстрел.
+    !cocyxa2 [count] [next] - Предсмертный выстрел.
 
     !<playlist> [-s/--shuffle/--shuffled] [-a/--all/--full] [count] [limit]L
     Добавляет limit (или все) избранных треков из плейлиста, повторенного count (или 1) раз (--all для всех треков, --shuffled для случайного порядка треков).
@@ -353,14 +356,7 @@ class ChimberCommands {
         response.delete()
     }
 
-    suspend fun say(event: MessageCreateEvent, jane: Boolean = false) {
-        val query = event.query
-        if (query.isBlank()) return
-        if (query.length > 500) {
-            event.replyWith("!say query must be no longer than 500 symbols")
-            return
-        }
-
+    private suspend fun textToSpeech(event: MessageCreateEvent, query: String, jane: Boolean = false) {
         val file = ttsManager.textToSpeech(query, jane) ?: run {
             event.replyWith("Could not load tts :(")
             return
@@ -376,6 +372,17 @@ class ChimberCommands {
         }
 
         session.ttsQueue.addLast(track)
+    }
+
+    suspend fun say(event: MessageCreateEvent, jane: Boolean = false) {
+        val query = event.query
+        if (query.isBlank()) return
+        if (query.length > 500) {
+            event.replyWith("!say query must be no longer than 500 symbols")
+            return
+        }
+
+        textToSpeech(event, query, jane)
     }
 
     suspend fun play(event: MessageCreateEvent, count: Int = 1, playNext: Boolean = false) {
@@ -592,6 +599,10 @@ class ChimberCommands {
         event.replyWith("Player is resumed.")
     }
 
+    suspend fun join(event: MessageCreateEvent) {
+        queueTracksByLink(event, "https://www.youtube.com/watch?v=V6N-NeQfsnc")
+    }
+
 
     suspend fun pirat(event: MessageCreateEvent) {
         loadFromRepo(event, PiratRepository, "О как же хорошо: моя чимчима не в курсе")
@@ -712,6 +723,22 @@ class ChimberCommands {
 
     suspend fun diss(event: MessageCreateEvent) {
         queueTracksByLink(event, "https://www.youtube.com/watch?v=QzrFC51rwDs")
+    }
+
+    suspend fun cocyxa(event: MessageCreateEvent) {
+        val count = parseArgs(event).count ?: 5
+        queueTracksByLink(
+            event,
+            "https://static.wikia.nocookie.net/dota2_ru_gamepedia/images/9/94/Snip_death_08_ru.mp3",
+            overrideCount = count
+        )
+    }
+
+    suspend fun cocyxa2(event: MessageCreateEvent) {
+        val count = parseArgs(event).count ?: 5
+        repeat(count) {
+            textToSpeech(event, "предсмертный выстрел")
+        }
     }
 
 
