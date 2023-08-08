@@ -92,8 +92,11 @@ suspend fun main() = runBlocking {
             "!sperma" -> commands.sperma(event)
             "!taxi" -> commands.taxi(event)
             "!diss" -> commands.diss(event)
+            "!kotiki" -> commands.kotiki(event)
+
             "!cocyxa", "!сосуха" -> commands.cocyxa(event)
             "!cocyxa2", "!сосуха2" -> commands.cocyxa2(event)
+
             "!ruslan" -> commands.ruslan(event)
         }
 
