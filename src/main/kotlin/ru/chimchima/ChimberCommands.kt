@@ -48,7 +48,8 @@ const val USAGE = """Команды:
     !sperma [count] [next] - Сперма в рот летит как будто самолет.
     !taxi [count] [next] - ДИСС НА ТИГРАНА.
     !diss [count] [next] - ДИСС НА ТИГРАНА [REMASTERED].
-    !kotiki [count] [next] - Кошечки хорошие лишнего не скажут.
+    !kotiki [count] [next] - Маслорий на бите.
+    !кошечки [count] [next] - Кошечки хорошие лишнего не скажут.
     
     !cocyxa [count] [next] - Предсмертный выстрел.
     !cocyxa2 [count] [next] - Предсмертный выстрел.
@@ -731,6 +732,10 @@ class ChimberCommands {
 
     suspend fun diss(event: MessageCreateEvent) {
         queueTracksByLink(event, "https://www.youtube.com/watch?v=QzrFC51rwDs")
+    }
+
+    suspend fun kokiki(event: MessageCreateEvent) {
+        queueTracksByLink(event, "https://www.youtube.com/watch?v=aFt6Q4fxFqY")
     }
 
     suspend fun kotiki(event: MessageCreateEvent) {
