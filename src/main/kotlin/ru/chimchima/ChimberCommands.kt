@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 private const val MAX_MESSAGE_LENGTH = 2000
 const val USAGE = """Команды:
     !play[count] <track name / track url / playlist url> — Присоединяется к каналу и воспроизводит 1 (или count) треков/плейлистов с указанным названием (поиск по YouTube) / по указанной ссылке.
-    !stop — Прекращает воспроизведение очереди и покидает канал.
+    !stop, !стоп — Прекращает воспроизведение очереди и покидает канал.
     !skip [count] — Пропускает следующие count композиций (включая текущую), по умолчанию count=1.
     !next[count] [track name / track url / playlist url] — Ставит указанный трек следующим (в начало очереди).
     !seek/!ff [seconds] - Проматывает текущий трек на seconds (или 10) секунд вперед (назад при отрицательном аргументе).
@@ -31,6 +31,7 @@ const val USAGE = """Команды:
     !shuffle — Перемешать очередь композиций.
     !clear — Очистить очередь композиций.
     !current — Выводит название текущей композиции.
+    !status — !current + !status.
     !repeat [on/off] — Устанавливает режим повторения трека на переданный (выводит текущий при отсутствии аргументов).
     !pause - Ставит текущий трек на паузу.
     !resume - Снимает текущий трек с паузы.
@@ -580,6 +581,11 @@ class ChimberCommands {
     suspend fun current(event: MessageCreateEvent) {
         val title = sessions[event.guildId]?.current?.title ?: return
         event.replyWith(title)
+    }
+
+    suspend fun status(event: MessageCreateEvent) {
+        current(event)
+        queue(event)
     }
 
     suspend fun repeat(event: MessageCreateEvent) {
