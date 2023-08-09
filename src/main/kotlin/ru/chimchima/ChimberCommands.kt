@@ -744,7 +744,7 @@ class ChimberCommands {
         queueTracksByLink(event, "https://www.youtube.com/watch?v=aFt6Q4fxFqY")
     }
 
-    suspend fun kotiki(event: MessageCreateEvent) {
+    suspend fun koshechki(event: MessageCreateEvent) {
         queueTracksByLink(event, "https://www.youtube.com/watch?v=hc5YkbnH2pY")
     }
 
