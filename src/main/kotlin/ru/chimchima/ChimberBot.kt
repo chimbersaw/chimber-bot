@@ -37,7 +37,7 @@ suspend fun main() = runBlocking {
             lastCommands[author.id] = this
         }
 
-        val command = event.message.content.substringBefore(" ")
+        val command = event.message.content.substringBefore(" ").lowercase()
         when (command) {
             "!plink" -> commands.plink(event)
             "!say", "!tts" -> commands.say(event)
