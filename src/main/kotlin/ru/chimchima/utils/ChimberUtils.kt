@@ -3,13 +3,54 @@ package ru.chimchima.utils
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.kord.core.behavior.reply
 import dev.kord.core.entity.Message
+import dev.kord.core.entity.User
 import dev.kord.core.event.message.MessageCreateEvent
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import java.util.concurrent.ConcurrentHashMap
 
 suspend fun Message.replyWith(text: String) = reply { content = text }
 suspend fun MessageCreateEvent.replyWith(text: String) = message.replyWith(text)
+
+class MessageHandler {
+    private val skipReplyToUserIds = ConcurrentHashMap<Long, Boolean>()
+
+    private suspend fun skipMessage(author: User?): Boolean {
+        if (author == null) {
+            return true
+        }
+
+        return skipReplyToUserIds.containsKey(author.data.id.toString().toLong())
+    }
+
+    suspend fun messageReplyWith(message: Message, text: String) {
+        if (skipMessage(message.author)) {
+            return
+        }
+
+        message.replyWith(text)
+    }
+
+    suspend fun eventReplyWith(event: MessageCreateEvent, text: String) {
+        messageReplyWith(event.message, text)
+    }
+
+    suspend fun mute(event: MessageCreateEvent): Boolean {
+        val author = event.message.author?: return true
+
+        val userId = author.data.id.toString().toLong()
+        if (!skipReplyToUserIds.containsKey(userId)) {
+            skipReplyToUserIds.put(userId, true)
+            event.replyWith("Bot is muted.")
+        } else {
+            skipReplyToUserIds.remove(userId)
+            event.replyWith("Bot is unmuted.")
+        }
+
+        return false
+    }
+}
 
 val MessageCreateEvent.args: String
     get() {

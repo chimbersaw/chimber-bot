@@ -30,6 +30,7 @@ const val USAGE = """Команды:
     !queue — Выводит текущую очередь композиций.
     !shuffle — Перемешать очередь композиций.
     !clear — Очистить очередь композиций.
+    !mute - Запрещает боту отвечать на ваши сообщения.
     !current — Выводит название текущей композиции.
     !status — !current + !status.
     !repeat [on/off] — Устанавливает режим повторения трека на переданный (выводит текущий при отсутствии аргументов).
@@ -38,6 +39,7 @@ const val USAGE = """Команды:
     !join - Включает час тишины (полезно для tts).
     !again/!rep/!yadaun - Повторяет последнюю команду пользователя.
     !help — Выводит данное сообщение.
+    !mute - Бот больше не пингует вас на каждое сообщение.
 
     !say/!tts <text> - Произносит текст рандомным голосом вне очереди.
     !jane <text> - Произносит текст голосом злой Жени вне очереди.
@@ -96,6 +98,8 @@ const val USAGE = """Команды:
 
 typealias PlaylistLoader = suspend () -> List<Track>
 typealias TrackLoader = suspend () -> Track?
+private val messageHandler = MessageHandler()
+
 
 class Track(
     private val message: Message,
@@ -114,7 +118,7 @@ class Track(
         audioTrack.position = 0
     }
 
-    suspend fun playingTrack() = message.replyWith("playing track: $title")
+    suspend fun playingTrack() = messageHandler.messageReplyWith(message, "playing track: $title")
 
     companion object {
         private fun AudioTrack.toTrack(message: Message, title: String? = null): Track {
@@ -269,7 +273,7 @@ class ChimberCommands {
                 } else {
                     session.queue.addLast(it.clone())
                 }
-            } ?: event.replyWith("Loading tracks failed...")
+            } ?: messageHandler.eventReplyWith(event, "Loading tracks failed...")
         }
 
         return queueSize + loaders.size
@@ -291,7 +295,7 @@ class ChimberCommands {
         }
 
         if (tracks.isEmpty()) {
-            event.replyWith("No such track or playlist was found :(")
+            messageHandler.eventReplyWith(event, "No such track or playlist was found :(")
             return
         }
 
@@ -324,7 +328,7 @@ class ChimberCommands {
                 }
             }
 
-            event.replyWith(msg)
+            messageHandler.eventReplyWith(event, msg)
             if (tracks.size > 1) {
                 queue(event)
             }
@@ -338,7 +342,7 @@ class ChimberCommands {
         playNext: Boolean = false
     ) {
         val track = Track.trackLoader(event.message, "ytsearch: $query").invoke() ?: run {
-            event.replyWith("No such track was found :(")
+            messageHandler.eventReplyWith(event, "No such track was found :(")
             return
         }
 
@@ -353,7 +357,7 @@ class ChimberCommands {
                 "queued $count tracks: ${track.title}"
             }
 
-            event.replyWith(msg)
+            messageHandler.eventReplyWith(event, msg)
         }
     }
 
@@ -368,7 +372,7 @@ class ChimberCommands {
 
     private suspend fun textToSpeech(event: MessageCreateEvent, query: String, jane: Boolean = false) {
         val file = ttsManager.textToSpeech(query, jane) ?: run {
-            event.replyWith("Could not load tts :(")
+            messageHandler.eventReplyWith(event, "Could not load tts :(")
             return
         }
 
@@ -377,7 +381,7 @@ class ChimberCommands {
         val session = sessions[guildId] ?: connect(channel)
 
         val track = Track.trackLoader(event.message, file.absolutePath, query).invoke() ?: run {
-            event.replyWith("Couldn't load tts :(")
+            messageHandler.eventReplyWith(event, "Couldn't load tts :(")
             return
         }
 
@@ -388,7 +392,7 @@ class ChimberCommands {
         val query = event.query
         if (query.isBlank()) return
         if (query.length > 500) {
-            event.replyWith("!say query must be no longer than 500 symbols")
+            messageHandler.eventReplyWith(event, "!say query must be no longer than 500 symbols")
             return
         }
 
@@ -473,7 +477,7 @@ class ChimberCommands {
 
     suspend fun shuffle(event: MessageCreateEvent) {
         val session = sessions[event.guildId] ?: run {
-            event.replyWith("Nothing to shuffle.")
+            messageHandler.eventReplyWith(event, "Nothing to shuffle.")
             return
         }
 
@@ -503,7 +507,8 @@ class ChimberCommands {
         sessions[event.guildId]?.current = null
 
         val skipped = skippedTracks.joinToString(separator = "\n")
-        event.replyWith("skipped:\n```$skipped\n".take(MAX_MESSAGE_LENGTH - 3) + "```")
+        messageHandler.eventReplyWith(event, "skipped:\n```$skipped\n".take(MAX_MESSAGE_LENGTH - 3) + "```")
+        // messageHandler.eventReplyWith(event, "skipped:\n```$skipped\n".take(MAX_MESSAGE_LENGTH - 3) + "```")
     }
 
     suspend fun next(event: MessageCreateEvent) {
@@ -565,22 +570,29 @@ class ChimberCommands {
             result
         }
 
-        event.replyWith(reply)
+        messageHandler.eventReplyWith(event, reply)
     }
 
     suspend fun clear(event: MessageCreateEvent) {
         val queue = sessions[event.guildId]?.queue ?: run {
-            event.replyWith("Queue is already empty.")
+            messageHandler.eventReplyWith(event, "Queue is already empty.")
             return
         }
 
         queue.clear()
-        event.replyWith("Queue cleared.")
+        messageHandler.eventReplyWith(event, "Queue cleared.")
+    }
+
+    suspend fun mute(event: MessageCreateEvent) {
+        val err = messageHandler.mute(event)
+        if (err) {
+            event.replyWith("Can't perform \"!mute\" command.")
+        }
     }
 
     suspend fun current(event: MessageCreateEvent) {
         val title = sessions[event.guildId]?.current?.title ?: return
-        event.replyWith(title)
+        messageHandler.eventReplyWith(event, title)
     }
 
     suspend fun status(event: MessageCreateEvent) {
@@ -599,19 +611,19 @@ class ChimberCommands {
         }
 
         val mode = (repeats[guildId] ?: Repeat.OFF).toString().lowercase()
-        event.replyWith("$start $mode.")
+        messageHandler.eventReplyWith(event, "$start $mode.")
     }
 
     suspend fun pause(event: MessageCreateEvent) {
         val guildId = event.guildId ?: return
         pauses[guildId] = Pause.ON
-        event.replyWith("Player is paused.")
+        messageHandler.eventReplyWith(event, "Player is paused.")
     }
 
     suspend fun resume(event: MessageCreateEvent) {
         val guildId = event.guildId ?: return
         pauses[guildId] = Pause.OFF
-        event.replyWith("Player is resumed.")
+        messageHandler.eventReplyWith(event, "Player is resumed.")
     }
 
     suspend fun join(event: MessageCreateEvent) {
@@ -771,6 +783,6 @@ class ChimberCommands {
 
 
     suspend fun help(event: MessageCreateEvent) {
-        event.replyWith("http://chimchima.ru/bot")
+        messageHandler.eventReplyWith(event, "http://chimchima.ru/bot")
     }
 }

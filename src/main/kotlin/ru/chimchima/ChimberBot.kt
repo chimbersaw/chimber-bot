@@ -51,6 +51,7 @@ suspend fun main() = runBlocking {
             "!queue" -> commands.queue(event)
             "!shuffle" -> commands.shuffle(event)
             "!clear" -> commands.clear(event)
+            "!mute" -> commands.mute(event)
             "!current" -> commands.current(event)
             "!status" -> commands.status(event)
             "!repeat" -> commands.repeat(event)
