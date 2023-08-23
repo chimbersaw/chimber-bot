@@ -4,7 +4,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.reply
 import dev.kord.core.entity.Message
-import dev.kord.core.entity.User
 import dev.kord.core.event.message.MessageCreateEvent
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
@@ -17,36 +16,42 @@ suspend fun MessageCreateEvent.replyWith(text: String) = message.replyWith(text)
 class MessageHandler {
     private val skipReplyToUserIds = ConcurrentHashMap.newKeySet<Snowflake>()
 
-    suspend fun messageReplyWith(message: Message, text: String) {
-        val author = message.author?: return
-        if (author.data.id in skipReplyToUserIds) {
+    suspend fun delete(message: Message?) {
+        if (message == null) {
             return
         }
 
-        message.replyWith(text)
+        message.delete()
     }
 
-    suspend fun eventReplyWith(event: MessageCreateEvent, text: String) {
-        messageReplyWith(event.message, text)
+    suspend fun replyWith(message: Message, text: String, forcedMessage: Boolean = false): Message? {
+        val author = message.author?: return null
+        if (author.data.id in skipReplyToUserIds && !forcedMessage) {
+            return null
+        }
+
+        return message.replyWith(text)
     }
 
-    suspend fun mute(event: MessageCreateEvent): Boolean {
+    suspend fun replyWith(event: MessageCreateEvent, text: String, forcedMessage: Boolean = false): Message? {
+        return replyWith(event.message, text, forcedMessage)
+    }
+
+    suspend fun mute(event: MessageCreateEvent) {
         val author = event.message.author
         if (author == null) {
-            event.replyWith("Can't perform \"!mute\" command.")
+            replyWith(event, "Can't perform \"!mute\" command, author is not defined.", true)
             return
         }
 
-        val userId = author!!.data.id
+        val userId = author.data.id
         if (userId !in skipReplyToUserIds) {
             skipReplyToUserIds.add(userId)
-            event.replyWith("Bot is muted.")
+            replyWith(event, "Bot is muted.", true)
         } else {
             skipReplyToUserIds.remove(userId)
-            event.replyWith("Bot is unmuted.")
+            replyWith(event, "Bot is unmuted.", true)
         }
-
-        return false
     }
 }
 

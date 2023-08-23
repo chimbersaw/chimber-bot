@@ -117,7 +117,7 @@ class Track(
         audioTrack.position = 0
     }
 
-    suspend fun playingTrack() = messageHandler.messageReplyWith(message, "playing track: $title")
+    suspend fun playingTrack() = messageHandler.replyWith(message, "playing track: $title")
 
     companion object {
         private fun AudioTrack.toTrack(message: Message, title: String? = null): Track {
@@ -272,7 +272,7 @@ class ChimberCommands {
                 } else {
                     session.queue.addLast(it.clone())
                 }
-            } ?: messageHandler.eventReplyWith(event, "Loading tracks failed...")
+            } ?: messageHandler.replyWith(event, "Loading tracks failed...")
         }
 
         return queueSize + loaders.size
@@ -294,7 +294,7 @@ class ChimberCommands {
         }
 
         if (tracks.isEmpty()) {
-            messageHandler.eventReplyWith(event, "No such track or playlist was found :(")
+            messageHandler.replyWith(event, "No such track or playlist was found :(")
             return
         }
 
@@ -327,7 +327,7 @@ class ChimberCommands {
                 }
             }
 
-            messageHandler.eventReplyWith(event, msg)
+            messageHandler.replyWith(event, msg)
             if (tracks.size > 1) {
                 queue(event)
             }
@@ -341,7 +341,7 @@ class ChimberCommands {
         playNext: Boolean = false
     ) {
         val track = Track.trackLoader(event.message, "ytsearch: $query").invoke() ?: run {
-            messageHandler.eventReplyWith(event, "No such track was found :(")
+            messageHandler.replyWith(event, "No such track was found :(")
             return
         }
 
@@ -356,22 +356,22 @@ class ChimberCommands {
                 "queued $count tracks: ${track.title}"
             }
 
-            messageHandler.eventReplyWith(event, msg)
+            messageHandler.replyWith(event, msg)
         }
     }
 
     suspend fun plink(event: MessageCreateEvent) {
         val message = event.message
-        val response = message.channel.createMessage("plonk!")
+        val response = messageHandler.replyWith(message, "plonk!", true)
 
         delay(5000)
-        message.delete()
-        response.delete()
+        messageHandler.delete(message)
+        messageHandler.delete(response)
     }
 
     private suspend fun textToSpeech(event: MessageCreateEvent, query: String, jane: Boolean = false) {
         val file = ttsManager.textToSpeech(query, jane) ?: run {
-            messageHandler.eventReplyWith(event, "Could not load tts :(")
+            messageHandler.replyWith(event, "Could not load tts :(")
             return
         }
 
@@ -380,7 +380,7 @@ class ChimberCommands {
         val session = sessions[guildId] ?: connect(channel)
 
         val track = Track.trackLoader(event.message, file.absolutePath, query).invoke() ?: run {
-            messageHandler.eventReplyWith(event, "Couldn't load tts :(")
+            messageHandler.replyWith(event, "Couldn't load tts :(")
             return
         }
 
@@ -391,7 +391,7 @@ class ChimberCommands {
         val query = event.query
         if (query.isBlank()) return
         if (query.length > 500) {
-            messageHandler.eventReplyWith(event, "!say query must be no longer than 500 symbols")
+            messageHandler.replyWith(event, "!say query must be no longer than 500 symbols")
             return
         }
 
@@ -461,14 +461,15 @@ class ChimberCommands {
         repository: SongRepository,
         loadingString: String
     ) {
-        val loading = event.replyWith("*$loadingString*")
+        val loading = messageHandler.replyWith(event, "*$loadingString*")
 
         val args = parseArgs(event)
 
         val loaders = repository.getLoaders(event.message, args.limit, args.count, args.favourites, args.shuffled)
         addTracksToQueue(event, loaders)
 
-        loading.delete()
+        messageHandler.delete(loading)
+
         if (connections.containsKey(event.guildId)) {
             queue(event)
         }
@@ -476,16 +477,17 @@ class ChimberCommands {
 
     suspend fun shuffle(event: MessageCreateEvent) {
         val session = sessions[event.guildId] ?: run {
-            messageHandler.eventReplyWith(event, "Nothing to shuffle.")
+            messageHandler.replyWith(event, "Nothing to shuffle.")
             return
         }
 
-        val loading = event.replyWith("*Shuffling...*")
+        val loading = messageHandler.replyWith(event, "*Shuffling...*")
 
         val shuffledQueue = session.queue.shuffled()
         session.queue = LinkedBlockingDeque<Track>(shuffledQueue)
 
-        loading.delete()
+        messageHandler.delete(loading)
+
         queue(event)
     }
 
@@ -506,7 +508,7 @@ class ChimberCommands {
         sessions[event.guildId]?.current = null
 
         val skipped = skippedTracks.joinToString(separator = "\n")
-        messageHandler.eventReplyWith(event, "skipped:\n```$skipped\n".take(MAX_MESSAGE_LENGTH - 3) + "```")
+        messageHandler.replyWith(event, "skipped:\n```$skipped\n".take(MAX_MESSAGE_LENGTH - 3) + "```")
     }
 
     suspend fun next(event: MessageCreateEvent) {
@@ -568,17 +570,17 @@ class ChimberCommands {
             result
         }
 
-        messageHandler.eventReplyWith(event, reply)
+        messageHandler.replyWith(event, reply)
     }
 
     suspend fun clear(event: MessageCreateEvent) {
         val queue = sessions[event.guildId]?.queue ?: run {
-            messageHandler.eventReplyWith(event, "Queue is already empty.")
+            messageHandler.replyWith(event, "Queue is already empty.")
             return
         }
 
         queue.clear()
-        messageHandler.eventReplyWith(event, "Queue cleared.")
+        messageHandler.replyWith(event, "Queue cleared.")
     }
 
     suspend fun mute(event: MessageCreateEvent) {
@@ -587,7 +589,7 @@ class ChimberCommands {
 
     suspend fun current(event: MessageCreateEvent) {
         val title = sessions[event.guildId]?.current?.title ?: return
-        messageHandler.eventReplyWith(event, title)
+        messageHandler.replyWith(event, title)
     }
 
     suspend fun status(event: MessageCreateEvent) {
@@ -606,19 +608,19 @@ class ChimberCommands {
         }
 
         val mode = (repeats[guildId] ?: Repeat.OFF).toString().lowercase()
-        messageHandler.eventReplyWith(event, "$start $mode.")
+        messageHandler.replyWith(event, "$start $mode.")
     }
 
     suspend fun pause(event: MessageCreateEvent) {
         val guildId = event.guildId ?: return
         pauses[guildId] = Pause.ON
-        messageHandler.eventReplyWith(event, "Player is paused.")
+        messageHandler.replyWith(event, "Player is paused.")
     }
 
     suspend fun resume(event: MessageCreateEvent) {
         val guildId = event.guildId ?: return
         pauses[guildId] = Pause.OFF
-        messageHandler.eventReplyWith(event, "Player is resumed.")
+        messageHandler.replyWith(event, "Player is resumed.")
     }
 
     suspend fun join(event: MessageCreateEvent) {
@@ -778,6 +780,6 @@ class ChimberCommands {
 
 
     suspend fun help(event: MessageCreateEvent) {
-        messageHandler.eventReplyWith(event, "http://chimchima.ru/bot")
+        messageHandler.replyWith(event, "http://chimchima.ru/bot")
     }
 }
