@@ -507,7 +507,6 @@ class ChimberCommands {
 
         val skipped = skippedTracks.joinToString(separator = "\n")
         messageHandler.eventReplyWith(event, "skipped:\n```$skipped\n".take(MAX_MESSAGE_LENGTH - 3) + "```")
-        // messageHandler.eventReplyWith(event, "skipped:\n```$skipped\n".take(MAX_MESSAGE_LENGTH - 3) + "```")
     }
 
     suspend fun next(event: MessageCreateEvent) {
