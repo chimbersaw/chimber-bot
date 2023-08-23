@@ -1,6 +1,7 @@
 package ru.chimchima.utils
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.reply
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.User
@@ -14,18 +15,11 @@ suspend fun Message.replyWith(text: String) = reply { content = text }
 suspend fun MessageCreateEvent.replyWith(text: String) = message.replyWith(text)
 
 class MessageHandler {
-    private val skipReplyToUserIds = ConcurrentHashMap<Long, Boolean>()
-
-    private suspend fun skipMessage(author: User?): Boolean {
-        if (author == null) {
-            return true
-        }
-
-        return skipReplyToUserIds.containsKey(author.data.id.toString().toLong())
-    }
+    private val skipReplyToUserIds = ConcurrentHashMap.newKeySet<Snowflake>()
 
     suspend fun messageReplyWith(message: Message, text: String) {
-        if (skipMessage(message.author)) {
+        val author = message.author?: return
+        if (author.data.id in skipReplyToUserIds) {
             return
         }
 
@@ -37,11 +31,14 @@ class MessageHandler {
     }
 
     suspend fun mute(event: MessageCreateEvent): Boolean {
-        val author = event.message.author?: return true
+        val author = event.message.author
+        if (author == null) {
+            event.replyWith("Can't perform \"!mute\" command.")
+        }
 
-        val userId = author.data.id.toString().toLong()
-        if (!skipReplyToUserIds.containsKey(userId)) {
-            skipReplyToUserIds.put(userId, true)
+        val userId = author!!.data.id
+        if (userId !in skipReplyToUserIds) {
+            skipReplyToUserIds.add(userId)
             event.replyWith("Bot is muted.")
         } else {
             skipReplyToUserIds.remove(userId)

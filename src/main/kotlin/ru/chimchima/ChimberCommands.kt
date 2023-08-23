@@ -30,7 +30,7 @@ const val USAGE = """Команды:
     !queue — Выводит текущую очередь композиций.
     !shuffle — Перемешать очередь композиций.
     !clear — Очистить очередь композиций.
-    !mute - Запрещает боту отвечать на ваши сообщения.
+    !mute - Бот больше не пингует вас на каждое сообщение.
     !current — Выводит название текущей композиции.
     !status — !current + !status.
     !repeat [on/off] — Устанавливает режим повторения трека на переданный (выводит текущий при отсутствии аргументов).
@@ -39,7 +39,6 @@ const val USAGE = """Команды:
     !join - Включает час тишины (полезно для tts).
     !again/!rep/!yadaun - Повторяет последнюю команду пользователя.
     !help — Выводит данное сообщение.
-    !mute - Бот больше не пингует вас на каждое сообщение.
 
     !say/!tts <text> - Произносит текст рандомным голосом вне очереди.
     !jane <text> - Произносит текст голосом злой Жени вне очереди.
@@ -584,10 +583,7 @@ class ChimberCommands {
     }
 
     suspend fun mute(event: MessageCreateEvent) {
-        val err = messageHandler.mute(event)
-        if (err) {
-            event.replyWith("Can't perform \"!mute\" command.")
-        }
+        messageHandler.mute(event)
     }
 
     suspend fun current(event: MessageCreateEvent) {
