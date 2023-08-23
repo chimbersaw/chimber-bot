@@ -34,6 +34,7 @@ class MessageHandler {
         val author = event.message.author
         if (author == null) {
             event.replyWith("Can't perform \"!mute\" command.")
+            return
         }
 
         val userId = author!!.data.id
