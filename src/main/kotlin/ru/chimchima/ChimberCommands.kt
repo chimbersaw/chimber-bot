@@ -97,6 +97,7 @@ const val USAGE = """Команды:
 
 typealias PlaylistLoader = suspend () -> List<Track>
 typealias TrackLoader = suspend () -> Track?
+
 private val messageHandler = MessageHandler()
 
 
@@ -771,6 +772,15 @@ class ChimberCommands {
         repeat(count) {
             textToSpeech(event, "предсмертный выстрел")
         }
+    }
+
+    suspend fun raketa(event: MessageCreateEvent) {
+        val count = parseArgs(event).count ?: 5
+        queueTracksByLink(
+            event,
+            "https://static.wikia.nocookie.net/dota2_ru_gamepedia/images/3/38/Ratt_ability_flare_04_ru.mp3/revision/latest",
+            overrideCount = count
+        )
     }
 
 

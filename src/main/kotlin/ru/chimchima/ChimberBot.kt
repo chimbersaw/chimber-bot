@@ -99,6 +99,7 @@ suspend fun main() = runBlocking {
 
             "!cocyxa", "!сосуха" -> commands.cocyxa(event)
             "!cocyxa2", "!сосуха2" -> commands.cocyxa2(event)
+            "!raketa", "!zxkoncepba" -> commands.raketa(event)
 
             "!ruslan" -> commands.ruslan(event)
         }
