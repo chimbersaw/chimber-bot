@@ -29,6 +29,7 @@ const val USAGE = """Команды:
     !back - Начинает текущий трек заново.
     !queue — Выводит текущую очередь композиций.
     !shuffle — Перемешать очередь композиций.
+    !reverse — Перевернуть очередь композиций.
     !clear — Очистить очередь композиций.
     !mute - Бот больше не пингует вас на каждое сообщение.
     !current — Выводит название текущей композиции.
@@ -485,6 +486,22 @@ class ChimberCommands {
         val loading = messageHandler.replyWith(event, "*Shuffling...*")
 
         val shuffledQueue = session.queue.shuffled()
+        session.queue = LinkedBlockingDeque<Track>(shuffledQueue)
+
+        messageHandler.delete(loading)
+
+        queue(event)
+    }
+
+    suspend fun reverse(event: MessageCreateEvent) {
+        val session = sessions[event.guildId] ?: run {
+            messageHandler.replyWith(event, "Nothing to reverse (daun).")
+            return
+        }
+
+        val loading = messageHandler.replyWith(event, "*Reversing...*")
+
+        val shuffledQueue = session.queue.reversed()
         session.queue = LinkedBlockingDeque<Track>(shuffledQueue)
 
         messageHandler.delete(loading)
