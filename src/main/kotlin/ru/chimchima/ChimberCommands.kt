@@ -53,6 +53,9 @@ const val USAGE = """Команды:
     !diss [count] [next] - ДИСС НА ТИГРАНА [REMASTERED].
     !kotiki [count] [next] - Маслорий на бите.
     !кошечки [count] [next] - Кошечки хорошие лишнего не скажут.
+    !val [count] [next] - Val - low grades.
+    !valera [count] [next] - tupa valera.
+    !val0 [count] [next] - tupa valera + low grades.
     
     !cocyxa [count] [next] - Предсмертный выстрел.
     !cocyxa2 [count] [next] - Предсмертный выстрел.
@@ -773,6 +776,14 @@ class ChimberCommands {
 
     suspend fun koshechki(event: MessageCreateEvent) {
         queueTracksByLink(event, "https://www.youtube.com/watch?v=hc5YkbnH2pY")
+    }
+
+    suspend fun valera(event: MessageCreateEvent) {
+        queueTracksByLink(event, "https://www.youtube.com/watch?v=1uPYwaUZmH0")
+    }
+
+    suspend fun lowgrades(event: MessageCreateEvent) {
+        queueTracksByLink(event, "https://www.youtube.com/watch?v=8Fc1IvNu9a0")
     }
 
     suspend fun cocyxa(event: MessageCreateEvent) {
