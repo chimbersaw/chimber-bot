@@ -7,6 +7,8 @@ import dev.kord.core.on
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.runBlocking
+import ru.chimchima.core.ChimberCommands
+import ru.chimchima.core.Command
 import ru.chimchima.help.HelpServer
 import ru.chimchima.properties.DISCORD_TOKEN
 import ru.chimchima.properties.LocalProperties
@@ -23,99 +25,89 @@ suspend fun main() = runBlocking {
     val kord = Kord(token)
     startHelpServer()
 
-    val commands = ChimberCommands()
-    val lastCommands = ConcurrentHashMap<Snowflake, MessageCreateEvent>()
+    val chimber = ChimberCommands()
+    val prevPlay = ConcurrentHashMap<Snowflake, Command>()
 
     kord.on<MessageCreateEvent> {
         val author = message.author ?: return@on
         if (author.isBot) return@on
 
-        var event = this
-        if (message.content.substringBefore(" ") in listOf("!again", "!rep", "!yadaun")) {
-            event = lastCommands[author.id] ?: return@on
-        } else {
-            lastCommands[author.id] = this
+        val command = Command.create(this, prevPlay[author.id]) ?: return@on
+        if (command.isPlay) {
+            prevPlay[author.id] = command
         }
 
-        val command = event.message.content.substringBefore(" ").lowercase()
-        when (command) {
-            "!plink" -> commands.plink(event)
-            "!say", "!tts" -> commands.say(event)
-            "!jane" -> commands.say(event, jane = true)
-            "!play" -> commands.play(event)
-            "!stop", "!стоп" -> commands.stop(event)
-            "!skip" -> commands.skip(event)
-            "!next" -> commands.next(event)
-            "!seek", "!ff" -> commands.seek(event)
-            "!back" -> commands.back(event)
-            "!queue" -> commands.queue(event)
-            "!shuffle" -> commands.shuffle(event)
-            "!reverse" -> commands.reverse(event)
-            "!clear" -> commands.clear(event)
-            "!mute" -> commands.mute(event)
-            "!current" -> commands.current(event)
-            "!status" -> commands.status(event)
-            "!repeat" -> commands.repeat(event)
-            "!pause" -> commands.pause(event)
-            "!unpause", "!resume" -> commands.resume(event)
-            "!join" -> commands.join(event)
-            "!help" -> commands.help(event)
+        when (command.name) {
+            "!plink" -> chimber.plink(command)
 
-            "!pirat" -> commands.pirat(event)
-            "!cover" -> commands.cover(event)
+            "!play" -> chimber.play(command)
+            "!stop", "!стоп" -> chimber.stop(command)
+            "!skip" -> chimber.skip(command)
+            "!next" -> chimber.next(command)
+            "!queue" -> chimber.queue(command, forcedMessage = true)
+            "!current" -> chimber.current(command)
+            "!status", "!st" -> chimber.status(command)
 
-            "!antihype" -> commands.antihype(event)
-            "!nemimohype", "!nemimohypa", "!nemimo" -> commands.nemimohype(event)
-            "!hypetrain" -> commands.hypetrain(event)
-            "!antihypetrain", "!antipenis" -> commands.antihypetrain(event)
+            "!mute" -> chimber.mute(command)
+            "!repeat" -> chimber.repeat(command)
+            "!pause" -> chimber.pause(command)
+            "!resume", "!unpause" -> chimber.resume(command)
 
-            "!zamay" -> commands.zamay(event)
-            "!mrgaslight", "!gaslight" -> commands.mrgaslight(event)
-            "!lusthero3", "!lusthero", "!lust" -> commands.lusthero3(event)
+            "!seek", "!ff" -> chimber.seek(command)
+            "!back" -> chimber.back(command)
+            "!shuffle" -> chimber.shuffle(command)
+            "!reverse" -> chimber.reverse(command)
+            "!clear" -> chimber.clear(command)
+            "!join" -> chimber.join(command)
+            "!help" -> chimber.help(command)
 
-            "!slavakpss", "!slava", "!kpss" -> commands.slavakpss(event)
-            "!russianfield", "!pole" -> commands.russianfield(event)
-            "!bootlegvolume1", "!bootleg" -> commands.bootlegvolume1(event)
-            "!angelstrue", "!angel", "!true" -> commands.angelstrue(event)
+            "!say", "!tts" -> chimber.say(command)
+            "!jane" -> chimber.say(command, jane = true)
 
-            "!krovostok", "!krov" -> commands.krovostok(event)
-            "!bloodriver", "!blood", "!reka", "!rekakrovi" -> commands.bloodriver(event)
-            "!skvoznoe", "!skvoz" -> commands.skvoznoe(event)
-            "!dumbbell", "!dumb", "!gantelya" -> commands.dumbbell(event)
-            "!studen" -> commands.studen(event)
-            "!lombard" -> commands.lombard(event)
-            "!cheburashka", "!cheba", "!chb" -> commands.cheburashka(event)
-            "!nauka", "!science" -> commands.nauka(event)
-            "!krovonew", "!lenin" -> commands.krovonew(event)
+            "!ruslan" -> chimber.ruslan(command)
 
-            "!snus" -> commands.snus(event)
-            "!pauk" -> commands.pauk(event)
-            "!sasha" -> commands.sasha(event)
-            "!discord" -> commands.discord(event)
-            "!sperma" -> commands.sperma(event)
-            "!taxi" -> commands.taxi(event)
-            "!diss" -> commands.diss(event)
-            "!dvar", "!kokiki", "!kotiki", "!котики" -> commands.kokiki(event)
-            "!koshechki", "!кошечки" -> commands.koshechki(event)
-            "!val", "!zota", "!lowgrades" -> commands.lowgrades(event)
-            "!valera", "val2" -> commands.valera(event)
-            "!val0", "!val -a" -> commands.valera(event).also { commands.lowgrades(event) }
+            "!pirat" -> chimber.pirat(command)
+            "!cover" -> chimber.cover(command)
 
-            "!cocyxa", "!сосуха" -> commands.cocyxa(event)
-            "!cocyxa2", "!сосуха2" -> commands.cocyxa2(event)
-            "!raketa", "!zxkoncepba" -> commands.raketa(event)
+            "!antihype" -> chimber.antihype(command)
+            "!nemimohype", "!nemimohypa", "!nemimo" -> chimber.nemimohype(command)
+            "!hypetrain" -> chimber.hypetrain(command)
+            "!antihypetrain", "!antipenis" -> chimber.antihypetrain(command)
 
-            "!ruslan" -> commands.ruslan(event)
-        }
+            "!zamay" -> chimber.zamay(command)
+            "!mrgaslight", "!gaslight" -> chimber.mrgaslight(command)
+            "!lusthero3", "!lusthero", "!lust" -> chimber.lusthero3(command)
 
-        if (command.startsWith("!play")) {
-            val count = command.substringAfter("!play").toIntOrNull() ?: return@on
-            commands.play(event, count)
-        }
+            "!slavakpss", "!slava", "!kpss" -> chimber.slavakpss(command)
+            "!russianfield", "!pole" -> chimber.russianfield(command)
+            "!bootlegvolume1", "!bootleg" -> chimber.bootlegvolume1(command)
+            "!angelstrue", "!angel", "!true" -> chimber.angelstrue(command)
 
-        if (command.startsWith("!next")) {
-            val count = command.substringAfter("!next").toIntOrNull() ?: return@on
-            commands.play(event, count, playNext = true)
+            "!krovostok", "!krov" -> chimber.krovostok(command)
+            "!bloodriver", "!blood", "!reka", "!rekakrovi" -> chimber.bloodriver(command)
+            "!skvoznoe", "!skvoz" -> chimber.skvoznoe(command)
+            "!dumbbell", "!dumb", "!gantelya" -> chimber.dumbbell(command)
+            "!studen" -> chimber.studen(command)
+            "!lombard" -> chimber.lombard(command)
+            "!cheburashka", "!cheba", "!chb" -> chimber.cheburashka(command)
+            "!nauka", "!science" -> chimber.nauka(command)
+            "!krovonew", "!lenin" -> chimber.krovonew(command)
+
+            "!snus" -> chimber.snus(command)
+            "!pauk" -> chimber.pauk(command)
+            "!sasha" -> chimber.sasha(command)
+            "!discord" -> chimber.discord(command)
+            "!sperma" -> chimber.sperma(command)
+            "!taxi" -> chimber.taxi(command)
+            "!diss" -> chimber.diss(command)
+            "!kotiki", "!kokiki", "!котики", "!dvar" -> chimber.kokiki(command)
+            "!кошечки", "!koshechki" -> chimber.koshechki(command)
+            "!cocyxa", "!сосуха" -> chimber.cocyxa(command)
+            "!cocyxa2", "!сосуха2" -> chimber.cocyxa2(command)
+            "!raketa", "!zxkoncepba" -> chimber.raketa(command)
+            "!val", "!zota", "!lowgrades" -> chimber.lowgrades(command)
+            "!valera", "val2" -> chimber.valera(command)
+            "!val0", "!val -a" -> chimber.val0(command)
         }
     }
 
