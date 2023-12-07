@@ -28,12 +28,12 @@ fun formatTime(millis: Long): String {
     return String.format("%02d:%02d", seconds / 60, seconds % 60)
 }
 
-fun generateStatusBar(position: Long, duration: Long, barLength: Int = 15): String {
+fun generateStatusBar(position: Long, duration: Long, barLength: Int = 12): String {
     val progress = (position.toDouble() / duration.toDouble() * barLength).toInt()
     val remaining = barLength - progress
 
-    val progressBar = "▬".repeat(progress)
-    val emptyBar = "━".repeat(remaining)
+    val progressBar = "▣".repeat(progress)
+    val emptyBar = "▢".repeat(remaining)
 
     return "[$progressBar$emptyBar] ${formatTime(position)} / ${formatTime(duration)}"
 }
