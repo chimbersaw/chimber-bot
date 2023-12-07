@@ -4,6 +4,7 @@ object PiratRepository : SongRepository {
     override val songs = listOf(
         "фп ам" fav "https://youtu.be/FGeaG4eL4OY",
         "Тп на аме" fav "https://youtu.be/ocRN6Hz3LrI",
+        "Зомби апокалипсис" fav "https://youtu.be/jirQpN2wr9A",
         "Ну и что, что я вор?" fav "https://youtu.be/KxpGxVQOkG0",
         "Мой байк" fav "https://youtu.be/OQGdrezi0Y4",
         "Почему ты еще не фанат?" fav "https://youtu.be/apWlgn-nrEE",
@@ -14,7 +15,8 @@ object PiratRepository : SongRepository {
         "Апельсин" fav "https://youtu.be/Vr-DOV-TP5s",
         "Солевар" fav "https://youtu.be/KhX3T_NYndo",
         "Извини сегодня праздник" fav "https://youtu.be/REReaqbM6Kw",
-        "Я взлетаю вверх" fav "https://youtu.be/oghlaYD2_FQ"
+        "Я взлетаю вверх" fav "https://youtu.be/oghlaYD2_FQ",
+        "Ни один не нажал, ни один не прожал" fav "https://youtu.be/r48RRKF6EA0"
     )
 }
 
