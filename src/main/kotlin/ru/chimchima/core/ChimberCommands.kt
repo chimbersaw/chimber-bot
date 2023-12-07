@@ -413,8 +413,10 @@ class ChimberCommands {
     }
 
     suspend fun current(command: Command) {
-        val title = sessions[command.guildId]?.current?.title ?: return
-        messageHandler.replyWith(command, title, forcedMessage = true)
+        val track = sessions[command.guildId]?.current ?: return
+        val title = track.title.substringBeforeLast(" ")
+        val statusBar = track.statusBar()
+        messageHandler.replyWith(command, "$title\n$statusBar", forcedMessage = true)
     }
 
     suspend fun status(command: Command) {

@@ -4,10 +4,10 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.kord.core.entity.Message
 import ru.chimchima.player.LavaPlayerManager
-import ru.chimchima.utils.formatDuration
+import ru.chimchima.utils.formatTime
+import ru.chimchima.utils.generateStatusBar
 
 typealias TrackLoader = suspend () -> Track?
-typealias PlaylistLoader = suspend () -> List<Track>
 
 class Track(
     private val audioTrack: AudioTrack,
@@ -16,6 +16,10 @@ class Track(
 ) {
     fun playWith(player: AudioPlayer) = player.playTrack(audioTrack)
     fun clone() = Track(audioTrack.makeClone(), message, title)
+
+    fun statusBar(): String {
+        return generateStatusBar(audioTrack.position, audioTrack.duration)
+    }
 
     fun seek(millis: Long) {
         val newPosition = audioTrack.position + millis
@@ -28,7 +32,7 @@ class Track(
 
     companion object {
         private fun AudioTrack.toTrack(message: Message, title: String? = null): Track {
-            val fullTitle = "${title ?: info.title} ${formatDuration()}"
+            val fullTitle = "${title ?: info.title} ${formatTime(duration)}"
             return Track(this, message, fullTitle)
         }
 

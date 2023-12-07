@@ -45,7 +45,7 @@ suspend fun main() = runBlocking {
             "!skip" -> chimber.skip(command)
             "!next" -> chimber.next(command)
             "!queue" -> chimber.queue(command, forcedMessage = true)
-            "!current" -> chimber.current(command)
+            "!current", "!hp" -> chimber.current(command)
             "!status", "!st" -> chimber.status(command)
 
             "!mute" -> chimber.mute(command)

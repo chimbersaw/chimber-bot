@@ -1,6 +1,5 @@
 package ru.chimchima.utils
 
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -24,11 +23,19 @@ val Command.query: String
         content
     }
 
-fun AudioTrack.formatDuration(): String {
-    val durationInSeconds = duration.milliseconds.inWholeSeconds
-    val minutes = String.format("%02d", durationInSeconds / 60)
-    val seconds = String.format("%02d", durationInSeconds % 60)
-    return "$minutes:$seconds"
+fun formatTime(millis: Long): String {
+    val seconds = millis.milliseconds.inWholeSeconds
+    return String.format("%02d:%02d", seconds / 60, seconds % 60)
+}
+
+fun generateStatusBar(position: Long, duration: Long, barLength: Int = 15): String {
+    val progress = (position.toDouble() / duration.toDouble() * barLength).toInt()
+    val remaining = barLength - progress
+
+    val progressBar = "▬".repeat(progress)
+    val emptyBar = "━".repeat(remaining)
+
+    return "[$progressBar$emptyBar] ${formatTime(position)} / ${formatTime(duration)}"
 }
 
 suspend inline fun <reified T, R> HttpResponse.runOnSuccessOrNull(block: (T) -> R?): R? {
