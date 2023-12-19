@@ -16,7 +16,8 @@ object PiratRepository : SongRepository {
         "Солевар" fav "https://youtu.be/KhX3T_NYndo",
         "Извини сегодня праздник" fav "https://youtu.be/REReaqbM6Kw",
         "Я взлетаю вверх" fav "https://youtu.be/oghlaYD2_FQ",
-        "Ни один не нажал, ни один не прожал" fav "https://youtu.be/r48RRKF6EA0"
+        "Ни один не нажал, ни один не прожал" fav "https://youtu.be/r48RRKF6EA0",
+        "Питер" fav "https://youtu.be/O2hejaHvL_o"
     )
 }
 
