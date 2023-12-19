@@ -454,7 +454,7 @@ class ChimberCommands {
 
 
     suspend fun pirat(command: Command) {
-        queueTracksByLink(command, "https://www.youtube.com/playlist?list=PLpXSZSgpFNH__BENr7QFd6besil_Y7n8p")
+        loadFromRepo(command, PiratRepository, "О как же хорошо: моя чимчима не в курсе")
     }
 
     suspend fun cover(command: Command) {
