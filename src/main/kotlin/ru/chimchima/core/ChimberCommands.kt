@@ -100,7 +100,7 @@ class ChimberCommands {
                 }
 
                 if (repeats[guildId] == Repeat.OFF || session.current == null) {
-                    session.current = queue.poll(100, TimeUnit.MILLISECONDS)?.also {
+                    session.current = session.queue.poll(100, TimeUnit.MILLISECONDS)?.also {
                         messageHandler.replyWith(it.message, "playing track: ${it.title}")
                     }
                 } else {
