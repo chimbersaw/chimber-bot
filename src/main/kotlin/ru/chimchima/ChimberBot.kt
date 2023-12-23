@@ -10,8 +10,9 @@ import kotlinx.coroutines.runBlocking
 import ru.chimchima.core.ChimberCommands
 import ru.chimchima.core.Command
 import ru.chimchima.help.HelpServer
-import ru.chimchima.properties.DISCORD_TOKEN
-import ru.chimchima.properties.LocalProperties
+import ru.chimchima.heroku.HerokuClient
+import ru.chimchima.utils.DISCORD_TOKEN
+import ru.chimchima.utils.LocalProperties
 import java.util.concurrent.ConcurrentHashMap
 
 fun startHelpServer() {
@@ -63,6 +64,8 @@ suspend fun main() = runBlocking {
 
             "!say", "!tts" -> chimber.say(command)
             "!jane" -> chimber.say(command, jane = true)
+
+            "!restart" -> chimber.restart()
 
             "!ruslan" -> chimber.ruslan(command)
 

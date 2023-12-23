@@ -8,6 +8,7 @@ import dev.kord.core.behavior.channel.connect
 import dev.kord.voice.AudioFrame
 import dev.kord.voice.VoiceConnection
 import kotlinx.coroutines.delay
+import ru.chimchima.heroku.HerokuClient
 import ru.chimchima.player.LavaPlayerManager
 import ru.chimchima.repository.*
 import ru.chimchima.tts.TTSManager
@@ -38,6 +39,7 @@ enum class Pause {
 
 @OptIn(KordVoice::class)
 class ChimberCommands {
+    private val heroku = HerokuClient()
     private val ttsManager = TTSManager()
     private val messageHandler = MessageHandler()
 
@@ -240,6 +242,10 @@ class ChimberCommands {
         }
 
         textToSpeech(command, query, jane)
+    }
+
+    suspend fun restart() {
+        heroku.restart()
     }
 
     suspend fun plink(command: Command) {

@@ -6,14 +6,14 @@ import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
-import ru.chimchima.properties.LocalProperties
+import ru.chimchima.utils.LocalProperties
 import ru.chimchima.utils.runOnSuccessOrNull
 import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-const val YANDEX_TTS_URL = "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize"
-const val YANDEX_IAM_TOKEN_URL = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
+private const val YANDEX_TTS_URL = "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize"
+private const val YANDEX_IAM_TOKEN_URL = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
 
 private val enVoices = listOf("john" to null)
 private val ruVoices = listOf(
@@ -33,8 +33,8 @@ private val ruVoices = listOf(
 )
 
 class YandexTTS {
-    private val oauthToken = LocalProperties.oauthToken
-    private val folderId = LocalProperties.folderId
+    private val oauthToken = LocalProperties.yaOauthToken
+    private val folderId = LocalProperties.yaFolderId
     private val client = HttpClient()
     private var iamToken = requestIamToken()
 
