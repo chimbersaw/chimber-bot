@@ -53,6 +53,8 @@ suspend inline fun <reified T, R> HttpResponse.runOnSuccessOrNull(block: (T) -> 
     }
 }
 
+suspend inline fun HttpResponse.performRequest() = runOnSuccessOrNull<String, Boolean> { true } ?: false
+
 fun String.isHttp() = Regex("https?://.+").matches(this)
 
 fun String.toSignedIntOrNull(allowNegative: Boolean) = if (allowNegative) toIntOrNull() else toUIntOrNull()?.toInt()

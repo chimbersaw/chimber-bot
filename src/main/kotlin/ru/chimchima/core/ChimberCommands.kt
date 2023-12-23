@@ -244,8 +244,16 @@ class ChimberCommands {
         textToSpeech(command, query, jane)
     }
 
-    suspend fun restart() {
-        heroku.restart()
+    suspend fun restart(command: Command) {
+        val success = heroku.restart()
+
+        val text = if (success) {
+            "Restarting chimber..."
+        } else {
+            "Failed to restart chimber :("
+        }
+
+        messageHandler.replyWith(command.message, text, forcedMessage = true)
     }
 
     suspend fun plink(command: Command) {
