@@ -27,15 +27,11 @@ data class Session(
     var current: Track? = null
 )
 
-enum class Repeat {
-    ON,
-    OFF
-}
-
-enum class Pause {
-    ON,
-    OFF
-}
+data class SessionConfig(
+    var pause: Boolean = false,
+    var repeat: Boolean = false,
+    var stay: Boolean = false
+)
 
 @OptIn(KordVoice::class)
 class ChimberCommands {
@@ -45,8 +41,7 @@ class ChimberCommands {
 
     private val connections = ConcurrentHashMap<Snowflake, VoiceConnection>()
     private val sessions = ConcurrentHashMap<Snowflake, Session>()
-    private val repeats = ConcurrentHashMap<Snowflake, Repeat>()
-    private val pauses = ConcurrentHashMap<Snowflake, Pause>()
+    private val configs = ConcurrentHashMap<Snowflake, SessionConfig>()
 
     init {
         LavaPlayerManager.registerAllSources()
@@ -60,8 +55,8 @@ class ChimberCommands {
             it.player.stopTrack()
         }
 
+        configs.remove(guildId)
         connections.remove(guildId)?.shutdown()
-        pauses.remove(guildId)
     }
 
     private suspend fun connect(channel: BaseVoiceChannelBehavior): Session {
@@ -70,21 +65,13 @@ class ChimberCommands {
         val ttsPlayer = LavaPlayerManager.createPlayer()
         val ttsQueue = LinkedBlockingDeque<Track>()
 
-        val session = Session(player, queue, ttsQueue)
-
         val guildId = channel.guildId
-
-        repeats.computeIfAbsent(guildId) {
-            Repeat.OFF
-        }
-
-        pauses.computeIfAbsent(guildId) {
-            Pause.OFF
-        }
+        val session = Session(player, queue, ttsQueue)
+        val config = configs[guildId] ?: SessionConfig()
 
         val connection = channel.connect {
             audioProvider {
-                if (pauses[guildId] == Pause.ON) {
+                if (config.pause) {
                     return@audioProvider AudioFrame.SILENCE
                 }
 
@@ -101,7 +88,7 @@ class ChimberCommands {
                     return@audioProvider AudioFrame.fromData(it.data)
                 }
 
-                if (repeats[guildId] == Repeat.OFF || session.current == null) {
+                if (!config.repeat || session.current == null) {
                     session.current = session.queue.poll(100, TimeUnit.MILLISECONDS)?.also {
                         messageHandler.replyWith(it.message, "playing track: ${it.title}")
                     }
@@ -121,8 +108,9 @@ class ChimberCommands {
             }
         }
 
-        sessions[channel.guildId] = session
-        connections[channel.guildId] = connection
+        sessions[guildId] = session
+        configs[guildId] = config
+        connections[guildId] = connection
 
         return session
     }
@@ -292,9 +280,7 @@ class ChimberCommands {
 
         messageHandler.delete(loading)
 
-        if (connections.containsKey(command.guildId)) {
-            queue(command)
-        }
+        queue(command)
     }
 
     suspend fun shuffle(command: Command) {
@@ -439,26 +425,28 @@ class ChimberCommands {
     }
 
     suspend fun repeat(command: Command) {
-        val guildId = command.guildId
+        val config = configs.computeIfAbsent(command.guildId) {
+            SessionConfig()
+        }
 
         var start = "Repeat is now"
         when (command.content.lowercase()) {
-            "on", "1" -> repeats[guildId] = Repeat.ON
-            "off", "0" -> repeats[guildId] = Repeat.OFF
+            "on", "1" -> config.repeat = true
+            "off", "0" -> config.repeat = false
             else -> start = "Repeat is"
         }
 
-        val mode = (repeats[guildId] ?: Repeat.OFF).toString().lowercase()
+        val mode = if (config.repeat) "on" else "off"
         messageHandler.replyWith(command, "$start $mode.")
     }
 
     suspend fun pause(command: Command) {
-        pauses[command.guildId] = Pause.ON
+        configs[command.guildId]?.pause = true
         messageHandler.replyWith(command, "Player is paused.")
     }
 
     suspend fun resume(command: Command) {
-        pauses[command.guildId] = Pause.OFF
+        configs[command.guildId]?.pause = false
         messageHandler.replyWith(command, "Player is resumed.")
     }
 
