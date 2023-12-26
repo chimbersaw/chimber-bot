@@ -52,13 +52,14 @@ suspend fun main() = runBlocking {
             "!repeat" -> chimber.repeat(command)
             "!pause" -> chimber.pause(command)
             "!resume", "!unpause" -> chimber.resume(command)
+            "!stay" -> chimber.stay(command)
+            "!join" -> chimber.join(command)
 
             "!seek", "!ff" -> chimber.seek(command)
             "!back" -> chimber.back(command)
             "!shuffle" -> chimber.shuffle(command)
             "!reverse" -> chimber.reverse(command)
             "!clear" -> chimber.clear(command)
-            "!join" -> chimber.join(command)
             "!help" -> chimber.help(command)
 
             "!say", "!tts" -> chimber.say(command)

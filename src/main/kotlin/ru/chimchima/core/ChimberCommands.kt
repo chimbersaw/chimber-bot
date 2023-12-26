@@ -71,16 +71,16 @@ class ChimberCommands {
 
         val connection = channel.connect {
             audioProvider {
-                if (config.pause) {
-                    return@audioProvider AudioFrame.SILENCE
-                }
-
                 ttsPlayer.provide(1, TimeUnit.SECONDS)?.let {
                     return@audioProvider AudioFrame.fromData(it.data)
                 }
 
                 session.ttsQueue.poll()?.let {
                     it.playWith(ttsPlayer)
+                    return@audioProvider AudioFrame.SILENCE
+                }
+
+                if (config.pause) {
                     return@audioProvider AudioFrame.SILENCE
                 }
 
@@ -98,12 +98,12 @@ class ChimberCommands {
 
                 val track = session.current
 
-                if (track == null) {
+                if (track == null && !config.stay) {
                     disconnect(guildId)
                     return@audioProvider null
                 }
 
-                track.playWith(player)
+                track?.playWith(player)
                 return@audioProvider AudioFrame.SILENCE
             }
         }
@@ -450,8 +450,25 @@ class ChimberCommands {
         messageHandler.replyWith(command, "Player is resumed.")
     }
 
+    suspend fun stay(command: Command) {
+        val config = configs.computeIfAbsent(command.guildId) {
+            SessionConfig()
+        }
+
+        var start = "Stay is now"
+        when (command.content.lowercase()) {
+            "on", "1" -> config.stay = true
+            "off", "0" -> config.stay = false
+            else -> start = "Stay is"
+        }
+
+        val mode = if (config.stay) "on" else "off"
+        messageHandler.replyWith(command, "$start $mode.")
+    }
+
     suspend fun join(command: Command) {
-        queueTracksByLink(command, "https://www.youtube.com/watch?v=V6N-NeQfsnc")
+        configs[command.guildId] = SessionConfig().apply { stay = true }
+        addTracksToQueue(command, emptyList())
     }
 
 
