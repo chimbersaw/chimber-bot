@@ -7,7 +7,11 @@ import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 import dev.kord.core.behavior.channel.connect
 import dev.kord.voice.AudioFrame
 import dev.kord.voice.VoiceConnection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.launch
 import ru.chimchima.heroku.HerokuClient
 import ru.chimchima.player.LavaPlayerManager
 import ru.chimchima.repository.*
@@ -105,6 +109,22 @@ class ChimberCommands {
 
                 track?.playWith(player)
                 return@audioProvider AudioFrame.SILENCE
+            }
+        }
+
+        CoroutineScope(Dispatchers.Default).launch {
+            while (true) {
+                delay(60_000)
+
+                if (!sessions.containsKey(guildId)) {
+                    break
+                }
+
+                val membersInChannel = channel.voiceStates.count()
+                if (membersInChannel == 1) {
+                    disconnect(guildId)
+                    break
+                }
             }
         }
 
