@@ -8,7 +8,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 val Command.content: String
     get() {
-        val query = message.content
+        val query = message?.content.orEmpty()
         return if (query.startsWith("!")) {
             query.substringAfter(delimiter = " ", missingDelimiterValue = "").trim()
         } else {

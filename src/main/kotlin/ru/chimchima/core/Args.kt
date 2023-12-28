@@ -62,5 +62,7 @@ class Args private constructor() {
                 processArgument(arg, allowNegative)
             }
         }
+
+        fun default() = Args()
     }
 }

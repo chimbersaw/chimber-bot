@@ -12,8 +12,8 @@ class MessageHandler {
         message?.delete()
     }
 
-    suspend fun replyWith(message: Message, text: String, forcedMessage: Boolean = false): Message? {
-        val author = message.author ?: return null
+    suspend fun replyWith(message: Message?, text: String, forcedMessage: Boolean = false): Message? {
+        val author = message?.author ?: return null
         if (author.data.id in skipReplyToUserIds && !forcedMessage) {
             return null
         }
@@ -28,7 +28,7 @@ class MessageHandler {
     }
 
     suspend fun mute(command: Command) {
-        val author = command.message.author ?: run {
+        val author = command.message?.author ?: run {
             replyWith(command, "Can't perform \"!mute\" command, author is not defined.", true)
             return
         }

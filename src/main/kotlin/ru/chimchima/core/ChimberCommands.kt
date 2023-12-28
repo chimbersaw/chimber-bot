@@ -217,7 +217,7 @@ class ChimberCommands {
         messageHandler.replyWith(command, msg)
     }
 
-    private suspend fun textToSpeech(command: Command, query: String, jane: Boolean = false) {
+    suspend fun textToSpeech(command: Command, query: String, jane: Boolean = false) {
         val file = ttsManager.textToSpeech(query, jane) ?: run {
             messageHandler.replyWith(command, "Could not load tts :(")
             return

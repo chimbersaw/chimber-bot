@@ -11,7 +11,7 @@ typealias TrackLoader = suspend () -> Track?
 
 class Track(
     private val audioTrack: AudioTrack,
-    val message: Message,
+    val message: Message?,
     val title: String
 ) {
     fun playWith(player: AudioPlayer) = player.playTrack(audioTrack)
@@ -31,16 +31,16 @@ class Track(
     }
 
     companion object {
-        private fun AudioTrack.toTrack(message: Message, title: String? = null): Track {
+        private fun AudioTrack.toTrack(message: Message?, title: String? = null): Track {
             val fullTitle = "${title ?: info.title} ${formatTime(duration)}"
             return Track(this, message, fullTitle)
         }
 
-        suspend fun trackLoader(message: Message, query: String, title: String? = null): TrackLoader = {
+        suspend fun trackLoader(message: Message?, query: String, title: String? = null): TrackLoader = {
             LavaPlayerManager.loadTrack(query)?.toTrack(message, title)
         }
 
-        suspend fun playlistLoader(message: Message, query: String, title: String? = null): List<Track> {
+        suspend fun playlistLoader(message: Message?, query: String, title: String? = null): List<Track> {
             return LavaPlayerManager.loadPlaylist(query).map {
                 it.toTrack(message, title)
             }

@@ -11,7 +11,7 @@ private val ALLOW_OVERRIDE_COUNT = listOf(Regex("!play\\d*"), Regex("!next\\d*")
 
 class Command private constructor(
     val name: String,
-    val message: Message,
+    val message: Message?,
     val args: Args,
     val guildId: Snowflake,
     val member: Member
@@ -37,5 +37,7 @@ class Command private constructor(
 
             return Command(name, event.message, args, guildId, member)
         }
+
+        fun empty(guildId: Snowflake, member: Member) = Command("", null, Args.default(), guildId, member)
     }
 }

@@ -17,7 +17,7 @@ infix fun String.kal(url: String): Song = Song(this, url, favourite = false)
 interface SongRepository {
     val songs: List<Song>
 
-    suspend fun getLoaders(message: Message, args: Args): List<TrackLoader> {
+    suspend fun getLoaders(message: Message?, args: Args): List<TrackLoader> {
         return args.applyToSongList(songs).map { (title, url) ->
             Track.trackLoader(message, url, title)
         }
