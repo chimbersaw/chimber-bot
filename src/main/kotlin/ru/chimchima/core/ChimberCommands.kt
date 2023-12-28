@@ -7,7 +7,11 @@ import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 import dev.kord.core.behavior.channel.connect
 import dev.kord.voice.AudioFrame
 import dev.kord.voice.VoiceConnection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.launch
 import ru.chimchima.heroku.HerokuClient
 import ru.chimchima.player.LavaPlayerManager
 import ru.chimchima.repository.*
@@ -16,6 +20,7 @@ import ru.chimchima.utils.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 private const val MAX_MESSAGE_LENGTH = 2000
@@ -106,6 +111,13 @@ class ChimberCommands {
                 track?.playWith(player)
                 return@audioProvider AudioFrame.SILENCE
             }
+        }
+
+        CoroutineScope(Dispatchers.Default).launch {
+            while (sessions.containsKey(guildId) && channel.voiceStates.count() > 1) {
+                delay(10.minutes)
+            }
+            disconnect(guildId)
         }
 
         sessions[guildId] = session
