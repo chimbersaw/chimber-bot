@@ -20,6 +20,7 @@ import ru.chimchima.utils.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 private const val MAX_MESSAGE_LENGTH = 2000
@@ -113,19 +114,10 @@ class ChimberCommands {
         }
 
         CoroutineScope(Dispatchers.Default).launch {
-            while (true) {
-                delay(60_000)
-
-                if (!sessions.containsKey(guildId)) {
-                    break
-                }
-
-                val membersInChannel = channel.voiceStates.count()
-                if (membersInChannel == 1) {
-                    disconnect(guildId)
-                    break
-                }
+            while (sessions.containsKey(guildId) && channel.voiceStates.count() > 1) {
+                delay(10.minutes)
             }
+            disconnect(guildId)
         }
 
         sessions[guildId] = session
