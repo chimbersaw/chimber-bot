@@ -117,6 +117,7 @@ class ChimberCommands {
             while (sessions.containsKey(guildId) && channel.voiceStates.count() > 1) {
                 delay(10.minutes)
             }
+
             disconnect(guildId)
         }
 
