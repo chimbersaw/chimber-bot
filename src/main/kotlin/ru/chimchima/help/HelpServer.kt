@@ -58,6 +58,7 @@ const val USAGE = """Основные команды:
     Добавит из всех (а не только избранных) первых 10 треков плейлиста pirat в случайном порядке, повторенные 3 раза.
 
     !ruslan - Добавляет плейлист для игры в доту aka https://www.youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR
+    !vlad - Добавляет плейлист для влада aka https://www.youtube.com/playlist?list=PLpXSZSgpFNH-Tljl-1zF9B-JMMTxCTJlX
 
     !pirat - Избранные треки сереги бандита.
     !cover - Избранные каверы сереги чимичанги.

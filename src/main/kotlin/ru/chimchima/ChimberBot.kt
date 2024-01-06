@@ -88,6 +88,7 @@ suspend fun main() = runBlocking {
             "!restart" -> chimber.restart(command)
 
             "!ruslan" -> chimber.ruslan(command)
+            "!vlad" -> chimber.vlad(command)
 
             "!pirat" -> chimber.pirat(command)
             "!cover" -> chimber.cover(command)
