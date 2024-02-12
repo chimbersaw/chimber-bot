@@ -25,12 +25,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
-    implementation("dev.kord:kord-core:0.12.0")
-    implementation("dev.kord:kord-core-voice:0.12.0")
+    implementation("dev.kord:kord-core:0.13.1")
+    implementation("dev.kord:kord-core-voice:0.13.1")
 
-    implementation("dev.arbjerg:lavaplayer:2.0.4")
-    implementation("io.ktor:ktor-client-core:2.3.7")
-    implementation("org.slf4j:slf4j-simple:2.0.9")
+    implementation("dev.arbjerg:lavaplayer:2.1.0")
+    implementation("io.ktor:ktor-client-core:2.3.8")
+    implementation("org.slf4j:slf4j-simple:2.0.12")
 }
 
 tasks.withType<KotlinCompile> {
