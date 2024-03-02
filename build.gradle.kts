@@ -18,6 +18,7 @@ application {
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
+    maven("https://maven.lavalink.dev/snapshots") // For 727959e9f621fc457b3a5adafcfffb55fdeaa538 fix
 }
 
 dependencies {
@@ -28,7 +29,8 @@ dependencies {
     implementation("dev.kord:kord-core:0.13.1")
     implementation("dev.kord:kord-core-voice:0.13.1")
 
-    implementation("dev.arbjerg:lavaplayer:2.1.0")
+//    implementation("dev.arbjerg:lavaplayer:2.1.0")
+    implementation("dev.arbjerg:lavaplayer:727959e9f621fc457b3a5adafcfffb55fdeaa538-SNAPSHOT")
     implementation("io.ktor:ktor-client-core:2.3.8")
     implementation("org.slf4j:slf4j-simple:2.0.12")
 }
