@@ -1,9 +1,9 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.22"
-    kotlin("plugin.serialization") version "1.9.22"
+    kotlin("jvm") version "1.9.23"
+    kotlin("plugin.serialization") version "1.9.23"
     application
 }
 
@@ -12,7 +12,7 @@ version = "1.0-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 application {
-    mainClass.set("ru.chimchima.ChimberBotKt")
+    mainClass = "ru.chimchima.ChimberBotKt"
 }
 
 repositories {
@@ -22,8 +22,8 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     implementation("dev.kord:kord-core:0.13.1")
     implementation("dev.kord:kord-core-voice:0.13.1")
@@ -35,8 +35,8 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
-        freeCompilerArgs.set(listOf("-Xjsr305=strict", "-opt-in=kotlin.RequiresOptIn"))
-        jvmTarget.set(JVM_17)
+        freeCompilerArgs = listOf("-Xjsr305=strict", "-opt-in=kotlin.RequiresOptIn")
+        jvmTarget = JvmTarget.JVM_17
     }
 }
 

@@ -126,6 +126,8 @@ suspend fun main() = runBlocking {
             "!diss" -> chimber.diss(command)
             "!kotiki", "!kokiki", "!котики", "!dvar" -> chimber.kokiki(command)
             "!кошечки", "!koshechki" -> chimber.koshechki(command)
+            "!satana", "!сатана" -> chimber.satana(command)
+
             "!cocyxa", "!сосуха" -> chimber.cocyxa(command)
             "!cocyxa2", "!сосуха2" -> chimber.cocyxa2(command)
             "!raketa", "!zxkoncepba" -> chimber.raketa(command)

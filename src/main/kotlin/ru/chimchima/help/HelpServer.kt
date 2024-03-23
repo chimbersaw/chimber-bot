@@ -42,6 +42,8 @@ const val USAGE = """Основные команды:
     !diss [count] [next] - ДИСС НА ТИГРАНА [REMASTERED].
     !kotiki [count] [next] - Маслорий на бите.
     !кошечки [count] [next] - Кошечки хорошие лишнего не скажут.
+    !satana [count] [next] - Со мною воюет сатана.
+
     !cocyxa [count] [next] - Предсмертный выстрел.
     !cocyxa2 [count] [next] - Предсмертный выстрел.
     !raketa [count] [next] - Ракета пошла.
