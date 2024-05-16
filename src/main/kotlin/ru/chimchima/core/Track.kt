@@ -7,7 +7,9 @@ import ru.chimchima.player.LavaPlayerManager
 import ru.chimchima.utils.formatTime
 import ru.chimchima.utils.generateStatusBar
 
-typealias TrackLoader = suspend () -> Track?
+class TrackLoader(val query: String, private val lambda: suspend () -> Track?) {
+    suspend fun invoke() = lambda.invoke()
+}
 
 class Track(
     private val audioTrack: AudioTrack,
@@ -36,7 +38,7 @@ class Track(
             return Track(this, message, fullTitle)
         }
 
-        suspend fun trackLoader(message: Message?, query: String, title: String? = null): TrackLoader = {
+        suspend fun trackLoader(message: Message?, query: String, title: String? = null) = TrackLoader(query) {
             LavaPlayerManager.loadTrack(query)?.toTrack(message, title)
         }
 

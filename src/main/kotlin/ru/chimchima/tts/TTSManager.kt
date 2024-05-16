@@ -10,11 +10,9 @@ import java.util.*
 
 class TTSManager {
     private val tts = YandexTTS()
-    private val tmp = File("tmp")
-
-    init {
-        tmp.mkdir()
-        tmp.deleteOnExit()
+    private val tmp = File("tmp").apply {
+        mkdir()
+        deleteOnExit()
     }
 
     suspend fun textToSpeech(text: String, jane: Boolean = false): File? {

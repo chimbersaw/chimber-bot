@@ -2,8 +2,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.23"
-    kotlin("plugin.serialization") version "1.9.23"
+    kotlin("jvm") version "1.9.24"
+    kotlin("plugin.serialization") version "1.9.24"
     application
 }
 
@@ -18,19 +18,21 @@ application {
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
+    maven("https://maven.lavalink.dev/releases")
 }
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     implementation("dev.kord:kord-core:0.13.1")
     implementation("dev.kord:kord-core-voice:0.13.1")
 
-    implementation("dev.arbjerg:lavaplayer:2.1.1")
+    implementation("dev.arbjerg:lavaplayer:2.1.2")
+    implementation("dev.lavalink.youtube:v2:1.2.0")
     implementation("io.ktor:ktor-client-core:2.3.9")
-    implementation("org.slf4j:slf4j-simple:2.0.12")
+    implementation("org.slf4j:slf4j-simple:2.0.13")
 }
 
 tasks.withType<KotlinCompile> {

@@ -133,7 +133,7 @@ suspend fun main() = runBlocking {
             "!raketa", "!zxkoncepba" -> chimber.raketa(command)
             "!val", "!zota", "!lowgrades" -> chimber.lowgrades(command)
             "!valera", "val2" -> chimber.valera(command)
-            "!val0", "!val -a" -> chimber.val0(command)
+            "!val0" -> chimber.val0(command)
         }
     }
 

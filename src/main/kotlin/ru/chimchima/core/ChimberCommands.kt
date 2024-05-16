@@ -72,8 +72,11 @@ class ChimberCommands {
 
         val guildId = channel.guildId
         val session = Session(player, queue, ttsQueue)
-        val config = configs[guildId] ?: SessionConfig()
+        val config = configs.computeIfAbsent(guildId) {
+            SessionConfig()
+        }
 
+        // TODO: this lambda may be invoked before the queue is populated with a track leading to a disconnect.
         val connection = channel.connect {
             audioProvider {
                 ttsPlayer.provide(1, TimeUnit.SECONDS)?.let {
@@ -94,7 +97,7 @@ class ChimberCommands {
                 }
 
                 if (!config.repeat || session.current == null) {
-                    session.current = session.queue.poll(100, TimeUnit.MILLISECONDS)?.also {
+                    session.current = session.queue.poll()?.also {
                         messageHandler.replyWith(it.message, "playing track: ${it.title}")
                     }
                 } else {
@@ -122,7 +125,6 @@ class ChimberCommands {
         }
 
         sessions[guildId] = session
-        configs[guildId] = config
         connections[guildId] = connection
 
         return session
@@ -146,7 +148,7 @@ class ChimberCommands {
                 } else {
                     session.queue.addLast(it.clone())
                 }
-            } ?: messageHandler.replyWith(command, "Loading tracks failed...")
+            } ?: messageHandler.replyWith(command, "Track `${loader.query}` failed to load, skipping...")
         }
 
         return queueSize + loaders.size
@@ -591,7 +593,7 @@ class ChimberCommands {
     }
 
     suspend fun discord(command: Command) {
-        queueTracksByLink(command, "https://www.youtube.com/watch?v=vHZChECbKEo")
+        queueTracksByLink(command, "https://www.youtube.com/watch?v=8tmxUJDjVhY")
     }
 
     suspend fun sperma(command: Command) {

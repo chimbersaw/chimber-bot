@@ -4,6 +4,8 @@ import io.ktor.client.call.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import ru.chimchima.core.Command
+import ru.chimchima.core.Track
+import ru.chimchima.core.TrackLoader
 import kotlin.time.Duration.Companion.milliseconds
 
 val Command.content: String
@@ -59,7 +61,7 @@ fun String.isHttp() = Regex("https?://.+").matches(this)
 
 fun String.toSignedIntOrNull(allowNegative: Boolean) = if (allowNegative) toIntOrNull() else toUIntOrNull()?.toInt()
 
-fun <T> T.toLoader(): suspend () -> T = { this }
+fun Track.toLoader() = TrackLoader(title) { this }
 
 fun <T> T.repeatNTimes(n: Int): List<T> = List(n) { this }
 

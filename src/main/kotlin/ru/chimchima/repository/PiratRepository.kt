@@ -9,7 +9,6 @@ object PiratRepository : SongRepository {
         "Мой байк" fav "https://youtu.be/OQGdrezi0Y4",
         "Почему ты еще не фанат?" fav "https://youtu.be/apWlgn-nrEE",
         "Свинья" fav "https://youtu.be/w8TW3IkVfAQ",
-        "zxcергей" fav "https://youtu.be/baXZvJoWgn0",
         "Вайбмен" fav "https://youtu.be/YpMU3g8JLjw",
         "Гимн Дахака" fav "https://youtu.be/mZvEsykmfZY",
         "Апельсин" fav "https://youtu.be/Vr-DOV-TP5s",

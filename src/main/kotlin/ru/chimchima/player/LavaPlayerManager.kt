@@ -4,9 +4,19 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.player.event.TrackExceptionEvent
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
+import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.getyarn.GetyarnAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.http.HttpAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.nico.NicoAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.soundcloud.SoundCloudAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.twitch.TwitchStreamAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager
+import com.sedmelluq.discord.lavaplayer.source.yamusic.YandexMusicAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
+import dev.lavalink.youtube.YoutubeAudioSourceManager
 import kotlinx.coroutines.runBlocking
 import ru.chimchima.heroku.HerokuClient
 import kotlin.coroutines.resume
@@ -14,8 +24,19 @@ import kotlin.coroutines.suspendCoroutine
 
 object LavaPlayerManager : DefaultAudioPlayerManager() {
     fun registerAllSources() {
-        AudioSourceManagers.registerRemoteSources(this)
         AudioSourceManagers.registerLocalSource(this)
+
+        // Register remote sources including `https://github.com/lavalink-devs/youtube-source#v2`.
+        registerSourceManager(YoutubeAudioSourceManager())
+        registerSourceManager(YandexMusicAudioSourceManager())
+        registerSourceManager(SoundCloudAudioSourceManager.createDefault())
+        registerSourceManager(BandcampAudioSourceManager())
+        registerSourceManager(VimeoAudioSourceManager())
+        registerSourceManager(TwitchStreamAudioSourceManager())
+        registerSourceManager(BeamAudioSourceManager())
+        registerSourceManager(GetyarnAudioSourceManager())
+        registerSourceManager(NicoAudioSourceManager())
+        registerSourceManager(HttpAudioSourceManager())
 
         val player = createPlayer().apply {
             addListener {
@@ -38,7 +59,10 @@ object LavaPlayerManager : DefaultAudioPlayerManager() {
             override fun trackLoaded(track: AudioTrack) = it.resume(listOf(track))
             override fun playlistLoaded(playlist: AudioPlaylist) = it.resume(playlist.tracks)
             override fun noMatches() = it.resume(emptyList())
-            override fun loadFailed(exception: FriendlyException?) = it.resume(emptyList())
+            override fun loadFailed(exception: FriendlyException) {
+                println("Load failed. Query: $query, reason: ${exception.stackTraceToString()}")
+                it.resume(emptyList())
+            }
         })
     }
 

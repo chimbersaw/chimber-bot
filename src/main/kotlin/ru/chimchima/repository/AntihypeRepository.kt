@@ -99,7 +99,7 @@ object AntihypeTrainRepository : SongRepository {
         "Все мои Ш" kal "https://youtu.be/qSPrd-ScjTM",
         "Убили гендер" fav "https://youtu.be/9w6yQCghNPY",
         "На свидании с другой" kal "https://youtu.be/mIDXV68EV6g",
-        "Флекс и флейм" fav "https://youtu.be/hwYcX0e0c-c",
+        "Флекс и флейм" fav "https://youtu.be/bDM-AWBJaS0",
         "Подкрадули" fav "https://youtu.be/C_zqomMqubg",
         "Жить в кайф" fav "https://youtu.be/sJzSYI5fIZE",
         "Губы" kal "https://youtu.be/A7M1mYaOfE8",
