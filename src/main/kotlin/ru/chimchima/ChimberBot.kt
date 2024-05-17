@@ -89,6 +89,7 @@ suspend fun main() = runBlocking {
 
             "!ruslan" -> chimber.ruslan(command)
             "!vlad" -> chimber.vlad(command)
+            "!fallout" -> chimber.fallout(command)
 
             "!pirat" -> chimber.pirat(command)
             "!cover" -> chimber.cover(command)

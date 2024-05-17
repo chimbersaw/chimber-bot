@@ -664,6 +664,10 @@ class ChimberCommands {
         queueTracksByLink(command, "https://www.youtube.com/playlist?list=PLpXSZSgpFNH-Tljl-1zF9B-JMMTxCTJlX")
     }
 
+    suspend fun fallout(command: Command) {
+        queueTracksByLink(command, "https://www.youtube.com/playlist?list=PL63B26E837C45A200")
+    }
+
 
     suspend fun help(command: Command) {
         messageHandler.replyWith(command, "http://chimchima.ru/bot")
