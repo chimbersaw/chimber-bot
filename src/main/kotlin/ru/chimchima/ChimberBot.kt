@@ -7,7 +7,6 @@ import dev.kord.core.event.user.VoiceStateUpdateEvent
 import dev.kord.core.on
 import dev.kord.gateway.Intent
 import dev.kord.gateway.PrivilegedIntent
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import ru.chimchima.core.ChimberCommands
 import ru.chimchima.core.Command
@@ -15,7 +14,6 @@ import ru.chimchima.help.HelpServer
 import ru.chimchima.utils.DISCORD_TOKEN
 import ru.chimchima.utils.LocalProperties
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.time.Duration.Companion.seconds
 
 fun startHelpServer() {
     println("Starting !help server...")
@@ -32,20 +30,7 @@ suspend fun main() = runBlocking {
     val prevPlay = ConcurrentHashMap<Snowflake, Command>()
 
     kord.on<VoiceStateUpdateEvent> {
-        if (old?.channelId == state.channelId) return@on
-        val member = state.getMemberOrNull() ?: return@on
-        member.getVoiceStateOrNull()?.getChannelOrNull() ?: return@on
-
-        val query = when (member.username) {
-            "scanhex" -> "вот и нахуй ты зашел сашка"
-            "andrbrawls" -> "всем привет с вами я - богдан т+ечис"
-            "zot9" -> "всем привет с вами я мистер зота ак+а пожилая барракуда"
-            else -> return@on
-        }
-
-        delay(1.seconds)
-        val command = Command.empty(member.guildId, member)
-        chimber.textToSpeech(command, query)
+        chimber.onVoiceStateUpdate(event = this)
     }
 
     kord.on<MessageCreateEvent> {

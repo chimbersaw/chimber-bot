@@ -5,6 +5,7 @@ import dev.kord.common.annotation.KordVoice
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.BaseVoiceChannelBehavior
 import dev.kord.core.behavior.channel.connect
+import dev.kord.core.event.user.VoiceStateUpdateEvent
 import dev.kord.voice.AudioFrame
 import dev.kord.voice.VoiceConnection
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +30,7 @@ data class Session(
     val player: AudioPlayer,
     var queue: LinkedBlockingDeque<Track>,
     var ttsQueue: LinkedBlockingDeque<Track>,
+    val channel: BaseVoiceChannelBehavior,
     var current: Track? = null
 )
 
@@ -71,7 +73,7 @@ class ChimberCommands {
         val ttsQueue = LinkedBlockingDeque<Track>()
 
         val guildId = channel.guildId
-        val session = Session(player, queue, ttsQueue)
+        val session = Session(player, queue, ttsQueue, channel)
         val config = configs.computeIfAbsent(guildId) {
             SessionConfig()
         }
@@ -219,7 +221,7 @@ class ChimberCommands {
         messageHandler.replyWith(command, msg)
     }
 
-    suspend fun textToSpeech(command: Command, query: String, jane: Boolean = false) {
+    private suspend fun textToSpeech(command: Command, query: String, jane: Boolean = false) {
         val file = ttsManager.textToSpeech(query, jane) ?: run {
             messageHandler.replyWith(command, "Could not load tts :(")
             return
@@ -335,7 +337,7 @@ class ChimberCommands {
         val count = args.count ?: 1
         if (count < 1) return
 
-        val (player, queue, _, current) = sessions[command.guildId] ?: return
+        val (player, queue, _, _, current) = sessions[command.guildId] ?: return
         if (current == null) return
 
         val skippedTracks = mutableListOf(current.title)
@@ -484,6 +486,27 @@ class ChimberCommands {
     suspend fun join(command: Command) {
         configs[command.guildId] = SessionConfig().apply { stay = true }
         addTracksToQueue(command, emptyList())
+    }
+
+
+    suspend fun onVoiceStateUpdate(event: VoiceStateUpdateEvent) {
+        if (event.old?.channelId == event.state.channelId) return
+        val member = event.state.getMemberOrNull() ?: return
+        val channel = member.getVoiceStateOrNull()?.getChannelOrNull() ?: return
+        val curChannel = sessions[member.guildId]?.channel
+        if (curChannel != null && curChannel != channel) return
+
+        val query = when (member.username) {
+            "scanhex" -> "вот и нахуй ты зашел сашка"
+            "andrbrawls" -> "всем привет с вами я - богдан т+ечис"
+            "zot9" -> "всем привет с вами я мистер зота ак+а пожилая барракуда"
+            "karburator14" -> "старый бог тут"
+            else -> return
+        }
+
+        delay(1.seconds)
+        val command = Command.empty(member.guildId, member)
+        textToSpeech(command, query)
     }
 
 
