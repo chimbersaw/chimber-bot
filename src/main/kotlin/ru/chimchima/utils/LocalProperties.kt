@@ -7,6 +7,7 @@ private const val PORT = "server.port"
 private const val YANDEX_OAUTH_TOKEN = "YANDEX_OAUTH_TOKEN"
 private const val YANDEX_FOLDER_ID = "YANDEX_FOLDER_ID"
 private const val HEROKU_TOKEN = "HEROKU_TOKEN"
+private const val YOUTUBE_REFRESH_TOKEN = "YOUTUBE_REFRESH_TOKEN"
 private const val LOCAL_PROPERTIES = "/local.properties"
 
 object LocalProperties {
@@ -34,4 +35,7 @@ object LocalProperties {
 
     val herokuToken: String?
         get() = getProperty(HEROKU_TOKEN)
+
+    val youtubeRefreshToken: String?
+        get() = getProperty(YOUTUBE_REFRESH_TOKEN)
 }

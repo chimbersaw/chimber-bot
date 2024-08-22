@@ -19,6 +19,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.lavalink.youtube.YoutubeAudioSourceManager
 import kotlinx.coroutines.runBlocking
 import ru.chimchima.heroku.HerokuClient
+import ru.chimchima.utils.LocalProperties
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -27,7 +28,10 @@ object LavaPlayerManager : DefaultAudioPlayerManager() {
         AudioSourceManagers.registerLocalSource(this)
 
         // Register remote sources including `https://github.com/lavalink-devs/youtube-source#v2`.
-        registerSourceManager(YoutubeAudioSourceManager())
+        val youtube = YoutubeAudioSourceManager()
+        youtube.useOauth2(LocalProperties.youtubeRefreshToken, true)
+        registerSourceManager(youtube)
+
         registerSourceManager(YandexMusicAudioSourceManager())
         registerSourceManager(SoundCloudAudioSourceManager.createDefault())
         registerSourceManager(BandcampAudioSourceManager())

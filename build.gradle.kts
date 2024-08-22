@@ -2,8 +2,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.0.10"
-    kotlin("plugin.serialization") version "2.0.10"
+    kotlin("jvm") version "2.0.20"
+    kotlin("plugin.serialization") version "2.0.20"
     application
 }
 
@@ -30,9 +30,9 @@ dependencies {
     implementation("dev.kord:kord-core-voice:0.14.0")
 
     implementation("dev.arbjerg:lavaplayer:2.2.1")
-    implementation("dev.lavalink.youtube:v2:1.5.2")
+    implementation("dev.lavalink.youtube:v2:1.7.1")
     implementation("io.ktor:ktor-client-core:2.3.12")
-    implementation("org.slf4j:slf4j-simple:2.0.14")
+    implementation("org.slf4j:slf4j-simple:2.0.16")
 }
 
 tasks.withType<KotlinCompile> {
