@@ -693,6 +693,6 @@ class ChimberCommands {
 
 
     suspend fun help(command: Command) {
-        messageHandler.replyWith(command, "http://chimchima.ru/bot")
+        messageHandler.replyWith(command, "https://chimchima.ru/bot")
     }
 }

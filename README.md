@@ -1,6 +1,6 @@
 # Chimber bot
 
-http://chimchima.ru/bot
+https://chimchima.ru/bot
 
 ## Prerequisites
 
