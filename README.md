@@ -4,7 +4,7 @@ https://chimchima.ru/bot
 
 ## Prerequisites
 
-* Install Java 17 and make sure with `java --version`.
+* Install Java 21 and make sure with `java --version`.
 * Create the `local.properties` file in `src/main/resources`.
 * Fill in a valid discord application token.
 * To use YouTube fill in a valid YOUTUBE_REFRESH_TOKEN as
