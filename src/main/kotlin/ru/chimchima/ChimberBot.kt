@@ -11,7 +11,6 @@ import kotlinx.coroutines.runBlocking
 import ru.chimchima.core.ChimberCommands
 import ru.chimchima.core.Command
 import ru.chimchima.help.HelpServer
-import ru.chimchima.utils.DISCORD_TOKEN
 import ru.chimchima.utils.LocalProperties
 import java.util.concurrent.ConcurrentHashMap
 
@@ -21,8 +20,8 @@ fun startHelpServer() {
     HelpServer(port).start()
 }
 
-suspend fun main() = runBlocking {
-    val token = LocalProperties.discordToken ?: throw RuntimeException("$DISCORD_TOKEN property is not set")
+fun main() = runBlocking {
+    val token = LocalProperties.discordToken ?: throw RuntimeException("DISCORD_TOKEN property is not set")
     val kord = Kord(token)
     startHelpServer()
 

@@ -4,16 +4,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "2.0.21"
     kotlin("plugin.serialization") version "2.0.21"
-    application
 }
 
 group = "ru.chimchima"
 version = "1.0-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_21
-
-application {
-    mainClass = "ru.chimchima.ChimberBotKt"
-}
 
 repositories {
     mavenCentral()

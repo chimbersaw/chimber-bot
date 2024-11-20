@@ -2,7 +2,6 @@ package ru.chimchima.player
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
-import com.sedmelluq.discord.lavaplayer.player.event.TrackExceptionEvent
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.source.beam.BeamAudioSourceManager
@@ -17,9 +16,8 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.lavalink.youtube.YoutubeAudioSourceManager
-import dev.lavalink.youtube.clients.TvHtml5Embedded
+import dev.lavalink.youtube.clients.Web
 import kotlinx.coroutines.runBlocking
-import ru.chimchima.heroku.HerokuClient
 import ru.chimchima.utils.LocalProperties
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -30,12 +28,11 @@ object LavaPlayerManager : DefaultAudioPlayerManager() {
 
         // Register remote sources including `https://github.com/lavalink-devs/youtube-source#v2`.
         val youtube = YoutubeAudioSourceManager(
-//            Music(),
-//            Web(),
-//            AndroidTestsuite(),
-            TvHtml5Embedded()
+            Web(),
+//            TvHtml5Embedded()
         )
-        youtube.useOauth2(LocalProperties.youtubeRefreshToken, true)
+//        youtube.useOauth2(LocalProperties.youtubeRefreshToken, true)
+        Web.setPoTokenAndVisitorData(LocalProperties.youtubePoToken, LocalProperties.youtubeVisitorData)
         registerSourceManager(youtube)
 
         registerSourceManager(YandexMusicAudioSourceManager())
@@ -48,17 +45,9 @@ object LavaPlayerManager : DefaultAudioPlayerManager() {
         registerSourceManager(NicoAudioSourceManager())
         registerSourceManager(HttpAudioSourceManager())
 
-        val player = createPlayer().apply {
-            addListener {
-                if (it is TrackExceptionEvent) {
-                    HerokuClient().restart()
-                }
-            }
-        }
-
         // YouTube cache warming on start to speed up loading the first track
         runBlocking {
-            player.playTrack(
+            createPlayer().playTrack(
                 loadTrack("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
             )
         }

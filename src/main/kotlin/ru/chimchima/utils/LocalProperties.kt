@@ -2,17 +2,11 @@ package ru.chimchima.utils
 
 import java.util.*
 
-const val DISCORD_TOKEN = "DISCORD_TOKEN"
-private const val PORT = "server.port"
-private const val YANDEX_OAUTH_TOKEN = "YANDEX_OAUTH_TOKEN"
-private const val YANDEX_FOLDER_ID = "YANDEX_FOLDER_ID"
-private const val HEROKU_TOKEN = "HEROKU_TOKEN"
-private const val YOUTUBE_REFRESH_TOKEN = "YOUTUBE_REFRESH_TOKEN"
-private const val LOCAL_PROPERTIES = "/local.properties"
+private const val LOCAL_PROPERTIES_FILE = "/local.properties"
 
 object LocalProperties {
     private val properties = Properties().apply {
-        LocalProperties::class.java.getResourceAsStream(LOCAL_PROPERTIES)?.let {
+        LocalProperties::class.java.getResourceAsStream(LOCAL_PROPERTIES_FILE)?.let {
             load(it)
         }
     }
@@ -22,20 +16,26 @@ object LocalProperties {
     }
 
     val discordToken: String?
-        get() = getProperty(DISCORD_TOKEN)
+        get() = getProperty("DISCORD_TOKEN")
 
     val port: Int?
-        get() = getProperty(PORT)?.toIntOrNull()
+        get() = getProperty("server.port")?.toIntOrNull()
 
     val yaOauthToken: String?
-        get() = getProperty(YANDEX_OAUTH_TOKEN)
+        get() = getProperty("YANDEX_OAUTH_TOKEN")
 
     val yaFolderId: String?
-        get() = getProperty(YANDEX_FOLDER_ID)
+        get() = getProperty("YANDEX_FOLDER_ID")
 
     val herokuToken: String?
-        get() = getProperty(HEROKU_TOKEN)
+        get() = getProperty("HEROKU_TOKEN")
 
     val youtubeRefreshToken: String?
-        get() = getProperty(YOUTUBE_REFRESH_TOKEN)
+        get() = getProperty("YOUTUBE_REFRESH_TOKEN")
+
+    val youtubePoToken: String?
+        get() = getProperty("YOUTUBE_PO_TOKEN")
+
+    val youtubeVisitorData: String?
+        get() = getProperty("YOUTUBE_VISITOR_DATA")
 }
