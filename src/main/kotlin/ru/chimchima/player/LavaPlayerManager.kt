@@ -16,8 +16,10 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.lavalink.youtube.YoutubeAudioSourceManager
+import dev.lavalink.youtube.clients.AndroidVr
 import dev.lavalink.youtube.clients.TvHtml5Embedded
 import dev.lavalink.youtube.clients.Web
+import dev.lavalink.youtube.clients.WebEmbedded
 import kotlinx.coroutines.runBlocking
 import ru.chimchima.utils.LocalProperties
 import kotlin.coroutines.resume
@@ -28,18 +30,15 @@ object LavaPlayerManager : DefaultAudioPlayerManager() {
         AudioSourceManagers.registerLocalSource(this)
 
         // Register remote sources including `https://github.com/lavalink-devs/youtube-source#v2`.
-        // TV client can load tracks by link or search (using oauth) but not playlists.
-        val youtubeTv = YoutubeAudioSourceManager(TvHtml5Embedded())
-        youtubeTv.useOauth2(LocalProperties.youtubeRefreshToken, true)
-
-        // WEB client can load playlists but fails to play tracks.
-        // Using poToken fixes the problem for some IPs/ASNs.
-        val youtubeWeb = YoutubeAudioSourceManager(Web())
+        val youtube = YoutubeAudioSourceManager(
+            Web(),             // Default client
+            TvHtml5Embedded(), // Works for age-restricted videos because of oAuth2
+            WebEmbedded(),
+            AndroidVr(),
+        )
         Web.setPoTokenAndVisitorData(LocalProperties.youtubePoToken, LocalProperties.youtubeVisitorData)
-
-        // TV client handles track loading, WEB client handles playlist loading (where TV client fails).
-        registerSourceManager(youtubeTv)
-        registerSourceManager(youtubeWeb)
+        youtube.useOauth2(LocalProperties.youtubeRefreshToken, true)
+        registerSourceManager(youtube)
 
         registerSourceManager(YandexMusicAudioSourceManager())
         registerSourceManager(SoundCloudAudioSourceManager.createDefault())

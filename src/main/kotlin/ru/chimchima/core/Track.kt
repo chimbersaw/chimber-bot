@@ -38,19 +38,13 @@ class Track(
             return Track(this, message, fullTitle)
         }
 
-        fun trackLoader(message: Message?, query: String, title: String? = null) = TrackLoader(query) {
+        suspend fun trackLoader(message: Message?, query: String, title: String? = null) = TrackLoader(query) {
             LavaPlayerManager.loadTrack(query)?.toTrack(message, title)
         }
 
-        suspend fun playlistLoader(message: Message?, query: String, title: String? = null): List<TrackLoader> {
+        suspend fun playlistLoader(message: Message?, query: String, title: String? = null): List<Track> {
             return LavaPlayerManager.loadPlaylist(query).map {
-                // If WEB client could play tracks loaded from a playlist, we could use:
-                // it.toTrack(message, title)
-
-                // Use this so that the TV client can load it later:
-                TrackLoader(it.info.title) {
-                    LavaPlayerManager.loadTrack(it.info.uri)?.toTrack(message, title)
-                }
+                 it.toTrack(message, title)
             }
         }
     }

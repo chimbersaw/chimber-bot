@@ -157,15 +157,15 @@ class ChimberCommands {
     }
 
     private suspend fun queueTracksByLink(command: Command, link: String) {
-        val initialLoaders = Track.playlistLoader(command.message, link)
+        val tracks = Track.playlistLoader(command.message, link)
 
-        if (initialLoaders.isEmpty()) {
+        if (tracks.isEmpty()) {
             messageHandler.replyWith(command, "No such track or playlist was found :(")
             return
         }
 
         val args = command.args
-        val loaders = args.applyToList(initialLoaders)
+        val loaders = args.applyToList(tracks).map { it.toLoader() }
         if (loaders.isEmpty()) {
             return
         }
@@ -176,16 +176,16 @@ class ChimberCommands {
         }
 
         val count = args.count ?: 1
-        val msg = if (initialLoaders.size > 1) {
+        val msg = if (tracks.size > 1) {
             if (count == 1) {
                 "queued playlist with ${loaders.size} tracks"
             } else if (args.limit == null) {
-                "queued playlist with ${initialLoaders.size} tracks $count times"
+                "queued playlist with ${tracks.size} tracks $count times"
             } else {
-                "queued playlist with ${initialLoaders.size} tracks $count times limited to ${loaders.size}"
+                "queued playlist with ${tracks.size} tracks $count times limited to ${loaders.size}"
             }
         } else {
-            val title = initialLoaders.first().query
+            val title = tracks.first().title
             if (count == 1) {
                 "queued track: $title"
             } else {
@@ -194,7 +194,7 @@ class ChimberCommands {
         }
 
         messageHandler.replyWith(command, msg)
-        if (initialLoaders.size > 1) {
+        if (tracks.size > 1) {
             queue(command)
         }
     }

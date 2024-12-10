@@ -25,8 +25,8 @@ dependencies {
     implementation("dev.kord:kord-core-voice:0.15.0")
 
     implementation("dev.arbjerg:lavaplayer:2.2.2")
-    implementation("dev.lavalink.youtube:v2:1.8.3")
-    implementation("io.ktor:ktor-client-core:2.3.12")
+    implementation("dev.lavalink.youtube:v2:1.11.1")
+    implementation("io.ktor:ktor-client-core:2.3.13")
     implementation("org.slf4j:slf4j-simple:2.0.16")
 }
 
