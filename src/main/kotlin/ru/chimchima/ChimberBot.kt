@@ -74,6 +74,7 @@ fun main() = runBlocking {
             "!ruslan" -> chimber.ruslan(command)
             "!vlad" -> chimber.vlad(command)
             "!fallout" -> chimber.fallout(command)
+            "!zov", "!svo" -> chimber.zov(command)
 
             "!pirat" -> chimber.pirat(command)
             "!cover" -> chimber.cover(command)
