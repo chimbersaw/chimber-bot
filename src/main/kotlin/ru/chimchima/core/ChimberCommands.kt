@@ -13,7 +13,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.launch
-import ru.chimchima.heroku.HerokuClient
 import ru.chimchima.player.LavaPlayerManager
 import ru.chimchima.repository.*
 import ru.chimchima.tts.TTSManager
@@ -42,7 +41,6 @@ data class SessionConfig(
 
 @OptIn(KordVoice::class)
 class ChimberCommands {
-    private val heroku = HerokuClient()
     private val ttsManager = TTSManager()
     private val messageHandler = MessageHandler()
 
@@ -247,18 +245,6 @@ class ChimberCommands {
         }
 
         textToSpeech(command, query, jane)
-    }
-
-    suspend fun restart(command: Command) {
-        val success = heroku.restart()
-
-        val text = if (success) {
-            "Restarting chimber..."
-        } else {
-            "Failed to restart chimber :("
-        }
-
-        messageHandler.replyWith(command.message, text, forcedMessage = true)
     }
 
     suspend fun plink(command: Command) {

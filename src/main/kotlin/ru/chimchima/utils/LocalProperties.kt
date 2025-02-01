@@ -27,9 +27,6 @@ object LocalProperties {
     val yaFolderId: String?
         get() = getProperty("YANDEX_FOLDER_ID")
 
-    val herokuToken: String?
-        get() = getProperty("HEROKU_TOKEN")
-
     val youtubeRefreshToken: String?
         get() = getProperty("YOUTUBE_REFRESH_TOKEN")
 

@@ -69,8 +69,6 @@ fun main() = runBlocking {
             "!say", "!tts" -> chimber.say(command)
             "!jane" -> chimber.say(command, jane = true)
 
-            "!restart" -> chimber.restart(command)
-
             "!ruslan" -> chimber.ruslan(command)
             "!vlad" -> chimber.vlad(command)
             "!fallout" -> chimber.fallout(command)
