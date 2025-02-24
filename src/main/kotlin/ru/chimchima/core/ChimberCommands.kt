@@ -589,6 +589,23 @@ class ChimberCommands {
     }
 
 
+    suspend fun crystalcastles(command: Command) {
+        loadFromRepo(command, CrystalCastlesRepository, "Кристальные чимчимы")
+    }
+
+    suspend fun cc1(command: Command) {
+        loadFromRepo(command, CC1Repository, "Tell me what to chimchima")
+    }
+
+    suspend fun cc2(command: Command) {
+        loadFromRepo(command, CC2Repository, "I am made of chimchima")
+    }
+
+    suspend fun cc3(command: Command) {
+        loadFromRepo(command, CC3Repository, "Wrath of chimchima")
+    }
+
+
     suspend fun snus(command: Command) {
         queueTracksByLink(command, "https://www.youtube.com/watch?v=mx-f_wbZTMI")
     }

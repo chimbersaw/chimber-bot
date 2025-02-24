@@ -101,6 +101,11 @@ fun main() = runBlocking {
             "!nauka", "!science" -> chimber.nauka(command)
             "!krovonew", "!lenin" -> chimber.krovonew(command)
 
+            "!cc", "!crystal" -> chimber.crystalcastles(command)
+            "!cc1", "!i" -> chimber.cc1(command)
+            "!cc2", "!ii" -> chimber.cc2(command)
+            "!cc3", "!iii" -> chimber.cc3(command)
+
             "!snus" -> chimber.snus(command)
             "!pauk" -> chimber.pauk(command)
             "!sasha" -> chimber.sasha(command)
