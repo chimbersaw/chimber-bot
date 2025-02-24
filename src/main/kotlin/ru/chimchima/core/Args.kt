@@ -6,7 +6,7 @@ import ru.chimchima.utils.repeatNTimes
 import ru.chimchima.utils.toSignedIntOrNull
 
 class Args private constructor() {
-    private var shuffled: Boolean = false
+    private var shuffled: Boolean = true
     private var favourites: Boolean = true
     var playNext: Boolean = false
     var count: Int? = null
@@ -27,7 +27,7 @@ class Args private constructor() {
     private fun processShortArg(arg: String) {
         for (c in arg.drop(1)) {
             when (c) {
-                's' -> shuffled = true
+                'o' -> shuffled = false
                 'a' -> favourites = false
                 'n' -> playNext = true
             }
@@ -36,9 +36,9 @@ class Args private constructor() {
 
     private fun processArgument(arg: String, allowNegative: Boolean = false) {
         when (arg) {
-            "--shuffle", "shuffle", "--shuffled", "shuffled" -> shuffled = true
-            "--all", "all", "--full", "full" -> favourites = false
-            "--next", "next" -> playNext = true
+            "--original", "--ordered", "--original-order" -> shuffled = false
+            "--all", "--full" -> favourites = false
+            "--next" -> playNext = true
         }
 
         if (arg.startsWith("-")) {

@@ -50,12 +50,12 @@ const val USAGE = """Основные команды:
     !val0 [count] [next] - tupa valera + low grades.
 
 Плейлисты:
-    !<playlist> [-s/--shuffle/--shuffled] [-a/--all/--full] [count] [limit]L
-    Добавляет limit (или все) избранных треков из плейлиста, повторенных count (или 1) раз (--all для всех треков, --shuffled для случайного порядка треков).
+    !<playlist> [-o/--ordered/--original] [-a/--all/--full] [count] [limit]L
+    Добавляет limit (или все) зашафленных избранных треков плейлиста, повторенных count (или 1) раз (--all для всех треков, --ordered для изначального порядка треков).
 
     Пример:
-    !pirat -as 3 10L
-    Добавит из всех (а не только избранных) первых 10 треков плейлиста pirat в случайном порядке, повторенные 3 раза.
+    !pirat -ao 3 10L
+    Добавит из всех (а не только избранных) первых 10 треков плейлиста pirat в незашафленном порядке, повторенные 3 раза.
 
     !ruslan - Добавляет плейлист для игры в доту aka `https://www.youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR`
     !vlad - Добавляет плейлист для влада aka `https://www.youtube.com/playlist?list=PLpXSZSgpFNH-Tljl-1zF9B-JMMTxCTJlX`
