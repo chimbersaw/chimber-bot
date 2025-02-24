@@ -116,6 +116,8 @@ fun main() = runBlocking {
             "!kotiki", "!kokiki", "!котики", "!dvar" -> chimber.kokiki(command)
             "!кошечки", "!koshechki" -> chimber.koshechki(command)
             "!satana", "!сатана" -> chimber.satana(command)
+            "!skibidi" -> chimber.skibidi(command)
+            "!zhuravli", "!brainrot" -> chimber.zhuravli(command)
 
             "!cocyxa", "!сосуха" -> chimber.cocyxa(command)
             "!cocyxa2", "!сосуха2" -> chimber.cocyxa2(command)

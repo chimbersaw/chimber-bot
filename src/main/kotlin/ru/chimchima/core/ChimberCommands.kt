@@ -646,6 +646,15 @@ class ChimberCommands {
         queueTracksByLink(command, "https://www.youtube.com/watch?v=-hU2T7IXtH4")
     }
 
+    suspend fun skibidi(command: Command) {
+        queueTracksByLink(command, "https://www.youtube.com/watch?v=ejda6cMXF2s")
+    }
+
+    suspend fun zhuravli(command: Command) {
+        queueTracksByLink(command, "https://www.youtube.com/watch?v=Lcli6EIECRw")
+    }
+
+
     suspend fun valera(command: Command) {
         queueTracksByLink(command, "https://www.youtube.com/watch?v=1uPYwaUZmH0")
     }
