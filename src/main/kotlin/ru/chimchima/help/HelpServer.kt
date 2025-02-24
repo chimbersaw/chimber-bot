@@ -41,6 +41,8 @@ const val USAGE = """Основные команды:
     !kotiki [count] [next] - Маслорий на бите.
     !кошечки [count] [next] - Кошечки хорошие лишнего не скажут.
     !satana [count] [next] - Со мною воюет сатана.
+    !skibidi [count] [next] - Оксимирон скибидист.
+    !brainrot [count] [next] - Оксимирон журавлист.
 
     !cocyxa [count] [next] - Предсмертный выстрел.
     !cocyxa2 [count] [next] - Предсмертный выстрел.
@@ -87,6 +89,11 @@ const val USAGE = """Основные команды:
     !cheburashka, !cheba, !chb - ЧБ (2018)
     !nauka, !science - Наука (2021)
     !krovonew, !lenin - Бабочки (2022) & Ленин (2023)
+    
+    !cc, !crystal - Три альбома ниже вместе.
+    !cc1, !i - Crystal Castles (2008)
+    !cc2, !ii - Crystal Castles (II) (2010)
+    !cc3, !iii - Crystal Castles (III) (2012)
 
 """
 
