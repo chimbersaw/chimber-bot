@@ -31,25 +31,25 @@ const val USAGE = """Основные команды:
     !jane <text> - Произносит текст голосом злой Жени вне очереди.
 
 Приколы:
-    !snus [count] [next] - Окей, мы часто кидаем снюс.
-    !pauk [count] [next] - В этой банке никого кроме паука...
-    !sasha [count] [next] - Саша лох.
-    !discord [count] [next] - Мама это дискорд.
-    !sperma [count] [next] - Сперма в рот летит как будто самолет.
-    !taxi [count] [next] - ДИСС НА ТИГРАНА.
-    !diss [count] [next] - ДИСС НА ТИГРАНА [REMASTERED].
-    !kotiki [count] [next] - Маслорий на бите.
-    !кошечки [count] [next] - Кошечки хорошие лишнего не скажут.
-    !satana [count] [next] - Со мною воюет сатана.
-    !skibidi [count] [next] - Оксимирон скибидист.
-    !brainrot [count] [next] - Оксимирон журавлист.
+    !snus [count] [-n] - Окей, мы часто кидаем снюс.
+    !pauk [count] [-n] - В этой банке никого кроме паука...
+    !sasha [count] [-n] - Саша лох.
+    !discord [count] [-n] - Мама это дискорд.
+    !sperma [count] [-n] - Сперма в рот летит как будто самолет.
+    !taxi [count] [-n] - ДИСС НА ТИГРАНА.
+    !diss [count] [-n] - ДИСС НА ТИГРАНА [REMASTERED].
+    !kotiki [count] [-n] - Маслорий на бите.
+    !кошечки [count] [-n] - Кошечки хорошие лишнего не скажут.
+    !satana [count] [-n] - Со мною воюет сатана.
+    !skibidi [count] [-n] - Оксимирон скибидист.
+    !brainrot [count] [-n] - Оксимирон журавлист.
 
-    !cocyxa [count] [next] - Предсмертный выстрел.
-    !cocyxa2 [count] [next] - Предсмертный выстрел.
-    !raketa [count] [next] - Ракета пошла.
-    !val [count] [next] - Val - low grades.
-    !valera [count] [next] - tupa valera.
-    !val0 [count] [next] - tupa valera + low grades.
+    !cocyxa [count] [-n] - Предсмертный выстрел.
+    !cocyxa2 [count] [-n] - Предсмертный выстрел.
+    !raketa [count] [-n] - Ракета пошла.
+    !val [count] [-n] - Val - low grades.
+    !valera [count] [-n] - tupa valera.
+    !val0 [count] [-n] - tupa valera + low grades.
 
 Плейлисты:
     !<playlist> [-o/--ordered/--original] [-a/--all/--full] [count] [limit]L
