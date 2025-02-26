@@ -565,7 +565,7 @@ class ChimberCommands {
     }
 
     suspend fun dumbbell(command: Command) {
-        loadFromRepo(command, DumbbellRepository, "Cперва я почимчимлю чимчиму отложив пекаль")
+        loadFromRepo(command, DumbbellRepository, "Cперва я почимчимлю чимчиму, отложив пекаль")
     }
 
     suspend fun studen(command: Command) {
