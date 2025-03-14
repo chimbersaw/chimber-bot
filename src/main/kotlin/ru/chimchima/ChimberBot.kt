@@ -59,6 +59,7 @@ fun main() = runBlocking {
             "!resume", "!unpause" -> chimber.resume(command)
             "!stay" -> chimber.stay(command)
             "!join" -> chimber.join(command)
+            "!echo" -> chimber.echo(command, message.channelId)
 
             "!seek", "!ff" -> chimber.seek(command)
             "!back" -> chimber.back(command)
@@ -122,10 +123,12 @@ fun main() = runBlocking {
 
             "!cocyxa", "!сосуха" -> chimber.cocyxa(command)
             "!cocyxa2", "!сосуха2" -> chimber.cocyxa2(command)
-            "!raketa", "!zxkoncepba" -> chimber.raketa(command)
+            "!raketa", "!ракета", "!zxkoncepba" -> chimber.raketa(command)
+            "!raketa2", "!ракета2", "!zxkoncepba2" -> chimber.raketa2(command)
             "!val", "!zota", "!lowgrades" -> chimber.lowgrades(command)
             "!valera", "val2" -> chimber.valera(command)
             "!val0" -> chimber.val0(command)
+            else -> chimber.unknown(command, message.channelId)
         }
     }
 

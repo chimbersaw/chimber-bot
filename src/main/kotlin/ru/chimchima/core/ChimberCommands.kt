@@ -36,7 +36,8 @@ data class Session(
 data class SessionConfig(
     var pause: Boolean = false,
     var repeat: Boolean = false,
-    var stay: Boolean = false
+    var stay: Boolean = false,
+    var echoChannel: Snowflake? = null
 )
 
 @OptIn(KordVoice::class)
@@ -220,6 +221,12 @@ class ChimberCommands {
     }
 
     private suspend fun textToSpeech(command: Command, query: String, jane: Boolean = false) {
+        if (query.isBlank()) return
+        if (query.length > 500) {
+            messageHandler.replyWith(command, "tts query must be no longer than 500 symbols")
+            return
+        }
+
         val file = ttsManager.textToSpeech(query, jane) ?: run {
             messageHandler.replyWith(command, "Could not load tts :(")
             return
@@ -237,14 +244,7 @@ class ChimberCommands {
     }
 
     suspend fun say(command: Command, jane: Boolean = false) {
-        val query = command.query
-        if (query.isBlank()) return
-        if (query.length > 500) {
-            messageHandler.replyWith(command, "!say query must be no longer than 500 symbols")
-            return
-        }
-
-        textToSpeech(command, query, jane)
+        textToSpeech(command, command.query, jane)
     }
 
     suspend fun plink(command: Command) {
@@ -437,6 +437,16 @@ class ChimberCommands {
         queue(command, forcedMessage = true)
     }
 
+    suspend fun pause(command: Command) {
+        configs[command.guildId]?.pause = true
+        messageHandler.replyWith(command, "Player is paused.")
+    }
+
+    suspend fun resume(command: Command) {
+        configs[command.guildId]?.pause = false
+        messageHandler.replyWith(command, "Player is resumed.")
+    }
+
     suspend fun repeat(command: Command) {
         val config = configs.computeIfAbsent(command.guildId) {
             SessionConfig()
@@ -453,16 +463,6 @@ class ChimberCommands {
         messageHandler.replyWith(command, "$start $mode.")
     }
 
-    suspend fun pause(command: Command) {
-        configs[command.guildId]?.pause = true
-        messageHandler.replyWith(command, "Player is paused.")
-    }
-
-    suspend fun resume(command: Command) {
-        configs[command.guildId]?.pause = false
-        messageHandler.replyWith(command, "Player is resumed.")
-    }
-
     suspend fun stay(command: Command) {
         val config = configs.computeIfAbsent(command.guildId) {
             SessionConfig()
@@ -477,11 +477,37 @@ class ChimberCommands {
 
         val mode = if (config.stay) "on" else "off"
         messageHandler.replyWith(command, "$start $mode.")
+
+        if (config.stay) {
+            addTracksToQueue(command, emptyList())
+        }
     }
 
     suspend fun join(command: Command) {
-        configs[command.guildId] = SessionConfig().apply { stay = true }
+        configs[command.guildId] = configs.computeIfAbsent(command.guildId) { SessionConfig() }.apply { stay = true }
         addTracksToQueue(command, emptyList())
+    }
+
+    suspend fun echo(command: Command, channelId: Snowflake) {
+        val config = configs.computeIfAbsent(command.guildId) {
+            SessionConfig()
+        }
+
+        if (command.content.lowercase() == "off") {
+            config.echoChannel = null
+            messageHandler.replyWith(command, "Echo is now off.")
+            return
+        }
+
+        messageHandler.replyWith(command, "Echo is now on.")
+        config.echoChannel = channelId
+        join(command)
+    }
+
+    internal suspend fun unknown(command: Command, channelId: Snowflake) {
+        if (channelId == configs[command.guildId]?.echoChannel) {
+            textToSpeech(command, command.message?.content.orEmpty())
+        }
     }
 
 
@@ -678,7 +704,7 @@ class ChimberCommands {
     }
 
     suspend fun cocyxa(command: Command) {
-        command.args.count = command.args.count ?: 5
+        command.args.count = command.args.count ?: 3
         queueTracksByLink(
             command,
             "https://static.wikia.nocookie.net/dota2_ru_gamepedia/images/9/94/Snip_death_08_ru.mp3"
@@ -686,18 +712,25 @@ class ChimberCommands {
     }
 
     suspend fun cocyxa2(command: Command) {
-        val count = minOf(10, command.args.count ?: 5)
+        val count = minOf(10, command.args.count ?: 3)
         repeat(count) {
             textToSpeech(command, "предсмертный выстрел")
         }
     }
 
     suspend fun raketa(command: Command) {
-        command.args.count = command.args.count ?: 5
+        command.args.count = command.args.count ?: 3
         queueTracksByLink(
             command,
             "https://static.wikia.nocookie.net/dota2_ru_gamepedia/images/3/38/Ratt_ability_flare_04_ru.mp3/revision/latest"
         )
+    }
+
+    suspend fun raketa2(command: Command) {
+        val count = minOf(10, command.args.count ?: 3)
+        repeat(count) {
+            textToSpeech(command, "ракета пошла")
+        }
     }
 
 
