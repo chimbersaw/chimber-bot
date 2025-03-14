@@ -48,6 +48,7 @@ fun main() = runBlocking {
             "!stop", "!стоп" -> chimber.stop(command)
             "!skip" -> chimber.skip(command)
             "!next" -> chimber.next(command)
+            "!force" -> chimber.force(command)
             "!queue" -> chimber.queue(command, forcedMessage = true)
             "!current", "!hp" -> chimber.current(command)
             "!status", "!st" -> chimber.status(command)

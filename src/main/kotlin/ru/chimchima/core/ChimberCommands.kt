@@ -318,9 +318,9 @@ class ChimberCommands {
         queue(command)
     }
 
-    suspend fun skip(command: Command) {
+    suspend fun skip(command: Command, count: Int? = null) {
         val args = command.args
-        val count = args.count ?: 1
+        val count = count ?: args.count ?: 1
         if (count < 1) return
 
         val (player, queue, _, _, current) = sessions[command.guildId] ?: return
@@ -345,6 +345,16 @@ class ChimberCommands {
             command.args.playNext = true
             play(command)
         }
+    }
+
+    suspend fun force(command: Command) {
+        if (command.content.isBlank()) {
+            return
+        }
+
+        command.args.playNext = true
+        play(command)
+        skip(command, count = 1)
     }
 
     fun seek(command: Command) {

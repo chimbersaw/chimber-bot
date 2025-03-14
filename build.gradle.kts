@@ -27,7 +27,7 @@ dependencies {
     implementation("dev.arbjerg:lavaplayer:2.2.3")
     implementation("dev.lavalink.youtube:v2:1.11.5")
     implementation("io.ktor:ktor-client-core:2.3.13")
-    implementation("org.slf4j:slf4j-simple:2.0.16")
+    implementation("org.slf4j:slf4j-simple:2.0.17")
 }
 
 tasks.withType<KotlinCompile> {
