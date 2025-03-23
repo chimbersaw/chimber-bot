@@ -703,7 +703,7 @@ class ChimberCommands {
         loadFromRepo(command, ValRepository, "жопа")
     }
 
-    suspend fun cocyxa(command: Command) {
+    suspend fun sniper(command: Command) {
         command.args.count = command.args.count ?: 3
         queueTracksByLink(
             command,
@@ -711,7 +711,7 @@ class ChimberCommands {
         )
     }
 
-    suspend fun cocyxa2(command: Command) {
+    suspend fun sniper2(command: Command) {
         val count = minOf(10, command.args.count ?: 3)
         repeat(count) {
             textToSpeech(command, "предсмертный выстрел")
@@ -735,19 +735,23 @@ class ChimberCommands {
 
 
     suspend fun ruslan(command: Command) {
-        queueTracksByLink(command, "https://www.youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR")
+        queueTracksByLink(command, "https://youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR")
     }
 
     suspend fun vlad(command: Command) {
-        queueTracksByLink(command, "https://www.youtube.com/playlist?list=PLpXSZSgpFNH-Tljl-1zF9B-JMMTxCTJlX")
+        queueTracksByLink(command, "https://youtube.com/playlist?list=PLpXSZSgpFNH-Tljl-1zF9B-JMMTxCTJlX")
+    }
+
+    suspend fun cocyxa(command: Command) {
+        queueTracksByLink(command, "https://youtube.com/playlist?list=PL2tw_6FkWmTHWQiFC7U5d7N7WL63zwUjV")
     }
 
     suspend fun fallout(command: Command) {
-        queueTracksByLink(command, "https://www.youtube.com/playlist?list=PL63B26E837C45A200")
+        queueTracksByLink(command, "https://youtube.com/playlist?list=PL63B26E837C45A200")
     }
 
     suspend fun zov(command: Command) {
-        queueTracksByLink(command, "https://www.youtube.com/playlist?list=PLznnQmzo0pMu7V_aL0E_wgIYbO2JK43PE")
+        queueTracksByLink(command, "https://youtube.com/playlist?list=PLznnQmzo0pMu7V_aL0E_wgIYbO2JK43PE")
     }
 
 

@@ -46,8 +46,8 @@ const val USAGE = """Основные команды:
     !skibidi [count] [-n] - Оксимирон скибидист.
     !brainrot [count] [-n] - Оксимирон журавлист.
 
-    !cocyxa [count] [-n] - Предсмертный выстрел.
-    !cocyxa2 [count] [-n] - Предсмертный выстрел.
+    !sniper [count] [-n] - Предсмертный выстрел.
+    !sniper2 [count] [-n] - Предсмертный выстрел.
     !raketa [count] [-n] - Ракета пошла.
     !val [count] [-n] - Val - low grades.
     !valera [count] [-n] - tupa valera.
@@ -61,9 +61,10 @@ const val USAGE = """Основные команды:
     !pirat -ao 3 10L
     Добавит из всех (а не только избранных) первых 10 треков плейлиста pirat в незашафленном порядке, повторенные 3 раза.
 
-    !ruslan - Добавляет плейлист для игры в доту aka `https://www.youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR`
-    !vlad - Добавляет плейлист для влада aka `https://www.youtube.com/playlist?list=PLpXSZSgpFNH-Tljl-1zF9B-JMMTxCTJlX`
-    !fallout - Добавляет плейлист Fallout 3: Galaxy News Radio aka `https://www.youtube.com/playlist?list=PL63B26E837C45A200`
+    !ruslan - Добавляет плейлист для игры в доту aka `https://youtube.com/playlist?list=PLpXSZSgpFNH-GPpNp9S_76hJBVWxUXWIR`
+    !vlad - Добавляет плейлист для влада aka `https://youtube.com/playlist?list=PLpXSZSgpFNH-Tljl-1zF9B-JMMTxCTJlX`
+    !cocyxa - Добавляет плейлист для сосухи aka `https://youtube.com/playlist?list=PL2tw_6FkWmTHWQiFC7U5d7N7WL63zwUjV`
+    !fallout - Добавляет плейлист Fallout 3: Galaxy News Radio aka `https://youtube.com/playlist?list=PL63B26E837C45A200`
 
     !pirat - Избранные треки сереги бандита.
     !cover - Избранные каверы сереги чимичанги.

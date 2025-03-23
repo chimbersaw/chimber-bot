@@ -73,6 +73,7 @@ fun main() = runBlocking {
 
             "!ruslan" -> chimber.ruslan(command)
             "!vlad" -> chimber.vlad(command)
+            "!cocyxa", "!сосуха", "!sosyxa" -> chimber.cocyxa(command)
             "!fallout" -> chimber.fallout(command)
             "!zov", "!svo" -> chimber.zov(command)
 
@@ -121,8 +122,8 @@ fun main() = runBlocking {
             "!skibidi" -> chimber.skibidi(command)
             "!zhuravli", "!brainrot" -> chimber.zhuravli(command)
 
-            "!cocyxa", "!сосуха" -> chimber.cocyxa(command)
-            "!cocyxa2", "!сосуха2" -> chimber.cocyxa2(command)
+            "!sniper", "!vystrel", "!выстрел" -> chimber.sniper(command)
+            "!sniper2", "!vystrel2", "!выстрел2" -> chimber.sniper2(command)
             "!raketa", "!ракета", "!zxkoncepba" -> chimber.raketa(command)
             "!raketa2", "!ракета2", "!zxkoncepba2" -> chimber.raketa2(command)
             "!val", "!zota", "!lowgrades" -> chimber.lowgrades(command)
