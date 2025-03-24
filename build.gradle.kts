@@ -14,6 +14,7 @@ repositories {
     mavenCentral()
     maven("https://jitpack.io")
     maven("https://maven.lavalink.dev/releases")
+    maven("https://maven.lavalink.dev/snapshots")
 }
 
 dependencies {
@@ -25,7 +26,7 @@ dependencies {
     implementation("dev.kord:kord-core-voice:0.15.0")
 
     implementation("dev.arbjerg:lavaplayer:2.2.3")
-    implementation("dev.lavalink.youtube:v2:1.11.5")
+    implementation("dev.lavalink.youtube:v2:3e4fb4dd88fcd7f18f71807cdfd38a6cf27fe023-SNAPSHOT")
     implementation("io.ktor:ktor-client-core:2.3.13")
     implementation("org.slf4j:slf4j-simple:2.0.17")
 }
