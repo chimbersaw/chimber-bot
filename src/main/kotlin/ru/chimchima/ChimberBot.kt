@@ -121,6 +121,7 @@ fun main() = runBlocking {
             "!satana", "!сатана" -> chimber.satana(command)
             "!skibidi" -> chimber.skibidi(command)
             "!zhuravli", "!brainrot" -> chimber.zhuravli(command)
+            "!long" -> chimber.long(command)
 
             "!sniper", "!vystrel", "!выстрел" -> chimber.sniper(command)
             "!sniper2", "!vystrel2", "!выстрел2" -> chimber.sniper2(command)
