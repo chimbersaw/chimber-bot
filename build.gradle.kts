@@ -27,7 +27,7 @@ dependencies {
 
     implementation("dev.arbjerg:lavaplayer:2.2.3")
 //    implementation("dev.lavalink.youtube:v2:1.13.0")
-    implementation("dev.lavalink.youtube:v2:0e5cfca4e88c32db430ce76e6866b13035c85d22-SNAPSHOT")
+    implementation("dev.lavalink.youtube:v2:a484d0a49f126cf3ed1954047f75ac31f210e9b3-SNAPSHOT")
 
     implementation("io.ktor:ktor-client-core:3.1.2")
     implementation("org.slf4j:slf4j-simple:2.0.17")
