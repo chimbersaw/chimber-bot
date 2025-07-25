@@ -28,10 +28,6 @@ fun main() = runBlocking {
     val chimber = ChimberCommands()
     val prevPlay = ConcurrentHashMap<Snowflake, Command>()
 
-    kord.on<VoiceStateUpdateEvent> {
-        chimber.onVoiceStateUpdate(event = this)
-    }
-
     kord.on<MessageCreateEvent> {
         val author = message.author ?: return@on
         if (author.isBot) return@on

@@ -510,28 +510,6 @@ class ChimberCommands {
         }
     }
 
-
-    suspend fun onVoiceStateUpdate(event: VoiceStateUpdateEvent) {
-        if (event.old?.channelId == event.state.channelId) return
-        val member = event.state.getMemberOrNull() ?: return
-        val channel = member.getVoiceStateOrNull()?.getChannelOrNull() ?: return
-        val curChannel = sessions[member.guildId]?.channel
-        if (curChannel != null && curChannel != channel) return
-
-        val query = when (member.username) {
-            "scanhex" -> "вот и нахуй ты зашел сашка"
-            "andrbrawls" -> "всем привет с вами я - богдан т+ечис"
-            "zot9" -> "всем привет с вами я мистер зота ак+а пожилая барракуда"
-            "karburator14" -> "старый бог тут"
-            else -> return
-        }
-
-        delay(1.seconds)
-        val command = Command.empty(member.guildId, member)
-        textToSpeech(command, query)
-    }
-
-
     suspend fun pirat(command: Command) {
         loadFromRepo(command, PiratRepository, "О как же хорошо: моя чимчима не в курсе")
     }
