@@ -519,7 +519,6 @@ class ChimberCommands {
         if (curChannel != null && curChannel != channel) return
 
         val query = when (member.username) {
-            "scanhex" -> "вот и нахуй ты зашел сашка"
             "andrbrawls" -> "всем привет с вами я - богдан т+ечис"
             "zot9" -> "всем привет с вами я мистер зота ак+а пожилая барракуда"
             "karburator14" -> "старый бог тут"
