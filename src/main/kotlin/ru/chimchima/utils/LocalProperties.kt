@@ -35,4 +35,7 @@ object LocalProperties {
 
     val youtubeVisitorData: String?
         get() = getProperty("YOUTUBE_VISITOR_DATA")
+
+    val useRemoteYTCipher: Boolean
+        get() = getProperty("USE_REMOTE_YT_CIPHER")?.toBoolean() ?: false
 }

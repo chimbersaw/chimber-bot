@@ -31,7 +31,10 @@ object LavaPlayerManager : DefaultAudioPlayerManager() {
         AudioSourceManagers.registerLocalSource(this)
 
         // Register remote sources including `https://github.com/lavalink-devs/youtube-source#v2`.
-        val options = YoutubeSourceOptions().setRemoteCipherUrl("http://localhost:8001", "test", null)
+        val options = YoutubeSourceOptions()
+        if (LocalProperties.useRemoteYTCipher) {
+            options.setRemoteCipherUrl("http://localhost:8001", "test", null)
+        }
         val youtube = YoutubeAudioSourceManager(
             options,
             Web(),             // Default client

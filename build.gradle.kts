@@ -1,5 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.net.URI
 import java.util.jar.JarFile
+import javax.xml.parsers.DocumentBuilderFactory
 
 plugins {
     kotlin("jvm") version "2.2.10"
@@ -12,7 +14,13 @@ java.sourceCompatibility = JavaVersion.VERSION_21
 
 repositories {
     mavenCentral()
-    maven("https://jitpack.io")
+    maven("https://maven.lavalink.dev/snapshots")
+}
+
+val latestYoutubeSourceSnapshot = run {
+    val url = URI.create("https://maven.lavalink.dev/snapshots/dev/lavalink/youtube/v2/maven-metadata.xml")
+    val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.toURL().openStream())
+    doc.getElementsByTagName("latest").item(0).textContent.trim()
 }
 
 dependencies {
@@ -24,7 +32,7 @@ dependencies {
     implementation("dev.kord:kord-core-voice:0.15.0")
 
     implementation("dev.arbjerg:lavaplayer:2.2.4")
-    implementation("com.github.lavalink-devs.youtube-source:v2:-SNAPSHOT") {
+    implementation("dev.lavalink.youtube:v2:$latestYoutubeSourceSnapshot") {
         isChanging = true
     }
 
