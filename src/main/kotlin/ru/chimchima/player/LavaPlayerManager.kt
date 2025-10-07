@@ -16,6 +16,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.lavalink.youtube.YoutubeAudioSourceManager
+import dev.lavalink.youtube.YoutubeSourceOptions
 import dev.lavalink.youtube.clients.AndroidVr
 import dev.lavalink.youtube.clients.TvHtml5Embedded
 import dev.lavalink.youtube.clients.Web
@@ -30,7 +31,9 @@ object LavaPlayerManager : DefaultAudioPlayerManager() {
         AudioSourceManagers.registerLocalSource(this)
 
         // Register remote sources including `https://github.com/lavalink-devs/youtube-source#v2`.
+        val options = YoutubeSourceOptions().setRemoteCipherUrl("http://localhost:8001", "test", null)
         val youtube = YoutubeAudioSourceManager(
+            options,
             Web(),             // Default client
             TvHtml5Embedded(), // Works for age-restricted videos because of oAuth2
             WebEmbedded(),
