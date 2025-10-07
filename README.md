@@ -12,9 +12,8 @@ https://chimchima.ru/bot
     * To load playlists from YouTube provide valid `YOUTUBE_PO_TOKEN` and `YOUTUBE_VISITOR_DATA` as
       described [here](https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#using-a-potoken).
     * To use Yandex TTS fill in a valid yandex OAuth token as well as your FOLDER_ID in Yandex Cloud.
-    * To use a remote YT Cipher service (like [this one](https://github.com/kikkia/yt-cipher)), set
-      `USE_REMOTE_YT_CIPHER`
-      to true.
+    * To use a remote YT Cipher service (like [this one](https://github.com/kikkia/yt-cipher)), provide both
+      `REMOTE_YT_CIPHER_URL` and `REMOTE_YT_CIPHER_PASSWORD`.
 
 ```
 DISCORD_TOKEN=xxx
@@ -23,7 +22,8 @@ YOUTUBE_PO_TOKEN=xxx
 YOUTUBE_VISITOR_DATA=xxx
 YANDEX_OAUTH_TOKEN=xxx
 YANDEX_FOLDER_ID=xxx
-USE_REMOTE_YT_CIPHER=xxx
+REMOTE_YT_CIPHER_URL=xxx
+REMOTE_YT_CIPHER_PASSWORD=xxx
 ```
 
 ## Run
