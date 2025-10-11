@@ -1,6 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.net.URI
-import java.util.jar.JarFile
 import javax.xml.parsers.DocumentBuilderFactory
 
 plugins {
@@ -57,34 +56,14 @@ tasks.withType<Jar> {
 
 val trackYoutubeSourceVersion by tasks.registering {
     doLast {
-        val targetGroup = "com.github.lavalink-devs.youtube-source"
-        val targetModule = "v2"
+        println("Tracking youtube source version...")
         val versionFile = layout.buildDirectory.file("youtube-source-version.txt").get().asFile
-        val configuration = configurations.runtimeClasspath.get()
-        configuration.resolve() // ensure resolved
-        val resolved = configuration.resolvedConfiguration.resolvedArtifacts.find {
-            it.moduleVersion.id.group == targetGroup && it.name == targetModule
+        val previousVersion = if (versionFile.exists()) versionFile.readText().trim() else null
+        logger.lifecycle("Current youtube source commit: $latestYoutubeSourceSnapshot")
+        if (previousVersion != null && previousVersion != latestYoutubeSourceSnapshot) {
+            logger.lifecycle("Youtube source dependency updated: $previousVersion -> $latestYoutubeSourceSnapshot")
         }
-
-        val currentVersion = resolved?.file?.let { jar ->
-            JarFile(jar).use { jf ->
-                val entry = jf.getJarEntry("yts-version.txt")
-                entry?.let {
-                    jf.getInputStream(entry).bufferedReader().use {
-                        it.readText().trim().substringBefore('-')
-                    }
-                }
-            }
-        }
-
-        if (currentVersion != null) {
-            val previousVersion = if (versionFile.exists()) versionFile.readText().trim() else null
-            logger.lifecycle("Current youtube source commit: $currentVersion")
-            if (previousVersion != null && previousVersion != currentVersion) {
-                logger.lifecycle("Youtube source dependency updated: $previousVersion -> $currentVersion")
-            }
-            versionFile.writeText(currentVersion)
-        }
+        versionFile.writeText(latestYoutubeSourceSnapshot)
     }
 }
 
