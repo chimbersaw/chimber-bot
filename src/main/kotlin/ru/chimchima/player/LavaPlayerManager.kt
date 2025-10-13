@@ -37,7 +37,7 @@ object LavaPlayerManager : DefaultAudioPlayerManager() {
             println("Using built-in YouTube cipher")
         } else {
             println("Using remote YouTube cipher from $remoteCipherUrl")
-            options.setRemoteCipherUrl(remoteCipherUrl, LocalProperties.remoteYTCipherPassword, null)
+            options.setRemoteCipher(remoteCipherUrl, LocalProperties.remoteYTCipherPassword, null)
         }
 
         val youtube = YoutubeAudioSourceManager(
