@@ -76,6 +76,7 @@ fun main() = runBlocking {
             "!cocyxa", "!сосуха", "!sosyxa" -> chimber.cocyxa(command)
             "!fallout" -> chimber.fallout(command)
             "!zov", "!svo" -> chimber.zov(command)
+            "!2017" -> chimber.x2017(command)
 
             "!pirat" -> chimber.pirat(command)
             "!cover" -> chimber.cover(command)
