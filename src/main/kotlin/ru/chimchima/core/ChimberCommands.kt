@@ -758,7 +758,7 @@ class ChimberCommands {
     }
 
     suspend fun x2017(command: Command) {
-        queueTracksByLink(command, "hhttps://www.youtube.com/playlist?list=PLpXSZSgpFNH8dTcoJo-uVTu3GwYUCNhW5")
+        queueTracksByLink(command, "https://www.youtube.com/playlist?list=PLpXSZSgpFNH8dTcoJo-uVTu3GwYUCNhW5")
     }
 
 
