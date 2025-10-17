@@ -41,6 +41,10 @@ fun main() = runBlocking {
             prevPlay[author.id] = command
         }
 
+        if (command.name.startsWith("!")) {
+            println("Received command: `${command.message?.content}` from `${author.tag}`")
+        }
+
         when (command.name) {
             "!plink" -> chimber.plink(command)
 
