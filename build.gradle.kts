@@ -25,17 +25,17 @@ val latestYoutubeSourceSnapshot = run {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
-    implementation("dev.kord:kord-core:0.15.0")
-    implementation("dev.kord:kord-core-voice:0.15.0")
+    implementation("dev.kord:kord-core:0.17.0")
+    implementation("dev.kord:kord-core-voice:0.17.0")
 
     implementation("dev.arbjerg:lavaplayer:2.2.4")
     implementation("dev.lavalink.youtube:v2:$latestYoutubeSourceSnapshot") {
         isChanging = true
     }
 
-    implementation("io.ktor:ktor-client-core:3.2.3")
+    implementation("io.ktor:ktor-client-core:3.3.1")
     implementation("org.slf4j:slf4j-simple:2.0.17")
 }
 
