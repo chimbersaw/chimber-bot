@@ -25,7 +25,7 @@ val latestYoutubeSourceSnapshot = run {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
     implementation("dev.kord:kord-core:0.17.0")
     implementation("dev.kord:kord-core-voice:0.17.0")
@@ -54,17 +54,29 @@ tasks.withType<Jar> {
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
 }
 
-val trackYoutubeSourceVersion by tasks.registering {
-    doLast {
+abstract class TrackYoutubeSourceVersion : DefaultTask() {
+    @get:Input
+    abstract val currentVersion: Property<String>
+    @get:OutputFile
+    abstract val versionFile: RegularFileProperty
+
+    @TaskAction
+    fun run() {
         println("Tracking youtube source version...")
-        val versionFile = layout.buildDirectory.file("youtube-source-version.txt").get().asFile
-        val previousVersion = if (versionFile.exists()) versionFile.readText().trim() else null
-        logger.lifecycle("Current youtube source commit: $latestYoutubeSourceSnapshot")
-        if (previousVersion != null && previousVersion != latestYoutubeSourceSnapshot) {
-            logger.lifecycle("Youtube source dependency updated: $previousVersion -> $latestYoutubeSourceSnapshot")
+        val current = currentVersion.get()
+        val file = versionFile.get().asFile
+        val prev = if (file.exists()) file.readText().trim() else null
+        logger.lifecycle("Current youtube source commit: $current")
+        if (prev != null && prev != current) {
+            logger.lifecycle("Youtube source dependency updated: $prev -> $current")
         }
-        versionFile.writeText(latestYoutubeSourceSnapshot)
+        file.writeText(current)
     }
+}
+
+val trackYoutubeSourceVersion by tasks.registering(TrackYoutubeSourceVersion::class) {
+    currentVersion.set(latestYoutubeSourceSnapshot)
+    versionFile.set(layout.buildDirectory.file("youtube-source-version.txt"))
 }
 
 tasks.named("build") {
