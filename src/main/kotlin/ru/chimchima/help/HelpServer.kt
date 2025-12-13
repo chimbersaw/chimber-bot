@@ -92,7 +92,7 @@ const val USAGE = """Основные команды:
     !lombard - Ломбард (2015)
     !cheburashka, !cheba, !chb - ЧБ (2018)
     !nauka, !science - Наука (2021)
-    !krovonew, !lenin - Бабочки (2022) & Ленин (2023)
+    !p&r, !piry, !rany - Пиры и раны (2025)
     
     !cc, !crystal - Три альбома ниже вместе.
     !cc1, !i - Crystal Castles (2008)

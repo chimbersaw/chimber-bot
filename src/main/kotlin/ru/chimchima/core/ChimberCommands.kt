@@ -619,8 +619,8 @@ class ChimberCommands {
         loadFromRepo(command, NaukaRepository, "Или всё будет не так, и чимчима спиздила. Проверим.")
     }
 
-    suspend fun krovonew(command: Command) {
-        loadFromRepo(command, KrovostokMisc, "Бог оказался фраером, расчимчимленным фраерком")
+    suspend fun piryAndRany(command: Command) {
+        loadFromRepo(command, PiryAndRanyRepository, "Бог оказался фраером, расчимчимленным фраерком")
     }
 
 
