@@ -18,7 +18,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import dev.lavalink.youtube.YoutubeAudioSourceManager
 import dev.lavalink.youtube.YoutubeSourceOptions
 import dev.lavalink.youtube.clients.AndroidVr
-import dev.lavalink.youtube.clients.TvHtml5Embedded
+import dev.lavalink.youtube.clients.Tv
 import dev.lavalink.youtube.clients.Web
 import dev.lavalink.youtube.clients.WebEmbedded
 import kotlinx.coroutines.runBlocking
@@ -43,7 +43,7 @@ object LavaPlayerManager : DefaultAudioPlayerManager() {
         val youtube = YoutubeAudioSourceManager(
             options,
             Web(),             // Default client
-            TvHtml5Embedded(), // Works for age-restricted videos because of oAuth2
+            Tv(),              // Works for age-restricted videos because of oAuth2
             WebEmbedded(),
             AndroidVr(),
         )
