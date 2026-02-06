@@ -134,16 +134,16 @@ object NaukaRepository : SongRepository {
 
 object PiryAndRanyRepository : SongRepository {
     override val songs = listOf(
-        "Столовая" fav "https://youtu.be/I6ynDV040gM",
+        "Столовая" kal "https://youtu.be/I6ynDV040gM",
         "Ленин" fav "https://youtu.be/WlpKAmK0TnU",
-        "Бей/Беги" fav "https://youtu.be/rKB9mRztOSY",
+        "Бей/Беги" kal "https://youtu.be/rKB9mRztOSY",
         "Бабочки" fav "https://youtu.be/73n7xLPg7w0",
         "Миша" fav "https://youtu.be/pH8PnqpyJIU",
-        "Стружка" fav "https://youtu.be/u7jE95qp3Bo",
-        "Подозрение" fav "https://youtu.be/PtwbuC8wUKk",
-        "Огонёк" fav "https://youtu.be/-H7VdXnr2_M",
-        "Случай" fav "https://youtu.be/SG3g7IBmbEE",
-        "Батя" fav "https://youtu.be/0QGW3LB-EXI",
+        "Стружка" kal "https://youtu.be/u7jE95qp3Bo",
+        "Подозрение" kal "https://youtu.be/PtwbuC8wUKk",
+        "Огонёк" kal "https://youtu.be/-H7VdXnr2_M",
+        "Случай" kal "https://youtu.be/SG3g7IBmbEE",
+        "Батя" kal "https://youtu.be/0QGW3LB-EXI",
         "Пиранья" fav "https://youtu.be/L4MijGLCo_Q"
     )
 }
