@@ -93,7 +93,7 @@ class ChimberCommands {
                     return@audioProvider AudioFrame.SILENCE
                 }
 
-                player.provide(1, TimeUnit.SECONDS)?.let {
+                player.provide(3, TimeUnit.SECONDS)?.let {
                     return@audioProvider AudioFrame.fromData(it.data)
                 }
 
@@ -352,9 +352,13 @@ class ChimberCommands {
             return
         }
 
+        val doSkip = sessions[command.guildId]?.current != null
         command.args.playNext = true
         play(command)
-        skip(command, count = 1)
+
+        if (doSkip) {
+            skip(command, count = 1)
+        }
     }
 
     fun seek(command: Command) {
