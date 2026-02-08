@@ -42,10 +42,10 @@ object LavaPlayerManager : DefaultAudioPlayerManager() {
 
         val youtube = YoutubeAudioSourceManager(
             options,
-            Web(),             // Default client
+            AndroidVr(),
             Tv(),              // Works for age-restricted videos because of oAuth2
             WebEmbedded(),
-            AndroidVr(),
+            Web(),
         )
         Web.setPoTokenAndVisitorData(LocalProperties.youtubePoToken, LocalProperties.youtubeVisitorData)
         youtube.useOauth2(LocalProperties.youtubeRefreshToken, true)
