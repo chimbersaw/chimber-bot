@@ -53,6 +53,8 @@ class ChimberCommands {
         LavaPlayerManager.registerAllSources()
     }
 
+    private fun getOrCreateConfig(guildId: Snowflake) = configs.computeIfAbsent(guildId) { SessionConfig() }
+
     private suspend fun disconnect(guildId: Snowflake) {
         sessions.remove(guildId)?.let {
             it.current = null
@@ -73,9 +75,7 @@ class ChimberCommands {
 
         val guildId = channel.guildId
         val session = Session(player, queue, ttsQueue, channel)
-        val config = configs.computeIfAbsent(guildId) {
-            SessionConfig()
-        }
+        val config = getOrCreateConfig(guildId)
 
         // TODO: this lambda may be invoked before the queue is populated with a track leading to a disconnect.
         val connection = channel.connect {
@@ -442,19 +442,19 @@ class ChimberCommands {
     }
 
     suspend fun pause(command: Command) {
-        configs[command.guildId]?.pause = true
+        val config = configs[command.guildId] ?: return
+        config.pause = true
         messageHandler.replyWith(command, "Player is paused.")
     }
 
     suspend fun resume(command: Command) {
-        configs[command.guildId]?.pause = false
+        val config = configs[command.guildId] ?: return
+        config.pause = false
         messageHandler.replyWith(command, "Player is resumed.")
     }
 
     suspend fun repeat(command: Command) {
-        val config = configs.computeIfAbsent(command.guildId) {
-            SessionConfig()
-        }
+        val config = configs[command.guildId] ?: return
 
         if (command.content.lowercase() == "off") {
             config.repeat = false
@@ -467,9 +467,7 @@ class ChimberCommands {
     }
 
     suspend fun stay(command: Command) {
-        val config = configs.computeIfAbsent(command.guildId) {
-            SessionConfig()
-        }
+        val config = getOrCreateConfig(command.guildId)
 
         if (command.content.lowercase() == "off") {
             config.stay = false
@@ -477,20 +475,17 @@ class ChimberCommands {
             return
         }
 
-        config.stay = true
+        join(command)
+    }
+
+    suspend fun join(command: Command) {
+        getOrCreateConfig(command.guildId).apply { stay = true }
         messageHandler.replyWith(command, "Stay is now on.")
         addTracksToQueue(command, emptyList())
     }
 
-    suspend fun join(command: Command) {
-        configs[command.guildId] = configs.computeIfAbsent(command.guildId) { SessionConfig() }.apply { stay = true }
-        addTracksToQueue(command, emptyList())
-    }
-
     suspend fun echo(command: Command, channelId: Snowflake) {
-        val config = configs.computeIfAbsent(command.guildId) {
-            SessionConfig()
-        }
+        val config = getOrCreateConfig(command.guildId)
 
         if (command.content.lowercase() == "off") {
             config.echoChannel = null
