@@ -456,15 +456,14 @@ class ChimberCommands {
             SessionConfig()
         }
 
-        var start = "Repeat is now"
-        when (command.content.lowercase()) {
-            "on", "1" -> config.repeat = true
-            "off", "0" -> config.repeat = false
-            else -> start = "Repeat is"
+        if (command.content.lowercase() == "off") {
+            config.repeat = false
+            messageHandler.replyWith(command, "Repeat is now off.")
+            return
         }
 
-        val mode = if (config.repeat) "on" else "off"
-        messageHandler.replyWith(command, "$start $mode.")
+        config.repeat = true
+        messageHandler.replyWith(command, "Repeat is now on.")
     }
 
     suspend fun stay(command: Command) {
@@ -472,19 +471,15 @@ class ChimberCommands {
             SessionConfig()
         }
 
-        var start = "Stay is now"
-        when (command.content.lowercase()) {
-            "on", "1" -> config.stay = true
-            "off", "0" -> config.stay = false
-            else -> start = "Stay is"
+        if (command.content.lowercase() == "off") {
+            config.stay = false
+            messageHandler.replyWith(command, "Stay is now off.")
+            return
         }
 
-        val mode = if (config.stay) "on" else "off"
-        messageHandler.replyWith(command, "$start $mode.")
-
-        if (config.stay) {
-            addTracksToQueue(command, emptyList())
-        }
+        config.stay = true
+        messageHandler.replyWith(command, "Stay is now on.")
+        addTracksToQueue(command, emptyList())
     }
 
     suspend fun join(command: Command) {
@@ -503,8 +498,8 @@ class ChimberCommands {
             return
         }
 
-        messageHandler.replyWith(command, "Echo is now on.")
         config.echoChannel = channelId
+        messageHandler.replyWith(command, "Echo is now on.")
         join(command)
     }
 
@@ -767,6 +762,6 @@ class ChimberCommands {
 
 
     suspend fun help(command: Command) {
-        messageHandler.replyWith(command, "https://iditenaxui.com")
+        messageHandler.replyWith(command, "https://iditenaxui.com/chimber")
     }
 }
