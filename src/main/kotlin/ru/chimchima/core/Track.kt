@@ -16,6 +16,8 @@ class Track(
     val message: Message?,
     val title: String
 ) {
+    val uri: String? = audioTrack.info.uri
+
     fun playWith(player: AudioPlayer) = player.playTrack(audioTrack)
     fun clone() = Track(audioTrack.makeClone(), message, title)
 
@@ -44,7 +46,7 @@ class Track(
 
         suspend fun playlistLoader(message: Message?, query: String, title: String? = null): List<Track> {
             return LavaPlayerManager.loadPlaylist(query).map {
-                 it.toTrack(message, title)
+                it.toTrack(message, title)
             }
         }
     }

@@ -433,12 +433,18 @@ class ChimberCommands {
         val track = sessions[command.guildId]?.current ?: return
         val title = track.title.substringBeforeLast(" ")
         val statusBar = track.statusBar()
-        messageHandler.replyWith(command, "$title\n$statusBar", forcedMessage = true)
+        messageHandler.replyForced(command, "$title\n$statusBar")
     }
 
     suspend fun status(command: Command) {
         current(command)
         queue(command, forcedMessage = true)
+    }
+
+    suspend fun link(command: Command) {
+        val track = sessions[command.guildId]?.current ?: return
+        val message = track.uri ?: "Current track doesn't have a link :("
+        messageHandler.replyForced(command, message)
     }
 
     suspend fun pause(command: Command) {

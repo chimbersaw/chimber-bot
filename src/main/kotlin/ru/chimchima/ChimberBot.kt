@@ -56,6 +56,7 @@ fun main() = runBlocking {
             "!queue" -> chimber.queue(command, forcedMessage = true)
             "!current", "!hp" -> chimber.current(command)
             "!status", "!st" -> chimber.status(command)
+            "!link" -> chimber.link(command)
 
             "!mute" -> chimber.mute(command)
             "!repeat" -> chimber.repeat(command)

@@ -27,6 +27,10 @@ class MessageHandler {
         return replyWith(command.message, text, forcedMessage)
     }
 
+    suspend fun replyForced(command: Command, text: String): Message? {
+        return replyWith(command, text, forcedMessage = true)
+    }
+
     suspend fun mute(command: Command) {
         val author = command.message?.author ?: run {
             replyWith(command, "Can't perform \"!mute\" command, author is not defined.", true)
