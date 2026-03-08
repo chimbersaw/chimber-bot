@@ -26,9 +26,11 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
 
-    implementation("dev.kord:kord-core:0.17.0")
-    implementation("dev.kord:kord-core-voice:0.17.0")
+    implementation(fileTree("kord-custom") { include("*.jar") })
+    implementation("dev.kord.cache:cache-api:0.5.4")
+    implementation("dev.kord.cache:cache-map:0.5.4")
 
     implementation("dev.arbjerg:lavaplayer:2.2.4")
     implementation("dev.lavalink.youtube:v2:$latestYoutubeSourceSnapshot") {
@@ -36,6 +38,12 @@ dependencies {
     }
 
     implementation("io.ktor:ktor-client-core:3.3.1")
+    implementation("io.ktor:ktor-client-okhttp:3.3.1")
+    implementation("io.ktor:ktor-client-content-negotiation:3.3.1")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.3.1")
+    implementation("io.ktor:ktor-network:3.3.1")
+    implementation("io.github.oshai:kotlin-logging:7.0.0")
+    implementation("com.google.crypto.tink:tink:1.15.0")
     implementation("org.slf4j:slf4j-simple:2.0.17")
 }
 
