@@ -27,8 +27,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 
-    implementation("dev.kord:kord-core:0.17.0")
-    implementation("dev.kord:kord-core-voice:0.17.0")
+    implementation("dev.kord:kord-core:0.18.0")
+    implementation("dev.kord:kord-core-voice:0.18.0")
 
     implementation("dev.arbjerg:lavaplayer:2.2.4")
     implementation("dev.lavalink.youtube:v2:$latestYoutubeSourceSnapshot") {
@@ -57,6 +57,7 @@ tasks.withType<Jar> {
 abstract class TrackYoutubeSourceVersion : DefaultTask() {
     @get:Input
     abstract val currentVersion: Property<String>
+
     @get:OutputFile
     abstract val versionFile: RegularFileProperty
 
